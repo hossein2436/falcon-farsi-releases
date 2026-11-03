@@ -167,6 +167,9 @@ window.FF_DICT = {
   "within its normal range": "در بازه‌ی معمول",
   "dot size = sessions": "اندازه‌ی نقطه = سشن",
   "too few sessions": "سشن کافی نیست",
+  "cell = order rate of sessions that visited the entry page.": "هر خانه = نرخ سفارشِ سشن‌هایی که صفحه‌ی ورود را دیدند.",
+  "red or green = change against the previous window.": "قرمز یا سبز = تغییر نسبت به بازه‌ی قبل.",
+  "open a macro for its entry points.": "برای دیدن نقاط ورود، یک ماکرو را باز کنید.",
   "these four judge the last full day against its usual level, so they change once a day": "این چهار کارت آخرین روزِ کامل را با سطح معمولش می‌سنجند و روزی یک بار عوض می‌شوند",
   "when does conversion actually happen?": "نرخ تبدیل واقعاً چه ساعتی اتفاق می‌افتد؟",
   "end to end cr": "CR سرتاسری",
@@ -940,6 +943,8 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     /* الگوهای جمله — به ترتیب اولویت */
     const R = [];
     const r = (re, fn) => R.push([re, fn]);
+    r(/^(.+) · Falcon$/, (m, a) => `${T(a)} · فالکون`);
+    r(/^Falcon \| SnappFood$/i, () => "فالکون | اسنپ‌فود");
     // مرکز کنترل
     r(/^Conversion is (near|below|above|well below|well above|far below|far above) its usual level(?:: (.+))?$/i, (m, l, rest) => {
       const L = { near: "نزدیک سطح معمول است", below: "پایین‌تر از سطح معمول است", above: "بالاتر از سطح معمول است", "well below": "خیلی پایین‌تر از سطح معمول است", "well above": "خیلی بالاتر از سطح معمول است", "far below": "خیلی پایین‌تر از سطح معمول است", "far above": "خیلی بالاتر از سطح معمول است" }[l.toLowerCase()];
@@ -1063,6 +1068,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     r(/^(\d+) (days|day)$/i, (m, n) => `${n} روز`);
     r(/^City (\d+)$/i, (m, n) => `شهر ${n}`);
     r(/^(\d+) sessions$/i, (m, n) => `${n} سشن`);
+    r(/^([^A-Za-z]+?) to ([^A-Za-z]+)$/, (m, a, b) => `${a} تا ${b}`);
     r(/^(.+?) \((.+?)\) vs$/i, (m, a, b) => `${T(a)} (${b}) در برابر`);
     // برچسب نقطه‌ی ورود: «Vendor card · Search»
     r(/^([A-Za-z][A-Za-z &()\-]+?) · ([A-Za-z][A-Za-z &()\-]+)$/, (m, a, b) => {
@@ -1082,6 +1088,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
       [/(\d[\d.,]*[KMB]?) orders\b/g, "$1 سفارش"],
       [/\bowner: unassigned\b/gi, "مالک: بدون مالک"],
       [/\bpartial day\b/gi, "روز ناقص"],
+      [/\busual = (\d+) days\b/gi, "معمول = $1 روز"],
     ];
 
     const SPLIT = /(?<=[.!?])\s+(?=[A-Z0-9“"(⁦])/;
@@ -1144,7 +1151,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
         core = punct(core);
       }
       if (S.digits && /\d/.test(core)) core = faNum(core);
-      if (!inSvg && S.rtl && /[A-Za-z]/.test(core) && !/[؀-ۿ]/.test(core) && /[\s.,:;()?!→·-]/.test(core) && !core.startsWith(LRI)) core = LRI + core + PDI;
+      if (inSvg !== "title" && !inSvg && S.rtl && /[A-Za-z]/.test(core) && !/[؀-ۿ]/.test(core) && /[\s.,:;()?!→·-]/.test(core) && !core.startsWith(LRI)) core = LRI + core + PDI;
       return lead + core + trail;
     }
 
@@ -1159,7 +1166,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
       if (!p || p.closest(SKIP)) return;
       const cur = node.nodeValue, rec = recs.get(node);
       if (rec && cur === rec.out) return;
-      const out = transform(cur, !!p.closest("svg"));
+      const out = transform(cur, p.tagName === "TITLE" ? "title" : !!p.closest("svg"));
       if (out !== cur) { recs.set(node, { src: cur, out }); touched.add(node); node.nodeValue = out; }
       else if (rec) { recs.delete(node); touched.delete(node); }
     }
@@ -1197,14 +1204,43 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
       for (const c of el.childNodes) { if (c.nodeType === 3) run.push(c); else if (c.nodeType !== 8) flush(); }
       flush();
     }
+    // جمله‌ای که ری‌اکت در چند text node شکسته («control 32.5% · v» «1» « 32.5%»): یکجا ترجمه می‌شود
+    const joined = new WeakSet();
+    function srcOf(n) { const rec = recs.get(n); return rec && n.nodeValue === rec.out ? rec.src : n.nodeValue; }
+    function tryJoin(el) {
+      if (!el || el.nodeType !== 1 || !S.translate || el.closest(SKIP) || el.closest("svg")) return false;
+      const kids = [...el.childNodes];
+      if (kids.some((c) => c.nodeType === 1)) return false;
+      const nodes = kids.filter((c) => c.nodeType === 3);
+      if (nodes.length < 2) return false;
+      const srcs = nodes.map(srcOf), full = srcs.join("");
+      if (!/[A-Za-z]{2}/.test(full)) return false;
+      const core = full.trim(), tcore = T(core);
+      if (tcore === core) return false;
+      const out = transform(full, el.tagName === "TITLE" ? "title" : false);
+      nodes.forEach((n, i) => {
+        const want = i === 0 ? out : "";
+        const rec = recs.get(n);
+        if (n.nodeValue !== want || !rec) { recs.set(n, { src: srcs[i], out: want }); touched.add(n); n.nodeValue = want; }
+      });
+      joined.add(el);
+      return true;
+    }
     function processTree(n) {
-      if (n.nodeType === 3) { processText(n); return isolateRuns(n.parentElement); }
+      if (n.nodeType === 3) {
+        const p = n.parentElement;
+        if (p && (joined.has(p) || [...p.childNodes].filter((c) => c.nodeType === 3).length > 1) && tryJoin(p)) return;
+        processText(n); return isolateRuns(p);
+      }
       if (n.nodeType !== 1) return;
       if (n.matches(SKIP)) return;
       const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT);
-      const parents = new Set(); let x;
-      while ((x = w.nextNode())) { processText(x); if (x.parentElement) parents.add(x.parentElement); }
-      parents.forEach(isolateRuns);
+      const texts = []; const parents = new Set(); let x;
+      while ((x = w.nextNode())) { texts.push(x); if (x.parentElement) parents.add(x.parentElement); }
+      const done = new Set();
+      parents.forEach((p) => { if (tryJoin(p)) done.add(p); });
+      for (const t of texts) if (!done.has(t.parentElement)) processText(t);
+      parents.forEach((p) => { if (!done.has(p)) isolateRuns(p); });
       if (n.hasAttribute && (n.hasAttribute("title") || n.hasAttribute("aria-label") || n.hasAttribute("placeholder"))) processAttrs(n);
       n.querySelectorAll("[title],[aria-label],[placeholder]").forEach(processAttrs);
     }
