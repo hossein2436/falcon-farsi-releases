@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
-  "minLoader": 2,
-  "notes": "اولین نسخه‌ی قابل‌به‌روزرسانی: تم شب و روز، راست‌به‌چپ، ترجمه و ارقام فارسی.",
+  "version": "2.0.0",
+  "minLoader": 3,
+  "notes": "بازطراحی کامل: لوگوی شاهین، تم روز و شب هماهنگ با فالکون، سایدبار تمیز، ترجمه‌ی کامل نماهای CEO، CPO و CRO و همه‌ی صفحه‌ها.",
   "zip": "https://github.com/hossein2436/falcon-farsi-releases/raw/main/falcon-farsi.zip",
-  "builtAt": "2026-11-03T15:34:07.970Z"
+  "builtAt": "2026-11-03T16:34:17.176Z"
 }
