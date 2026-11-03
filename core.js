@@ -791,6 +791,74 @@ window.FF_DICT = {
   "decisions the owner needs to make": "تصمیم‌هایی که مالک باید بگیرد",
   "stage cards · 6 instrumented stages": "کارت مرحله‌ها · ۶ مرحله‌ی ابزارگذاری‌شده",
   "one card per stage, rendered from the stage list (not a fixed number). order and events from backend/app/ingestion/sql/live_daily.sql.": "برای هر مرحله یک کارت، ساخته‌شده از فهرست مرحله‌ها (نه عدد ثابت). ترتیب و رویدادها از backend/app/ingestion/sql/live_daily.sql.",
+
+  /* ── مودال‌های جزئیات ───────────────────────────── */
+  "verdict": "جمع‌بندی",
+  ") · today": ") · امروز",
+  "pt behind.": "pt عقب‌تر.",
+  "how this is measured": "این عدد چطور اندازه‌گیری می‌شود",
+  "nothing here is outside its usual range.": "هیچ‌چیز اینجا بیرون از بازه‌ی معمولش نیست.",
+  "orders · close-cart sessions": "سفارش · سشن‌های Close Cart",
+  "of yesterday's full day": "از کل روز دیروز",
+  "yesterday, full day": "دیروز، کل روز",
+  "yesterday, same time": "دیروز، همین ساعت",
+  "last tuesday, same time": "سه‌شنبه‌ی گذشته، همین ساعت",
+  "last monday, same time": "دوشنبه‌ی گذشته، همین ساعت",
+  "last wednesday, same time": "چهارشنبه‌ی گذشته، همین ساعت",
+  "last thursday, same time": "پنجشنبه‌ی گذشته، همین ساعت",
+  "last friday, same time": "جمعه‌ی گذشته، همین ساعت",
+  "last saturday, same time": "شنبه‌ی گذشته، همین ساعت",
+  "last sunday, same time": "یکشنبه‌ی گذشته، همین ساعت",
+  "conversion · close-cart / valid sessions": "نرخ تبدیل · Close Cart / سشن معتبر",
+  "yesterday's full day": "کل روز دیروز",
+  "today is still running, so the fair comparison is the same clock time (the coloured markers). grey = yesterday's whole day, only to show how far into a normal day we are. ▲ / ▼ = today against each reference. hover a marker for its value.": "امروز هنوز تمام نشده، پس مقایسه‌ی منصفانه با همین ساعت است (نشانگرهای رنگی). خاکستری = کل روز دیروز، فقط برای اینکه ببینیم چقدر از یک روز عادی گذشته. ▲ / ▼ = امروز در برابر هر مرجع. برای دیدن مقدار، نشانگر را روی هرکدام ببرید.",
+  "platforms · share of sessions and conversion": "پلتفرم‌ها · سهم سشن و نرخ تبدیل",
+  "against a usual": "در برابر معمولِ",
+  "inside the normal range: everyday swing, not a change.": "داخل بازه‌ی معمول: نوسان روزمره است، نه تغییر.",
+  "open overall funnel": "باز کردن قیف کلی",
+  "normal range": "بازه‌ی معمول",
+  "usual level learned from": "سطح معمول از روی",
+  "distance from usual": "فاصله از معمول",
+  "expected orders = the usual conversion rate (same weekday, recent days weigh more) times yesterday's valid sessions.": "سفارش مورد انتظار = نرخ تبدیل معمول (همان روز هفته، با وزن بیشتر برای روزهای اخیر) × سشن‌های معتبر دیروز.",
+  "conversion yesterday": "نرخ تبدیل دیروز",
+  "difference": "اختلاف",
+  "close-cart sessions divided by valid sessions.": "سشن‌های Close Cart تقسیم بر سشن‌های معتبر.",
+  "expected": "مورد انتظار",
+  "gap": "فاصله",
+  "orders at risk": "سفارش‌های در خطر",
+  "worth": "ارزش",
+  "estimate": "تخمین",
+  "average order": "میانگین سفارش",
+  "revenue is an estimate: one price per order code, plus half of the events that carry no code.": "درآمد تخمینی است: یک قیمت برای هر کد سفارش، به‌علاوه‌ی نیمی از رویدادهایی که کد ندارند.",
+  "usual share": "سهم معمول",
+  "order share": "سهم سفارش",
+  "(tick = usual)": "(خط کوچک = معمول)",
+  "why": "چرا",
+  "the eco (best value) carousel, from impression to order.": "کاروسل Eco (Best Value)، از Impression تا سفارش.",
+  "confidence:": "اطمینان:",
+  "a single city moving on its own usually points at local supply, delivery or an area campaign.": "وقتی فقط یک شهر تکان می‌خورد، معمولاً پای عرضه‌ی محلی، ارسال یا کمپین منطقه‌ای در میان است.",
+  "orders and conversion, last 30 days": "سفارش و نرخ تبدیل، ۳۰ روز اخیر",
+  "orders and revenue by service": "سفارش و درآمد به تفکیک سرویس",
+  "share of orders ·": "سهم سفارش ·",
+  "share of revenue ·": "سهم درآمد ·",
+  "service · basket size": "سرویس · اندازه‌ی سبد",
+  "direct menu link": "لینک مستقیم منو",
+  "other direct entry": "سایر ورودهای مستقیم",
+  "google to a menu": "گوگل به منو",
+  "other snapp apps": "سایر اپ‌های اسنپ",
+  "home, click with no event": "خانه، کلیک بدون رویداد",
+  "back from payment": "بازگشت از پرداخت",
+  "basket size against the average basket: 1.0× is average, green bigger, amber smaller.": "اندازه‌ی سبد در برابر میانگین: ۱٫۰× یعنی میانگین، سبز بزرگ‌تر و نارنجی کوچک‌تر.",
+  "click a path to see its entry points.": "برای دیدن نقاط ورود، روی یک مسیر کلیک کنید.",
+  "each ordering session counted once, on its last entry click before the first add to cart (the event-mapper model); sessions with no entry click are named by where they came from. money: one price per order code plus half of the events with no code.": "هر سشنِ سفارش‌دهنده یک بار و روی آخرین کلیک ورودِ پیش از اولین افزودن به سبد شمرده می‌شود (مدل event-mapper)؛ سشن‌های بدون کلیک ورود با مبدأشان نام‌گذاری می‌شوند. پول: یک قیمت برای هر کد سفارش، به‌علاوه‌ی نیمی از رویدادهای بی‌کد.",
+  "each session counted once, credited to its last entry click before the first add to cart; orders = sessions that ordered. sessions with no entry click are left out of the shares. usual = the 28 days before.": "هر سشن یک بار شمرده می‌شود و به آخرین کلیک ورودِ پیش از اولین افزودن به سبد نسبت داده می‌شود؛ سفارش = سشن‌هایی که سفارش دادند. سشن‌های بدون کلیک ورود در سهم‌ها حساب نمی‌شوند. معمول = ۲۸ روز قبل.",
+  "share of sessions that ordered, each variation against the control, last 7 days.": "سهم سشن‌هایی که سفارش دادند، هر واریانت در برابر کنترل، ۷ روز اخیر.",
+  "a gap counts as at risk only when the drop is at least 2 noise units below usual. inside the normal range it is everyday swing, not a loss.": "فاصله فقط وقتی «در خطر» حساب می‌شود که افت دست‌کم ۲ واحد نوسان زیر معمول باشد. داخل بازه‌ی معمول، نوسان روزمره است نه زیان.",
+  "basis": "مبنا",
+  "slice = share of sessions": "هر برش = سهم از سشن‌ها",
+  "size = traffic share · brightness = conversion rate · top": "اندازه = سهم ترافیک · روشنی = نرخ تبدیل · برترین",
+  "the same weekday in the last four weeks, averaged (pooled for the tests)": "همان روز هفته در چهار هفته‌ی اخیر، میانگین‌گیری‌شده (تجمیع‌شده برای آزمون‌ها)",
+  "all cities ": "همه‌ی شهرها",
   /* ── عمومی ───────────────────────────── */
   "source": "منبع",
   "· source:": "· منبع:",
@@ -995,7 +1063,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
   const translator = (() => {
     const DICT = window.FF_DICT || {}, PARTS = window.FF_PARTS || {}, DAYS = window.FF_DAYS || {}, MONTHS = window.FF_MONTHS || {};
     const FA = "۰۱۲۳۴۵۶۷۸۹", LRI = "⁦", PDI = "⁩";
-    const SKIP = "script,style,noscript,textarea,input,select,code,pre,[contenteditable],.ff-skip";
+    const SKIP = "script,style,noscript,textarea,input,code,pre,[contenteditable],.ff-skip";
     const PLAT = "SUPERAPP_SUPERMARKET|SUPERAPP|PWA|PSA_ANDROID|PSA_IOS|Fidilio|IRANCELL|OUTBOX|AP|PROCUREMENT|SABA";
     const recs = new WeakMap(), touched = new Set();
     const arecs = new WeakMap(), atouched = new Set();
@@ -1034,6 +1102,18 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     r(/^(.+?) converts (below|above) its usual level$/i, (m, a, k) => `${tr(a)} ${k.toLowerCase() === "below" ? "پایین‌تر" : "بالاتر"} از سطح معمولش تبدیل می‌کند`);
     r(/^(.+?) orders lost \(about (.+?) (million|billion) toman\)$/i, (m, n, a, u) => `${n} سفارش از دست رفت (حدود ${a} ${mag(u)} تومان)`);
     r(/^(.+?) orders lost$/i, (m, n) => `${n} سفارش از دست رفت`);
+    r(/^(.+?) orders lost · about (.+?) (million|billion) toman · (.+)$/i, (m, n, a, u, o) => `${n} سفارش از دست رفت · حدود ${a} ${mag(u)} تومان · ${T(o)}`);
+    r(/^between (.+?) (billion|million) toman and (.+?) (billion|million) toman$/i, (m, a, u, b, u2) => `بین ${a} ${mag(u)} و ${b} ${mag(u2)} تومان`);
+    r(/^(.+?) (billion|million) toman$/i, (m, a, u) => `${a} ${mag(u)} تومان`);
+    r(/^([\d.,]+[KMB]?) toman$/i, (m, a) => `${a} تومان`);
+    r(/^(.+?)× avg basket$/i, (m, a) => `${a}× میانگین سبد`);
+    r(/^(\d+) earlier (Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days$/i, (m, n, x) => `${n} ${day(x.slice(0, 3))} قبل`);
+    r(/^(.+?) noise units: inside everyday swing$/i, (m, a) => `${a} واحد نوسان: داخل نوسان روزمره`);
+    r(/^(.+?) noise units: (.+)$/i, (m, a, b) => `${a} واحد نوسان: ${T(b)}`);
+    r(/^(.+?) reached$/i, (m, a) => `${a} رسیده`);
+    r(/^Variation (\d+)$/i, (m, n) => `واریانت ${n}`);
+    r(/^([^A-Za-z]+): (.+?) close-cart sessions, (.+)$/i, (m, dt, a, b) => `${dt}: ${a} سشن Close Cart، ${b}`);
+    r(/^close-cart sessions \/ all sessions, usual = (\d+) days$/i, (m, n) => `سشن‌های Close Cart / همه‌ی سشن‌ها، معمول = ${n} روز`);
     r(/^· about (.+?) (million|billion) toman$/i, (m, a, u) => `· حدود ${a} ${mag(u)} تومان`);
     r(/^about (.+?) (million|billion|thousand) toman$/i, (m, a, u) => `حدود ${a} ${mag(u)} تومان`);
     r(/^about (.+?) (million|billion|thousand)$/i, (m, a, u) => `حدود ${a} ${mag(u)}`);
@@ -1144,6 +1224,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     r(/^City (\d+)$/i, (m, n) => `شهر ${n}`);
     r(/^(\d+) sessions$/i, (m, n) => `${n} سشن`);
     r(/^([^A-Za-z]+?) to ([^A-Za-z]+)$/, (m, a, b) => `${a} تا ${b}`);
+    r(/^([A-Za-z][^,]+?), ([^A-Za-z]+)$/, (m, a, b) => { const A = T(a); return A === a ? null : `${A}، ${b}`; });
     r(/^(.+?) \((.+?)\) vs$/i, (m, a, b) => `${T(a)} (${b}) در برابر`);
     r(/^(.+?) sessions lost between (.+?) and (.+)$/i, (m, n, a, b) => `${n} سشن بین ${T(a)} و ${T(b)} از دست رفت`);
     r(/^(.+?) · (high|medium|low|critical)(?: · (.+))?$/i, (m, a, l, rest) => `${tr(a)} · ${lvl(l)}` + (rest ? ` · ${T(rest)}` : ""));
