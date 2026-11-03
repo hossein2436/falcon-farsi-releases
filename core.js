@@ -716,6 +716,81 @@ window.FF_DICT = {
   "actor": "انجام‌دهنده",
   "target": "هدف",
 
+
+  /* ── تکمیلی v2 ───────────────────────────── */
+  "valid": "سشن معتبر",
+  "home click": "کلیک خانه",
+  "the top": "بالای قیف",
+  "bottom of the funnel": "پایین قیف",
+  "the bottom of the funnel": "پایین قیف",
+  "the bottom of the funnel.": "پایین قیف",
+  "net orders.": "سفارش خالص",
+  "percent under each count is the share of the first stage; chips are the change of that share vs the comparison period.": "درصد زیر هر عدد، سهم آن از مرحله‌ی اول است؛ برچسب‌ها تغییر همین سهم نسبت به دوره‌ی مقایسه‌اند.",
+  "percent under each count is the share of the first stage": "درصد زیر هر عدد، سهم آن از مرحله‌ی اول است",
+  "id, not actionable ·": "شناسه، قابل اقدام نیست ·",
+  "which funnel stages and segments explain a drop in orders / sessions": "کدام مرحله‌ها و بخش‌های قیف، افت سفارش به سشن را توضیح می‌دهند",
+  "method, data audit and open questions (gate a)": "روش، ممیزی داده و سؤال‌های باز (Gate A)",
+  "gate": "مرحله‌ی تأیید",
+  "audit": "ممیزی",
+  "(now)": "(الان)",
+  "read-only mvp": "MVP فقط‌خواندنی",
+  "automation": "خودکارسازی",
+  "nothing below is a measured number. gate b needs your approval and the answers to the open questions.": "هیچ‌کدام از عددهای پایین اندازه‌گیری‌شده نیستند. Gate B به تأیید شما و پاسخ سؤال‌های باز نیاز دارد.",
+  "wireframe · top controls and summary": "وایرفریم · کنترل‌های بالا و خلاصه",
+  "date / time range": "بازه‌ی تاریخ / زمان",
+  "time zone: asia/tehran": "منطقه‌ی زمانی: Asia/Tehran",
+  "segment: platform · city": "بخش: پلتفرم · شهر",
+  "counterfactual order gap (estimate)": "شکاف سفارش در سناریوی خلاف واقع (تخمین)",
+  "the session's first menu view, page view or close cart falls in the window.": "اولین دیدن منو، دیدن صفحه یا Close Cart سشن در این بازه است.",
+  "δ relative": "Δ نسبی",
+  "δ pp": "Δ pp",
+  "sample / ci": "نمونه / بازه‌ی اطمینان",
+  "time series + baseline overlay (gate b)": "سری زمانی + خط پایه (Gate B)",
+  "explainability · inspect data · diagnostic snapshot": "توضیح‌پذیری · بررسی داده · خلاصه‌ی تشخیصی",
+  "formula:": "فرمول:",
+  ", ordered within the session, each session once.": "، به ترتیب درون سشن، هر سشن یک بار.",
+  "windows: same tehran weekday and clock window, d−7 / d−28 / median of 8 weeks.": "بازه‌ها: همان روز هفته و همان ساعت به وقت تهران، D−7 / D−28 / میانه‌ی ۸ هفته.",
+  "segment breakdown, hypotheses and the copyable markdown/json snapshot arrive in gate b–c.": "تفکیک بخش‌ها، فرضیه‌ها و خلاصه‌ی قابل‌کپی Markdown/JSON در Gate B–C می‌آیند.",
+  "the session clicked a vendor, product, deal offer or reorder after becoming valid.": "سشن پس از معتبر شدن روی فروشنده، محصول، پیشنهاد ویژه یا سفارش دوباره کلیک کرد.",
+  "sessions reaching click": "سشن‌هایی که به کلیک رسیدند",
+  "the session added an item (or a deal offer) after its first click.": "سشن پس از اولین کلیک، کالا (یا پیشنهاد ویژه‌ای) به سبد اضافه کرد.",
+  "sessions reaching add to cart": "سشن‌هایی که به افزودن به سبد رسیدند",
+  "the session opened the basket after adding to cart.": "سشن پس از افزودن به سبد، سبد را باز کرد.",
+  "sessions reaching basket": "سشن‌هایی که به سبد رسیدند",
+  "the session continued to checkout from the basket.": "سشن از سبد به پرداخت رفت.",
+  "sessions reaching continue purchase": "سشن‌هایی که به ادامه‌ی خرید رسیدند",
+  "sessions with an order": "سشن‌های دارای سفارش",
+  "below the cards (gate c)": "زیر کارت‌ها (Gate C)",
+  "waterfall: shapley stage effects + mix + orders per session + residual (pp)": "آبشاری: اثر مرحله‌ها با Shapley + ترکیب + سفارش به سشن + باقی‌مانده (pp)",
+  "segment ranking (min. cohort, multiple-testing corrected)": "رتبه‌بندی بخش‌ها (حداقل کوهورت، با اصلاح آزمون‌های چندگانه)",
+  "instrumentation health: coverage, null sessions, uncoded close_cart, lag": "سلامت ابزارگذاری: پوشش، سشن‌های تهی، close_cart بی‌کد، تأخیر",
+  "incident timeline and exportable report": "خط زمانی رخداد و گزارش قابل‌خروجی",
+  "event source": "منبع رویداد",
+  "order mart": "مارت سفارش",
+  "ingestion": "ورود داده",
+  "store": "ذخیره‌سازی",
+  "frontend": "فرانت‌اند",
+  "this page (app server).": "همین صفحه (App Server).",
+  "daily gross / net orders per service. no session id, so orders cannot be tied to sessions from it.": "سفارش ناخالص و خالص روزانه به تفکیک سرویس. شناسه‌ی سشن ندارد، پس سفارش‌ها از این منبع به سشن وصل نمی‌شوند.",
+  "daily mergetree aggregates only. no intraday funnel table exists.": "فقط تجمیع‌های روزانه‌ی MergeTree. جدول قیف درون‌روزی وجود ندارد.",
+  "orders per session exist only as close_cart events. some carry no order_code and some fire twice, so orders need de-duplication and a quality warning.": "سفارش به ازای سشن فقط به شکل رویداد close_cart وجود دارد. بعضی order_code ندارند و بعضی دو بار ثبت می‌شوند؛ پس سفارش‌ها حذف تکرار و هشدار کیفیت لازم دارند.",
+  "no ingestion-time column is used anywhere, so late events are only visible by re-pulling a day.": "هیچ‌جا ستون زمان ورود داده استفاده نمی‌شود؛ پس رویدادهای دیررس فقط با دریافت دوباره‌ی یک روز دیده می‌شوند.",
+  "segments confirmed in the repo: platform and city. app version, traffic source, payment method and new/returning are not referenced yet.": "بخش‌های تأییدشده در ریپو: پلتفرم و شهر. نسخه‌ی اپ، منبع ترافیک، روش پرداخت و کاربر جدید/بازگشتی هنوز استفاده نشده‌اند.",
+  "no bot or internal-traffic filter in the funnel sql.": "در SQL قیف، فیلتر بات یا ترافیک داخلی وجود ندارد.",
+  "a wrong close_cart de-duplication moves orders/sessions for instrumentation reasons, not user reasons.": "حذف تکرار اشتباه close_cart، نسبت سفارش به سشن را به دلایل ابزارگذاری تکان می‌دهد، نه رفتار کاربر.",
+  "conversion timeout after session start?": "مهلت تبدیل پس از شروع سشن چقدر است؟",
+  "is there a bot / internal-traffic marker?": "نشانگر بات / ترافیک داخلی داریم؟",
+  "exact dates of the wed–fri drop and any release or incident around them.": "تاریخ دقیق افت چهارشنبه تا جمعه و هر ریلیز یا رخدادی در آن حوالی.",
+  "is a new ingestion job acceptable, or must the first version be on-demand only?": "یک job جدید ورود داده قابل‌قبول است یا نسخه‌ی اول باید فقط درخواستی باشد؟",
+  "which segment fields exist in extra, and are any of them personal data?": "کدام فیلدهای بخش در extra هستند و آیا هیچ‌کدام داده‌ی شخصی است؟",
+  "can a session hold several orders? is there an order table with status and order_code?": "یک سشن می‌تواند چند سفارش داشته باشد؟ جدول سفارشی با status و order_code داریم؟",
+  "gate a documents": "اسناد Gate A",
+  "architecture map, funnel inventory, findings, risks": "نقشه‌ی معماری، فهرست قیف‌ها، یافته‌ها، ریسک‌ها",
+  "cohort, ordered stages, measures, baselines, segments": "کوهورت، مرحله‌های مرتب، شاخص‌ها، خط‌های پایه، بخش‌ها",
+  "gates a–d": "Gate A تا D",
+  "decisions the owner needs to make": "تصمیم‌هایی که مالک باید بگیرد",
+  "stage cards · 6 instrumented stages": "کارت مرحله‌ها · ۶ مرحله‌ی ابزارگذاری‌شده",
+  "one card per stage, rendered from the stage list (not a fixed number). order and events from backend/app/ingestion/sql/live_daily.sql.": "برای هر مرحله یک کارت، ساخته‌شده از فهرست مرحله‌ها (نه عدد ثابت). ترتیب و رویدادها از backend/app/ingestion/sql/live_daily.sql.",
   /* ── عمومی ───────────────────────────── */
   "source": "منبع",
   "· source:": "· منبع:",
@@ -977,7 +1052,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     r(/^vs usual (.+)$/i, (m, b) => `نسبت به معمولِ ${b}`);
     r(/^vs yesterday$/i, () => "نسبت به دیروز");
     r(/^vs last (\w+)$/i, (m, x) => `نسبت به ${day(x)} گذشته`);
-    r(/^\(?([+−-]?[\d.,]+ ?(?:pp|pt|%)) vs previous period\)?$/i, (m, a) => `(${a} نسبت به دوره‌ی قبل)`);
+    r(/^(\(?)([+−-]?[\d.,]+ ?(?:pp|pt|%)) vs previous period(\)?)$/i, (m, o, a, c) => `${o}${a} نسبت به دوره‌ی قبل${c}`);
     r(/^vs previous period$/i, () => "نسبت به دوره‌ی قبل");
     r(/^vs baseline$/i, () => "نسبت به خط پایه");
     r(/^([−+-]?[\d.,]+ ?%) vs baseline$/i, (m, a) => `${a} نسبت به خط پایه`);
@@ -1070,6 +1145,11 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     r(/^(\d+) sessions$/i, (m, n) => `${n} سشن`);
     r(/^([^A-Za-z]+?) to ([^A-Za-z]+)$/, (m, a, b) => `${a} تا ${b}`);
     r(/^(.+?) \((.+?)\) vs$/i, (m, a, b) => `${T(a)} (${b}) در برابر`);
+    r(/^(.+?) sessions lost between (.+?) and (.+)$/i, (m, n, a, b) => `${n} سشن بین ${T(a)} و ${T(b)} از دست رفت`);
+    r(/^(.+?) · (high|medium|low|critical)(?: · (.+))?$/i, (m, a, l, rest) => `${tr(a)} · ${lvl(l)}` + (rest ? ` · ${T(rest)}` : ""));
+    r(/^(.+?) → (.+)$/, (m, a, b) => { const A = T(a), B = T(b); return A !== a || B !== b ? `${A === a ? iso(a) : A} → ${B === b ? iso(b) : B}` : null; });
+    r(/^(.+?) \(([^()]+)\)$/, (m, a, b) => { const A = T(a); if (A === a) return null; const B = T(b); return `${A} (${B === b ? iso(b) : B})`; });
+    r(/^([A-Za-z][^:]{2,40}): (.+)$/, (m, a, b) => { const A = T(a); if (A === a) return null; return `${A}: ${T(b)}`; });
     // برچسب نقطه‌ی ورود: «Vendor card · Search»
     r(/^([A-Za-z][A-Za-z &()\-]+?) · ([A-Za-z][A-Za-z &()\-]+)$/, (m, a, b) => {
       const A = PARTS[norm(a)], B = PARTS[norm(b)];
