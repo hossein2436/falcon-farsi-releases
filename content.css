@@ -188,7 +188,7 @@ html[data-ff] .text-gray-700, html[data-ff] .text-gray-600, html[data-ff] .text-
 html[data-ff] .text-gray-500, html[data-ff] .text-gray-400, html[data-ff] .text-slate-500 { color: var(--ff-ink-3) !important; }
 
 /* لایه‌های شناور */
-html[data-ff] [role="dialog"],
+html[data-ff] [role="dialog"]:not(.ff-pal-card),
 html[data-ff] [role="menu"],
 html[data-ff] [role="listbox"],
 html[data-ff] [role="tooltip"] {
@@ -648,6 +648,7 @@ html[data-ff] .ff-pal {
 html[data-ff]:not([data-ff-rtl]) .ff-pal { direction: ltr; }
 html[data-ff] .ff-pal.is-open { opacity: 1; pointer-events: auto; }
 html[data-ff] .ff-pal-card {
+  border-radius: 18px !important;
   width: min(640px, calc(100vw - 32px));
   max-height: 64vh; display: flex; flex-direction: column;
   background: var(--ff-surface); color: var(--ff-ink);

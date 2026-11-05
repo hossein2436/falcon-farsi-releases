@@ -1314,7 +1314,9 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
     r(/^(.+?) orders lost$/i, (m, n) => `${n} سفارش از دست رفت`);
     r(/^(.+?) orders lost · about (.+?) (million|billion) toman · (.+)$/i, (m, n, a, u, o) => `${n} سفارش از دست رفت · حدود ${a} ${mag(u)} تومان · ${T(o)}`);
     r(/^between (.+?) (billion|million) toman and (.+?) (billion|million) toman$/i, (m, a, u, b, u2) => `بین ${a} ${mag(u)} و ${b} ${mag(u2)} تومان`);
+    r(/^about (.+?) (billion|million) toman$/i, (m, a, u) => `حدود ${a} ${mag(u)} تومان`);
     r(/^(.+?) (billion|million) toman$/i, (m, a, u) => `${a} ${mag(u)} تومان`);
+    r(/^(.+?) orders gained · about (.+?) (million|billion) toman · (.+)$/i, (m, n, a, u, o) => `${n} سفارش بیشتر · حدود ${a} ${mag(u)} تومان · ${T(o)}`);
     r(/^([\d.,]+[KMB]?) toman$/i, (m, a) => `${a} تومان`);
     r(/^(.+?)× avg basket$/i, (m, a) => `${a}× میانگین سبد`);
     r(/^(\d+) earlier (Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days$/i, (m, n, x) => `${n} ${day(x.slice(0, 3))} قبل`);
@@ -1817,8 +1819,8 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       if (!S.enabled) return;
       if (!pal) {
         pal = mk("div", "ff-pal");
-        pal.setAttribute("role", "dialog"); pal.setAttribute("aria-modal", "true"); pal.setAttribute("aria-label", "پرش سریع");
         const card = mk("div", "ff-pal-card");
+        card.setAttribute("role", "dialog"); card.setAttribute("aria-modal", "true"); card.setAttribute("aria-label", "پرش سریع");
         const head = mk("div", "ff-pal-head");
         const input = mk("input", "ff-pal-input"); input.type = "search"; input.placeholder = "کجا برویم؟ نام صفحه، نما یا فرمان…"; input.setAttribute("aria-label", "جست‌وجو");
         head.appendChild(input); head.appendChild(mk("kbd", "ff-kbd", "Esc"));
