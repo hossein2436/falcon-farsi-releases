@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.0.0 */
+/* falcon-farsi core v2.1.0 */
 /* ==================================================================
    فالکون · پوسته‌ی فارسی v2
    زبان طراحی «شاهین»: کاغذ گرم و مرکب لاجوردی در روز، شب عمیق در تاریکی.
@@ -458,6 +458,49 @@ html[data-ff-motion] main h1 + .rounded-full:empty { animation: ff-pulse 2.4s ea
 @media (prefers-reduced-motion: reduce) {
   html[data-ff] *, html[data-ff] *::before, html[data-ff] *::after { animation: none !important; transition-duration: 0ms !important; }
 }
+
+/* ==================================================================
+   کارت حکم (CPO / CRO)
+   ================================================================== */
+html:not([data-ff]) .ff-verdict { display: none !important; }
+html[data-ff] [data-ff-verdict-host] { display: block !important; flex: 1 1 auto; margin: 0 !important; min-width: 0; }
+html[data-ff] div:has(> [data-ff-verdict-host]) {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  padding: 18px 20px !important;
+  border-radius: var(--ff-radius) !important;
+  border: 1px solid var(--ff-line) !important;
+  border-inline-start: 4px solid var(--ff-saffron-2) !important;
+  background: linear-gradient(100deg, var(--ff-saffron-soft), var(--ff-surface) 55%) !important;
+  box-shadow: var(--ff-shadow) !important;
+}
+html[data-ff-rtl] div:has(> [data-ff-verdict-host]) { background: linear-gradient(260deg, var(--ff-saffron-soft), var(--ff-surface) 55%) !important; }
+html[data-ff] .ff-verdict { display: grid; gap: 10px; color: var(--ff-ink); line-height: 1.7; }
+html[data-ff] .ff-v-head { font-size: 18px; font-weight: 800; line-height: 1.4; }
+html[data-ff] .ff-verdict[data-ff-level="down"] .ff-v-head { color: var(--ff-red); }
+html[data-ff] .ff-verdict[data-ff-level="up"] .ff-v-head { color: var(--ff-turq); }
+html[data-ff] .ff-v-stats { display: flex; flex-wrap: wrap; gap: 8px; }
+html[data-ff] .ff-v-stat {
+  display: inline-flex; align-items: baseline; gap: 8px;
+  padding: 6px 12px; border-radius: 10px;
+  background: var(--ff-surface); border: 1px solid var(--ff-line);
+}
+html[data-ff] .ff-v-stat i { font-style: normal; font-size: 12px; color: var(--ff-ink-3); }
+html[data-ff] .ff-v-stat b { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+html[data-ff] .ff-v-cause { font-size: 13.5px; color: var(--ff-ink-2); }
+html[data-ff] .ff-v-look {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+  padding: 10px 12px; border-radius: 12px;
+  background: var(--ff-surface); border: 1px dashed var(--ff-line-2);
+}
+html[data-ff] .ff-v-look i { font-style: normal; font-size: 12px; font-weight: 800; color: var(--ff-pri); }
+html[data-ff] .ff-v-look b { font-size: 13.5px; font-weight: 700; }
+html[data-ff] .ff-v-look em { font-style: normal; font-size: 12px; color: var(--ff-ink-3); }
+html[data-ff-motion] .ff-verdict > * { animation: ff-rise 420ms var(--ff-ease) backwards; }
+html[data-ff-motion] .ff-verdict > *:nth-child(2) { animation-delay: 60ms; }
+html[data-ff-motion] .ff-verdict > *:nth-child(3) { animation-delay: 120ms; }
+html[data-ff-motion] .ff-verdict > *:nth-child(4) { animation-delay: 180ms; }
 
 /* ---- generated: Tailwind status colors → palette ---- */
 html[data-ff] .text-amber-500,html[data-ff] .text-amber-600,html[data-ff] .text-amber-700,html[data-ff] .text-amber-800,html[data-ff] .text-amber-900,html[data-ff] .text-yellow-500,html[data-ff] .text-yellow-600,html[data-ff] .text-yellow-700,html[data-ff] .text-yellow-800,html[data-ff] .text-yellow-900,html[data-ff] .text-orange-500,html[data-ff] .text-orange-600,html[data-ff] .text-orange-700,html[data-ff] .text-orange-800,html[data-ff] .text-orange-900{color:var(--ff-saffron)!important}
