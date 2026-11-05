@@ -125,6 +125,74 @@ window.FF_DICT = {
   "conversion": "نرخ تبدیل",
   "valid sessions": "سشن‌های معتبر",
   "valid users": "کاربران معتبر",
+  "observed pre and post windows": "مقایسه‌ی مشاهده‌ای پیش و پس",
+  "observed count": "شمارش مشاهده‌شده",
+  "supertype icon on home": "آیکون سوپرتایپ در خانه",
+  "filter in a vendor list": "فیلتر در لیست فروشنده‌ها",
+  "filter click list on vendor list": "فهرست فیلترها در لیست فروشنده‌ها",
+  "more supertypes on home": "سوپرتایپ‌های بیشتر در خانه",
+  "breadcrumb on vendor list": "مسیر صفحه (Breadcrumb) در لیست فروشنده‌ها",
+  "vendor in \"show all\" search results": "فروشنده در نتایج «نمایش همه»ی جست‌وجو",
+  "search box on home": "جعبه‌ی جست‌وجو در خانه",
+  "search box in a vendor list": "جعبه‌ی جست‌وجو در لیست فروشنده‌ها",
+  "search box on the search page": "جعبه‌ی جست‌وجو در صفحه‌ی جست‌وجو",
+  "tab list item on search": "زبانه‌ی فهرست در جست‌وجو",
+  "bottom nav bar on search vendor list": "نوار ناوبری پایین در لیست فروشنده‌های جست‌وجو",
+  "show all searched vendors on search": "«نمایش همه»ی فروشنده‌ها در جست‌وجو",
+  "toggle filter on search": "فیلتر روشن/خاموش در جست‌وجو",
+  "search box on search vendor list": "جعبه‌ی جست‌وجو در لیست فروشنده‌های جست‌وجو",
+  "filter click list on search": "فهرست فیلترها در جست‌وجو",
+  "orders tab, from home": "زبانه‌ی سفارش‌ها، از خانه",
+  "reorder button": "دکمه‌ی سفارش دوباره",
+  "multibasket": "چندسبدی (Multibasket)",
+  "orders tab, from profile": "زبانه‌ی سفارش‌ها، از پروفایل",
+  "favorite vendors": "فروشنده‌های محبوب",
+  "bottom nav bar on promotion center": "نوار ناوبری پایین در مرکز پیشنهادها",
+  "bottom nav bar on product list": "نوار ناوبری پایین در لیست محصولات",
+  "bottom nav bar on landing": "نوار ناوبری پایین در لندینگ",
+  "bottom nav bar on jimbo": "نوار ناوبری پایین در Jimbo",
+  "bottom nav bar on orders": "نوار ناوبری پایین در سفارش‌ها",
+  "bottom nav bar": "نوار ناوبری پایین",
+  "product card on party": "کارت محصول در پارتی",
+  "product card on home": "کارت محصول در خانه",
+  "product card on vendor list": "کارت محصول در لیست فروشنده‌ها",
+  "bottom nav bar on party": "نوار ناوبری پایین در پارتی",
+  "show more carousel on home": "«بیشتر» در کاروسل در خانه",
+  "show more carousel on vendor list": "«بیشتر» در کاروسل در لیست فروشنده‌ها",
+  "supertype filter on party": "فیلتر سوپرتایپ در پارتی",
+  "carousel on home": "کاروسل در خانه",
+  "show more carousel on landing": "«بیشتر» در کاروسل در لندینگ",
+  "carousel on vendor list": "کاروسل در لیست فروشنده‌ها",
+  "carousel on landing": "کاروسل در لندینگ",
+  "deal offer card on meal for one": "کارت پیشنهاد ویژه در Meal For One",
+  "deal offer card on vendor list": "کارت پیشنهاد ویژه در لیست فروشنده‌ها",
+  "bottom nav bar on meal for one": "نوار ناوبری پایین در Meal For One",
+  "supertype filter on meal for one": "فیلتر سوپرتایپ در Meal For One",
+  "deal offer card on landing": "کارت پیشنهاد ویژه در لندینگ",
+  "vendor click pdp on meal-for-one": "کلیک فروشنده به صفحه‌ی محصول در Meal For One",
+  "vendor card on gem": "کارت فروشنده در Gem",
+  "bottom nav bar on gem": "نوار ناوبری پایین در Gem",
+  "gem fbt on vendor list": "Gem «اغلب با هم خریده می‌شوند» در لیست فروشنده‌ها",
+  "supertype filter on gem": "فیلتر سوپرتایپ در Gem",
+  "banner on search": "بنر در جست‌وجو",
+  "deal offer card on off box": "کارت پیشنهاد ویژه در Off-Box",
+  "off box tab on off box": "زبانه‌ی Off-Box در Off-Box",
+  "vendor card on landing": "کارت فروشنده در لندینگ",
+  "quick access item on home": "دسترسی سریع در خانه",
+  "pro vendor card on pro landing": "کارت فروشنده‌ی Pro در لندینگ Pro",
+  "search box on landing": "جعبه‌ی جست‌وجو در لندینگ",
+  "super type on landing": "سوپرتایپ در لندینگ",
+  "banner on home": "بنر در خانه",
+  "banner on landing": "بنر در لندینگ",
+  "quick access item on landing": "دسترسی سریع در لندینگ",
+  "category item on landing": "آیتم دسته‌بندی در لندینگ",
+  "product card on eco-landing": "کارت محصول در لندینگ Eco",
+  "bottom nav bar on eco-landing": "نوار ناوبری پایین در لندینگ Eco",
+  "supertype filter on eco-landing": "فیلتر سوپرتایپ در لندینگ Eco",
+  "category item on vendor list": "آیتم دسته‌بندی در لیست فروشنده‌ها",
+  "product in a category list": "محصول در فهرست دسته‌بندی",
+  "category on home": "دسته‌بندی در خانه",
+  "banner on vendor list": "بنر در لیست فروشنده‌ها",
   "overcast": "ابری",
   "partly cloudy": "نیمه‌ابری",
   "mostly cloudy": "بیشتر ابری",
@@ -2122,7 +2190,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       t.appendChild(h("tbody", null, rows.map((r) => h("tr", null, h("th", null, o.rowLabel ? o.rowLabel(r) : r), cols.map((c) => {
         const v = cell(r, c);
         if (v == null || isNaN(v)) return h("td", { class: "is-na" }, "");
-        const k = hi === lo ? 0.5 : (v - lo) / (hi - lo);
+        const k = hi === lo ? 0.5 : Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
         const td = h("td", { class: k > 0.58 ? "is-hi" : null, style: { "--k": k.toFixed(3) }, tabindex: "0" }, o.fmt ? o.fmt(v) : "");
         td.addEventListener("mousemove", (e) => showTip(e, [`${o.rowLabel ? o.rowLabel(r) : r} · ${o.colLabel ? o.colLabel(c) : c}`, (o.tipFmt || o.fmt || compact)(v)]));
         td.addEventListener("mouseleave", hideTip);
@@ -2285,7 +2353,8 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
     sideSec = h("div", { class: "ffd-nav" },
       h("p", null, "داشبوردهای فارسی"),
       h("ul", null, DASH.map((d) => h("li", null, h("a", { href: "#ff=" + d.id, "data-id": d.id, title: d.desc, onclick: (e) => { e.preventDefault(); open(d.id); } }, h("span", { class: "ffd-nav-ico" }, d.icon || "◆"), h("span", null, d.title))))));
-    nav.appendChild(sideSec);
+    const first = nav.querySelector(":scope > div");
+    if (first) first.after(sideSec); else nav.appendChild(sideSec);
     markNav();
   }
   // بستن پنل وقتی کاربر به صفحه‌ی دیگری از فالکون می‌رود
@@ -2329,6 +2398,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
   const weekday = (d) => { try { return new Date(d + "T12:00:00").toLocaleDateString("fa-IR", { weekday: "long" }); } catch (e) { return d; } };
   const expName = (id) => String(id || "").replace(/_experiment$/, "").replace(/_experiment_/, " ").replace(/_/g, " ");
   const cc = () => api("/api/v1/control-center", 120000);
+  const until = (t) => { const m = Math.round((Date.parse(t) - Date.now()) / 60000); if (isNaN(m)) return "—"; if (m <= 0) return "همین حالا"; if (m < 60) return `${fa(m)} دقیقه‌ی دیگر`; if (m < 2880) return `${fa(Math.round(m / 60))} ساعت دیگر`; return `${fa(Math.round(m / 1440))} روز دیگر`; };
   const two = (a, b) => h("div", null, h("b", null, a), b ? h("small", null, b) : null);
   const deltaSpan = (v, good, text) => h("span", { class: "ffd-delta " + (v == null || v === 0 ? "" : good ? "ffd-up" : "ffd-down") }, text);
   const state = {};
@@ -2604,6 +2674,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
   /* ================================================================ ۵) شهر × ساعت */
   D.register({
     id: "city-hour", icon: "◷", title: "شهر × ساعت", short: "شهر × ساعت",
+    slow: "الگوی ساعتی ۱۰ شهر جداگانه از فالکون خوانده می‌شود؛ بار اول چند ثانیه طول می‌کشد…",
     desc: "الگوی ساعتی نرخ تبدیل در شهرهای پرترافیک، ۱۴ روز اخیر. حالت «نسبت به میانگین همان شهر» نشان می‌دهد هر شهر در کدام ساعت‌ها از خودش بهتر یا بدتر است — جای مناسب برای زمان‌بندی کمپین و ظرفیت.",
     async render(ctx) {
       const mode = state.chMode || "index";
@@ -2671,7 +2742,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       })), { fmt: (v) => pct(v, 1) }));
       const big = svc.filter((x) => x.orders >= 1000);
       const avgAll = hd.revenue_orders ? hd.revenue_toman / hd.revenue_orders : null;
-      const per = K.card("میانگین سبد هر مسیر", avgAll ? `خط مبنا: میانگین کل ${toman(avgAll)}؛ مسیرهای زیر ۱٬۰۰۰ سفارش حذف شده‌اند` : null, K.bars(big.map((x) => ({ label: tr(x.label), value: x.revenue_toman / x.orders - (avgAll || 0), tip: [tr(x.label), `میانگین سبد: ${toman(x.revenue_toman / x.orders)}`, `${num(x.orders)} سفارش`] })).sort((a, b) => b.value - a.value), { fmt: (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + compact(Math.abs(v)) }));
+      const per = K.card("میانگین سبد هر مسیر", avgAll ? `خط مبنا: میانگین کل ${toman(avgAll)}؛ مسیرهای زیر ۱٬۰۰۰ سفارش حذف شده‌اند` : null, K.bars(big.map((x) => ({ label: tr(x.label), value: x.revenue_toman / x.orders - (avgAll || 0), tip: [tr(x.label), `میانگین سبد: ${toman(x.revenue_toman / x.orders)}`, `${num(x.orders)} سفارش`] })).sort((a, b) => b.value - a.value), { fmt: (v) => "⁦" + (v > 0 ? "+" : v < 0 ? "−" : "") + compact(Math.abs(v)) + "⁩" }));
       const withKids = svc.filter((x) => (x.children || []).length);
       const pick = state.basketSvc && withKids.some((x) => x.key === state.basketSvc) ? state.basketSvc : withKids[0] && withKids[0].key;
       const sel = withKids.find((x) => x.key === pick);
@@ -2695,7 +2766,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
         K.stat("منبع اصلی", pr.live ? "زنده" : "آفلاین", `${tr(pr.label || pr.source || "")} · همگام‌سازی ${ago(pr.last_synced)}`, pr.live && !pr.stale ? "good" : "bad"),
         K.stat("قیف کل", of.live ? "زنده" : "آفلاین", `همگام‌سازی ${ago(of.last_synced)}`, of.live && !of.stale ? "good" : "bad"),
         ing ? K.stat("کارگر دریافت", ing.worker && ing.worker.alive ? "فعال" : "متوقف", ing.worker ? `آخرین ضربان ${ago(ing.worker.heartbeat_at)}${ing.paused ? " · متوقف‌شده" : ""}` : "", ing.worker && ing.worker.alive && !ing.paused ? "good" : "bad") : null,
-        ing && ing.catch_up ? K.stat("صف جبران", fa(ing.catch_up.pending_queries || 0), ing.eta && ing.eta.all_done_at ? `پایان تخمینی ${ago(ing.eta.all_done_at).replace("پیش", "دیگر")}` : "", (ing.catch_up.pending_queries || 0) > 0 ? "warn" : "good") : null,
+        ing && ing.catch_up ? K.stat("صف جبران", fa(ing.catch_up.pending_queries || 0), ing.eta && ing.eta.all_done_at ? `پایان تخمینی ${until(ing.eta.all_done_at)}` : "", (ing.catch_up.pending_queries || 0) > 0 ? "warn" : "good") : null,
         K.stat("کیفیت داده", dq.ok ? "سالم" : "مشکل دارد", `${fa((dq.issues || []).length)} مورد هشدار · ${fa(dq.row_count || 0)} روز`, dq.ok ? "good" : "warn"),
       ].filter(Boolean)), { span: 12 });
       const out = [stats];
@@ -2721,7 +2792,8 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       } else {
         out.push(K.card("جزئیات خط دریافت", null, K.empty("جزئیات صف و پوشش دیتاست‌ها فقط برای ادمین‌های فالکون در دسترس است."), { span: 7 }));
       }
-      const notes = [...((c && c.data) || []).map((d) => ({ badge: K.badge(tr(d.domain), "info"), title: tr(d.note) })), ...(dq.issues || []).map((i) => ({ badge: K.badge(i.severity === "warning" ? "هشدار" : tr(i.severity), "warn"), title: tr(i.message), value: i.count != null ? `${fa(i.count)} ردیف` : null }))];
+      const noteFa = (t) => String(t || "").replace(/^(\d+) days stored, latest (\d{4}-\d{2}-\d{2})$/, (_, n, dt) => `${fa(n)} روز ذخیره‌شده · آخرین روز ${jalali(dt)}`);
+      const notes = [...((c && c.data) || []).map((d) => ({ badge: K.badge(tr(d.domain), "info"), title: /days stored/.test(d.note) ? noteFa(d.note) : tr(d.note) })), ...(dq.issues || []).map((i) => ({ badge: K.badge(i.severity === "warning" ? "هشدار" : tr(i.severity), "warn"), title: tr(i.message), value: i.count != null ? `${fa(i.count)} ردیف` : null }))];
       out.push(K.card("یادداشت‌های داده", m && m.available_range ? `بازه‌ی موجود: ${jalali(m.available_range.start)} تا ${jalali(m.available_range.end)}` : null, K.list(notes), { span: 5 }));
       return out;
     },

@@ -825,7 +825,7 @@ html[data-ff][data-ff-theme="dark"] {
 
 /* ------------------------------------------------------------------ پنل */
 html[data-ff] .ffd {
-  position: fixed; top: 0; bottom: 0; left: 0; right: 0; z-index: 45;
+  position: fixed; top: 0; bottom: 0; left: 0; right: 0; z-index: 55;
   display: none; flex-direction: column;
   background:
     radial-gradient(900px 320px at 85% -120px, var(--ff-glow-1), transparent 70%),
