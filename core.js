@@ -1865,7 +1865,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
 
     /* ---------- وضعیت بارگذاری (برای صفحه‌های کند مثل اثر افزایشی) */
     function loading() {
-      const m = document.querySelector("main"); if (!m) return false;
+      const m = document.querySelector("main"); if (!m || document.documentElement.hasAttribute("data-ffd-open")) return false;
       return m.querySelectorAll(".animate-pulse").length >= 2 || !!m.querySelector('[aria-label="Loading"],[aria-label="در حال بارگذاری"],[aria-busy="true"]');
     }
     function flash(msg, ok) {
@@ -2061,7 +2061,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
         svg.appendChild(s("line", { x1: P.l, x2: W - P.r, y1: y, y2: y, class: "ffd-grid" }));
         svg.appendChild(s("text", { x: P.l - 6, y: y + 4, class: "ffd-axis", "text-anchor": "end" }, (o.yfmt || compact)(v)));
       }
-      const step = Math.max(1, Math.ceil(xs.length / 6));
+      const step = xs.length <= 8 ? 1 : Math.max(1, Math.ceil(xs.length / 6));
       xs.forEach((x, i) => { if (i % step === 0 || i === xs.length - 1) svg.appendChild(s("text", { x: X(x), y: H - 6, class: "ffd-axis", "text-anchor": "middle" }, o.xfmt ? o.xfmt(x) : jalali(x))); });
       if (lo < 0 && hi > 0) svg.appendChild(s("line", { x1: P.l, x2: W - P.r, y1: Y(0), y2: Y(0), class: "ffd-zero" }));
       series.forEach((sr, i) => {
@@ -2316,7 +2316,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       const ch = (a, b) => (b ? a / b - 1 : null);
       const aovA = A.paid ? A.rev / A.paid : null, aovB = B.paid ? B.rev / B.paid : null;
       const rng = cur.length ? `${jalali(cur[0].date)} تا ${jalali(cur[cur.length - 1].date)}` : "";
-      const tone = (v) => (v == null ? null : v >= 0.005 ? "good" : v <= -0.005 ? "bad" : null);
+      const tone = (v) => (v == null ? null : v >= 0.02 ? "good" : v <= -0.02 ? "bad" : null);
       const crDelta = A.cr != null && B.cr != null ? (A.cr - B.cr) * 100 : null;
 
       const alerts = (al && al.alerts) || [];
@@ -2342,7 +2342,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       const hero = K.card(`هفته‌ی ${rng}`, "هر عدد در برابر هفت روز پیش از آن", K.stats([
         K.stat("سفارش", num(A.orders), `${signedPct(ch(A.orders, B.orders))} نسبت به هفته‌ی قبل`, tone(ch(A.orders, B.orders))),
         K.stat("درآمد", toman(A.rev), `${signedPct(ch(A.rev, B.rev))} نسبت به هفته‌ی قبل`, tone(ch(A.rev, B.rev))),
-        K.stat("CR (Close Cart)", pct(A.cr), crDelta == null ? "" : `${pp(crDelta)} نسبت به هفته‌ی قبل`, crDelta == null ? null : crDelta >= 0.1 ? "good" : crDelta <= -0.1 ? "bad" : null),
+        K.stat("CR (Close Cart)", pct(A.cr), crDelta == null ? "" : `${pp(crDelta)} نسبت به هفته‌ی قبل`, crDelta == null ? null : crDelta >= 0.3 ? "good" : crDelta <= -0.3 ? "bad" : null),
         K.stat("میانگین سبد", toman(aovA), `${signedPct(ch(aovA, aovB))} نسبت به هفته‌ی قبل`, tone(ch(aovA, aovB))),
       ]), { span: 12, tone: "hero", aside: copyBtn });
 
@@ -2356,7 +2356,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       const side = K.card("در یک نگاه", null, h("div", { class: "ffd-stats" },
         K.stat("رکورد CR", rec.cr ? pct(rec.cr) : "—", rec.date ? `${jalali(rec.date)} · ${fa(rec.days || 0)} روز پیش` : ""),
         K.stat("هشدار تازه در هفته", fa(newAlerts.length), `${fa(openCrit.length)} هشدار بحرانی یا زیاد هنوز باز است`, openCrit.length ? "warn" : "good"),
-        K.stat("آزمایش‌ها", `${fa(wins)} ↑ · ${fa(losses)} ↓`, `از ${fa(exps.length)} مقایسه‌ی در جریان`)), { span: 4 });
+        K.stat("آزمایش‌های برنده", fa(wins), `${fa(losses)} بازنده از ${fa(exps.length)} مقایسه‌ی در جریان`, wins ? "good" : null)), { span: 4 });
 
       const stories = K.card("روایت‌های مهم دیروز", "بخش‌هایی که از رفتار معمولشان فاصله گرفته‌اند", K.list((c.stories || []).map((s) => ({
         badge: sevBadge(s.severity === "warning" ? "medium" : s.severity), title: tr(s.title), text: tr(s.what),

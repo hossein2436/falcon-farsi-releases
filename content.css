@@ -950,13 +950,6 @@ html[data-ff] .ffd-stat.ffd-tone-good { background: var(--ff-turq-soft); border-
 html[data-ff] .ffd-stat.ffd-tone-warn { background: var(--ff-saffron-soft); border-color: transparent; }
 html[data-ff] .ffd-stat.ffd-tone-bad { background: var(--ff-red-soft); border-color: transparent; }
 html[data-ff] .ffd-stat.ffd-tone-info { background: var(--ff-lapis-soft); border-color: transparent; }
-html[data-ff] .ffd-stat.ffd-tone-good .ffd-stat-l::before,
-html[data-ff] .ffd-stat.ffd-tone-warn .ffd-stat-l::before,
-html[data-ff] .ffd-stat.ffd-tone-bad .ffd-stat-l::before { display: inline-block; margin-inline-end: 6px; font-weight: 800; }
-html[data-ff] .ffd-stat.ffd-tone-good .ffd-stat-l::before { content: "✓"; color: var(--ff-turq); }
-html[data-ff] .ffd-stat.ffd-tone-warn .ffd-stat-l::before { content: "!"; color: var(--ff-saffron); }
-html[data-ff] .ffd-stat.ffd-tone-bad .ffd-stat-l::before { content: "▲"; color: var(--ff-red); font-size: 9px; vertical-align: 2px; }
-
 /* نشان */
 html[data-ff] .ffd-badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; line-height: 1.7; white-space: nowrap; background: var(--ff-surface-3); color: var(--ff-ink-2); }
 html[data-ff] .ffd-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .85; }
