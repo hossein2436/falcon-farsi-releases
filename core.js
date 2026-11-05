@@ -1748,9 +1748,11 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       atouched.clear();
       if (running && ready) observe();
     }
-    return { start, stop, restoreAll, T };
+    return { start, stop, restoreAll, T, transform };
   })();
   window.__ffT = translator.T; // برای عیب‌یابی
+  // رابط داخلی برای ماژول داشبوردها (dash.js)
+  window.__ffCore = { settings: () => S, T: (x) => translator.transform(String(x)) };
 
   /* ================================================================ UX: پالت فرمان، وضعیت بارگذاری، دکمه‌ی جست‌وجو */
   const ux = (() => {
@@ -1913,4 +1915,782 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
   });
   document.dispatchEvent(new CustomEvent("fx:hello"));
   window.__ffSet = (patch) => onSettings({ ...S, ...patch }, false);
+})();
+
+/* فالکون · پوسته‌ی فارسی — داشبوردهای افزوده
+   پنل تمام‌صفحه کنار سایدبار، با داده‌ی همان APIهایی که خود فالکون با نشست کاربر می‌خواند.
+   هیچ داده‌ای از مرورگر بیرون نمی‌رود. */
+(() => {
+  if (window.__ffDashLoaded) return;
+  window.__ffDashLoaded = true;
+  const core = window.__ffCore || { settings: () => ({ enabled: true, digits: true }), T: (s) => s };
+  const S = () => core.settings();
+
+  /* ================================================================ قالب‌بندی */
+  const FA = "۰۱۲۳۴۵۶۷۸۹";
+  const fa = (s) => (S().digits ? String(s).replace(/\d/g, (d) => FA[d]).replace(/(\d|[۰-۹]),(?=[\d۰-۹]{3})/g, "$1٬").replace(/([۰-۹])\.([۰-۹])/g, "$1٫$2") : String(s));
+  const num = (v) => (v == null || isNaN(v) ? "—" : fa(Math.round(v).toLocaleString("en-US")));
+  const compact = (v) => {
+    if (v == null || isNaN(v)) return "—";
+    const a = Math.abs(v);
+    const [d, u] = a >= 1e9 ? [1e9, "B"] : a >= 1e6 ? [1e6, "M"] : a >= 1e4 ? [1e3, "K"] : [1, ""];
+    const x = v / d;
+    return fa((Math.abs(x) >= 100 || !u ? Math.round(x) : x.toFixed(1)).toString()) + u;
+  };
+  const pct = (v, dig = 1) => (v == null || isNaN(v) ? "—" : fa((v * (Math.abs(v) <= 1.5 ? 100 : 1)).toFixed(dig)) + "٪");
+  const pctRaw = (v, dig = 1) => (v == null || isNaN(v) ? "—" : fa(Number(v).toFixed(dig)) + "٪");
+  const pp = (v, dig = 2) => (v == null || isNaN(v) ? "—" : "⁦" + (v > 0 ? "+" : v < 0 ? "−" : "") + fa(Math.abs(v).toFixed(dig)) + " pp⁩");
+  const signed = (v) => (v == null || isNaN(v) ? "—" : "⁦" + (v > 0 ? "+" : v < 0 ? "−" : "") + compact(Math.abs(v)) + "⁩");
+  const tr = (s) => (s == null ? "" : core.T(String(s)));
+  const ago = (ts) => {
+    if (!ts) return "—";
+    const t = typeof ts === "number" ? (ts < 1e12 ? ts * 1000 : ts) : Date.parse(ts);
+    if (isNaN(t)) return "—";
+    const m = Math.round((Date.now() - t) / 60000);
+    if (m < 1) return "همین الان";
+    if (m < 60) return `${fa(m)} دقیقه پیش`;
+    const h = Math.round(m / 60);
+    if (h < 48) return `${fa(h)} ساعت پیش`;
+    return `${fa(Math.round(h / 24))} روز پیش`;
+  };
+  const jalali = (d) => { try { return fa(new Date(d).toLocaleDateString("fa-IR-u-nu-latn", { month: "short", day: "numeric" })); } catch (e) { return String(d); } };
+
+  /* ================================================================ DOM */
+  const h = (tag, attrs, ...kids) => {
+    const e = document.createElement(tag);
+    e.setAttribute("data-ff-owned", "");
+    if (attrs) for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === "class") e.className = v;
+      else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+      else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? "" : v);
+    }
+    for (const k of kids.flat(Infinity)) if (k != null && k !== false) e.appendChild(typeof k === "string" || typeof k === "number" ? document.createTextNode(String(k)) : k);
+    return e;
+  };
+  const NS = "http://www.w3.org/2000/svg";
+  const s = (tag, attrs, ...kids) => {
+    const e = document.createElementNS(NS, tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) if (v != null) e.setAttribute(k, v);
+    for (const k of kids.flat()) if (k) e.appendChild(typeof k === "string" ? document.createTextNode(k) : k);
+    return e;
+  };
+
+  /* ================================================================ داده */
+  const cache = new Map();
+  async function api(path, ttl = 300000) {
+    const hit = cache.get(path);
+    if (hit && Date.now() - hit.t < ttl) return hit.p;
+    const p = fetch(path, { credentials: "same-origin", headers: { Accept: "application/json" } }).then(async (r) => {
+      if (r.status === 401 || r.status === 403) throw Object.assign(new Error("دسترسی به این داده را ندارید"), { code: r.status });
+      if (!r.ok) throw new Error(`پاسخ سرور ${fa(r.status)} بود`);
+      return r.json();
+    });
+    cache.set(path, { t: Date.now(), p });
+    p.catch(() => cache.delete(path));
+    return p;
+  }
+  const settle = (ps) => Promise.allSettled(ps).then((rs) => rs.map((r) => (r.status === "fulfilled" ? r.value : null)));
+  const arr = (x) => (Array.isArray(x) ? x : x && typeof x === "object" ? Object.values(x).find(Array.isArray) || [] : []);
+  const pick = (o, ...keys) => { for (const k of keys) { const v = k.split(".").reduce((a, p) => (a == null ? a : a[p]), o); if (v != null) return v; } return null; };
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const daysAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return d; };
+
+  /* ================================================================ پالت سری‌ها (اعتبارسنجی‌شده، روشن/تیره) */
+  const SERIES = ["var(--ff-c1)", "var(--ff-c2)", "var(--ff-c3)", "var(--ff-c4)", "var(--ff-c5)"];
+
+  /* ================================================================ tooltip */
+  let tip = null;
+  function showTip(evt, rows) {
+    if (!tip) { tip = h("div", { class: "ffd-tip", role: "tooltip" }); document.body.appendChild(tip); }
+    tip.textContent = "";
+    rows.forEach((r, i) => tip.appendChild(h("div", { class: i === 0 ? "ffd-tip-h" : "ffd-tip-r" }, r)));
+    tip.classList.add("is-on");
+    const x = evt.clientX, y = evt.clientY, w = tip.offsetWidth, hh = tip.offsetHeight;
+    tip.style.left = Math.min(window.innerWidth - w - 8, Math.max(8, x - w / 2)) + "px";
+    tip.style.top = (y - hh - 14 < 8 ? y + 18 : y - hh - 14) + "px";
+  }
+  const hideTip = () => tip && tip.classList.remove("is-on");
+
+  /* ================================================================ کیت نمودار */
+  const K = {
+    card(title, sub, body, opts = {}) {
+      return h("section", { class: "ffd-card" + (opts.span ? " ffd-span-" + opts.span : "") + (opts.tone ? " ffd-tone-" + opts.tone : "") },
+        title ? h("header", { class: "ffd-card-h" }, h("h3", null, title), sub ? h("p", null, sub) : null, opts.aside || null) : null,
+        h("div", { class: "ffd-card-b" }, body));
+    },
+    stat(label, value, sub, tone) {
+      return h("div", { class: "ffd-stat" + (tone ? " ffd-tone-" + tone : "") }, h("span", { class: "ffd-stat-l" }, label), h("b", { class: "ffd-stat-v" }, value), sub ? h("span", { class: "ffd-stat-s" }, sub) : null);
+    },
+    stats(items) { return h("div", { class: "ffd-stats" }, items); },
+    badge(text, tone) { return h("span", { class: "ffd-badge ffd-tone-" + (tone || "neutral") }, text); },
+    empty(msg) { return h("div", { class: "ffd-empty" }, msg || "داده‌ای برای نمایش نیست"); },
+    note(msg) { return h("p", { class: "ffd-note" }, msg); },
+    /* میله‌های افقی با برچسب مستقیم */
+    bars(rows, o = {}) {
+      if (!rows.length) return K.empty();
+      const max = Math.max(...rows.map((r) => Math.abs(r.value))) || 1;
+      const diverging = rows.some((r) => r.value < 0);
+      return h("div", { class: "ffd-bars" + (diverging ? " is-div" : "") }, rows.map((r) => {
+        const w = (Math.abs(r.value) / max) * (diverging ? 50 : 100);
+        const bar = h("span", { class: "ffd-bar-fill" + (r.value < 0 ? " is-neg" : ""), style: { width: w + "%", background: r.color || (diverging ? (r.value < 0 ? "var(--ff-c4)" : "var(--ff-c2)") : "var(--ff-c1)") } });
+        const row = h("div", { class: "ffd-bar", tabindex: "0" },
+          h("span", { class: "ffd-bar-l", title: r.label }, r.label),
+          h("span", { class: "ffd-bar-t" }, bar),
+          h("span", { class: "ffd-bar-v" }, (o.fmt || compact)(r.value)));
+        if (r.tip) { row.addEventListener("mousemove", (e) => showTip(e, r.tip)); row.addEventListener("mouseleave", hideTip); }
+        return row;
+      }));
+    },
+    /* خط زمانی (یک یا چند سری روی یک محور) با crosshair */
+    line(series, o = {}) {
+      const all = series.flatMap((x) => x.points);
+      if (!all.length) return K.empty();
+      const W = 640, H = o.height || 220, P = { t: 12, r: 12, b: 26, l: 44 };
+      const xs = [...new Set(all.map((p) => p.x))].sort();
+      const ys = all.map((p) => p.y).filter((v) => v != null && !isNaN(v));
+      let lo = Math.min(...ys), hi = Math.max(...ys);
+      if (o.zero) lo = Math.min(0, lo);
+      const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
+      const X = (x) => P.l + (xs.indexOf(x) / Math.max(1, xs.length - 1)) * (W - P.l - P.r);
+      const Y = (y) => P.t + (1 - (y - lo) / (hi - lo)) * (H - P.t - P.b);
+      const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, class: "ffd-svg", role: "img", "aria-label": o.label || "" });
+      for (let i = 0; i <= 3; i++) {
+        const v = lo + ((hi - lo) * i) / 3, y = Y(v);
+        svg.appendChild(s("line", { x1: P.l, x2: W - P.r, y1: y, y2: y, class: "ffd-grid" }));
+        svg.appendChild(s("text", { x: P.l - 6, y: y + 4, class: "ffd-axis", "text-anchor": "end" }, (o.yfmt || compact)(v)));
+      }
+      const step = Math.max(1, Math.ceil(xs.length / 6));
+      xs.forEach((x, i) => { if (i % step === 0 || i === xs.length - 1) svg.appendChild(s("text", { x: X(x), y: H - 6, class: "ffd-axis", "text-anchor": "middle" }, o.xfmt ? o.xfmt(x) : jalali(x))); });
+      if (lo < 0 && hi > 0) svg.appendChild(s("line", { x1: P.l, x2: W - P.r, y1: Y(0), y2: Y(0), class: "ffd-zero" }));
+      series.forEach((sr, i) => {
+        const pts = sr.points.filter((p) => p.y != null && !isNaN(p.y));
+        if (!pts.length) return;
+        const col = sr.color || SERIES[i % SERIES.length];
+        const d = pts.map((p, j) => (j ? "L" : "M") + X(p.x).toFixed(1) + " " + Y(p.y).toFixed(1)).join(" ");
+        if (series.length === 1 && o.area !== false) svg.appendChild(s("path", { d: d + `L${X(pts[pts.length - 1].x).toFixed(1)} ${H - P.b}L${X(pts[0].x).toFixed(1)} ${H - P.b}Z`, class: "ffd-area", style: `fill:${col}` }));
+        svg.appendChild(s("path", { d, class: "ffd-line" + (sr.dashed ? " is-dash" : ""), style: `stroke:${col}` }));
+        if (!sr.dashed) { const last = pts[pts.length - 1]; svg.appendChild(s("circle", { cx: X(last.x), cy: Y(last.y), r: 4, class: "ffd-dot", style: `fill:${col}` })); }
+      });
+      const cross = s("line", { class: "ffd-cross", y1: P.t, y2: H - P.b, x1: -10, x2: -10 });
+      svg.appendChild(cross);
+      const hit = s("rect", { x: P.l, y: P.t, width: W - P.l - P.r, height: H - P.t - P.b, fill: "transparent" });
+      hit.addEventListener("mousemove", (e) => {
+        const r = svg.getBoundingClientRect();
+        const xv = ((e.clientX - r.left) / r.width) * W;
+        const idx = Math.max(0, Math.min(xs.length - 1, Math.round(((xv - P.l) / (W - P.l - P.r)) * (xs.length - 1))));
+        const x = xs[idx]; const cx = X(x); cross.setAttribute("x1", cx); cross.setAttribute("x2", cx);
+        showTip(e, [o.xfmt ? o.xfmt(x) : jalali(x), ...series.map((sr) => { const p = sr.points.find((q) => q.x === x); return `${sr.name}: ${p ? (o.yfmt || compact)(p.y) : "—"}`; })]);
+      });
+      hit.addEventListener("mouseleave", () => { cross.setAttribute("x1", -10); cross.setAttribute("x2", -10); hideTip(); });
+      svg.appendChild(hit);
+      const legend = series.length > 1 ? h("div", { class: "ffd-legend" }, series.map((sr, i) => h("span", null, h("i", { style: { background: sr.color || SERIES[i % SERIES.length] }, class: sr.dashed ? "is-dash" : null }), sr.name))) : null;
+      return h("div", { class: "ffd-chart" }, legend, svg);
+    },
+    /* هیت‌مپ یک‌رنگ (شدت) */
+    heat(rows, cols, cell, o = {}) {
+      if (!rows.length || !cols.length) return K.empty();
+      const vals = rows.flatMap((r) => cols.map((c) => cell(r, c))).filter((v) => v != null && !isNaN(v));
+      const lo = o.lo != null ? o.lo : Math.min(...vals), hi = o.hi != null ? o.hi : Math.max(...vals);
+      const t = h("table", { class: "ffd-heat" });
+      t.appendChild(h("thead", null, h("tr", null, h("th", null, o.corner || ""), cols.map((c) => h("th", null, o.colLabel ? o.colLabel(c) : c)))));
+      t.appendChild(h("tbody", null, rows.map((r) => h("tr", null, h("th", null, o.rowLabel ? o.rowLabel(r) : r), cols.map((c) => {
+        const v = cell(r, c);
+        if (v == null || isNaN(v)) return h("td", { class: "is-na" }, "");
+        const k = hi === lo ? 0.5 : (v - lo) / (hi - lo);
+        const td = h("td", { class: k > 0.58 ? "is-hi" : null, style: { "--k": k.toFixed(3) }, tabindex: "0" }, o.fmt ? o.fmt(v) : "");
+        td.addEventListener("mousemove", (e) => showTip(e, [`${o.rowLabel ? o.rowLabel(r) : r} · ${o.colLabel ? o.colLabel(c) : c}`, (o.tipFmt || o.fmt || compact)(v)]));
+        td.addEventListener("mouseleave", hideTip);
+        return td;
+      })))));
+      return h("div", null, h("div", { class: "ffd-heat-wrap" }, t), h("div", { class: "ffd-heat-scale" }, h("span", null, (o.tipFmt || o.fmt || compact)(lo)), h("i"), h("span", null, (o.tipFmt || o.fmt || compact)(hi)), o.scaleLabel ? h("span", null, "· " + o.scaleLabel) : null));
+    },
+    chips(options, cur, onPick) {
+      const wrap = h("div", { class: "ffd-chips", role: "group" });
+      options.forEach((op) => wrap.appendChild(h("button", { type: "button", class: "ffd-chip" + (op.value === cur ? " is-on" : ""), "aria-pressed": String(op.value === cur), onclick: () => onPick(op.value) }, op.label)));
+      return wrap;
+    },
+    list(items) {
+      if (!items.length) return K.empty();
+      return h("ul", { class: "ffd-list" }, items.map((it) => h("li", null, it.badge || h("span"), h("b", null, it.title), it.value != null ? h("span", { class: "ffd-num" }, it.value) : h("span"), it.text ? h("p", null, it.text) : null)));
+    },
+    strip(cells, titleOf) {
+      return h("div", { class: "ffd-strip", "aria-hidden": "true" }, cells.map((c, i) => h("i", { class: "s" + c, title: titleOf ? titleOf(c, i) : null })));
+    },
+    tipOn(el, rows) { el.addEventListener("mousemove", (e) => showTip(e, typeof rows === "function" ? rows() : rows)); el.addEventListener("mouseleave", hideTip); return el; },
+    /* پراکنش (برای رادار): یک محور x، یک محور y، برچسب مستقیم برای نقاط مهم */
+    scatter(points, o = {}) {
+      if (!points.length) return K.empty();
+      const W = 640, H = o.height || 320, P = { t: 18, r: 18, b: 38, l: 54 };
+      const fx = (v) => (o.logx ? Math.log10(Math.max(v, 1e-9)) : v);
+      const xs = points.map((p) => fx(p.x)), ys = points.map((p) => p.y);
+      let x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(0, ...ys), y1 = Math.max(0, ...ys);
+      const px = (x1 - x0) * 0.06 || 1, py = (y1 - y0) * 0.1 || 1; x0 -= px; x1 += px; y0 -= py; y1 += py;
+      const X = (v) => P.l + ((fx(v) - x0) / (x1 - x0)) * (W - P.l - P.r);
+      const Y = (v) => P.t + (1 - (v - y0) / (y1 - y0)) * (H - P.t - P.b);
+      const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, class: "ffd-svg", role: "img", "aria-label": o.label || "" });
+      for (let i = 0; i <= 4; i++) {
+        const v = y0 + ((y1 - y0) * i) / 4, y = Y(v);
+        svg.appendChild(s("line", { x1: P.l, x2: W - P.r, y1: y, y2: y, class: "ffd-grid" }));
+        svg.appendChild(s("text", { x: P.l - 6, y: y + 4, class: "ffd-axis", "text-anchor": "end" }, (o.yfmt || compact)(v)));
+      }
+      for (let i = 0; i <= 4; i++) {
+        const t = x0 + ((x1 - x0) * i) / 4, v = o.logx ? Math.pow(10, t) : t;
+        svg.appendChild(s("text", { x: X(v), y: H - 18, class: "ffd-axis", "text-anchor": "middle" }, (o.xfmt || compact)(v)));
+      }
+      svg.appendChild(s("line", { x1: P.l, x2: W - P.r, y1: Y(0), y2: Y(0), class: "ffd-zero" }));
+      if (o.xlabel) svg.appendChild(s("text", { x: (W + P.l) / 2, y: H - 2, class: "ffd-axis", "text-anchor": "middle" }, o.xlabel));
+      if (o.ylabel) svg.appendChild(s("text", { x: P.l, y: 10, class: "ffd-axis", "text-anchor": "start" }, o.ylabel));
+      [...points].sort((a, b) => (b.r || 5) - (a.r || 5)).forEach((p) => {
+        const c = s("circle", { cx: X(p.x), cy: Y(p.y), r: p.r || 5, class: "ffd-pt", style: `fill:${p.color || SERIES[0]}`, tabindex: "0" });
+        if (p.tip) { c.addEventListener("mousemove", (e) => showTip(e, p.tip)); c.addEventListener("mouseleave", hideTip); }
+        svg.appendChild(c);
+      });
+      points.filter((p) => p.label).forEach((p) => svg.appendChild(s("text", { x: X(p.x), y: Y(p.y) - (p.r || 5) - 4, class: "ffd-pt-l", "text-anchor": "middle" }, p.label)));
+      return h("div", { class: "ffd-chart" }, o.legend ? h("div", { class: "ffd-legend" }, o.legend.map((l) => h("span", null, h("i", { style: { background: l.color, height: "8px", width: "8px", borderRadius: "50%" } }), l.label))) : null, svg);
+    },
+    /* جدول مرتب‌شونده */
+    table(cols, rows, o = {}) {
+      if (!rows.length) return K.empty(o.empty);
+      let sortKey = o.sort || null, dir = -1;
+      const tbody = h("tbody");
+      let draw = () => {
+        tbody.textContent = "";
+        const list = sortKey ? [...rows].sort((a, b) => { const va = a[sortKey], vb = b[sortKey]; return (va > vb ? 1 : va < vb ? -1 : 0) * dir; }) : rows;
+        list.slice(0, o.limit || 200).forEach((r) => tbody.appendChild(h("tr", null, cols.map((c) => h("td", { class: c.num ? "is-num" : null }, c.render ? c.render(r) : r[c.key] == null ? "—" : String(r[c.key]))))));
+      };
+      const ths = cols.map((c) => h("th", { class: c.num ? "is-num" : null, scope: "col", onclick: () => { if (!c.key) return; if (sortKey === c.key) dir = -dir; else { sortKey = c.key; dir = -1; } draw(); } }, c.label));
+      const thead = h("thead", null, h("tr", null, ths));
+      const drawAll = draw;
+      draw = () => { drawAll(); ths.forEach((th, i) => { if (cols[i].key && cols[i].key === sortKey) th.setAttribute("aria-sort", dir < 0 ? "descending" : "ascending"); else th.removeAttribute("aria-sort"); }); };
+      draw();
+      return h("div", { class: "ffd-table-wrap" }, h("table", { class: "ffd-table" }, thead, tbody));
+    },
+  };
+
+  /* ================================================================ رجیستری داشبوردها */
+  const DASH = [];
+  const register = (d) => DASH.push(d);
+  window.__ffDash = { register, K, api, settle, arr, pick, fmt: { fa, num, compact, pct, pctRaw, pp, signed, ago, jalali, tr }, h, s, iso, daysAgo, SERIES };
+
+  /* ================================================================ پنل */
+  let panel = null, cur = null, sideSec = null;
+  function place() {
+    if (!panel) return;
+    const aside = document.querySelector("aside");
+    const r = aside && aside.offsetParent !== null ? aside.getBoundingClientRect() : null;
+    if (r && r.width) {
+      if (r.left > window.innerWidth / 2) { panel.style.left = "0px"; panel.style.right = (window.innerWidth - r.left) + "px"; }
+      else { panel.style.left = r.right + "px"; panel.style.right = "0px"; }
+    } else { panel.style.left = "0px"; panel.style.right = "0px"; }
+  }
+  function build() {
+    panel = h("div", { class: "ffd", role: "region", "aria-label": "داشبوردهای فالکون" });
+    const tabs = h("nav", { class: "ffd-tabs", role: "tablist", "aria-label": "داشبوردها" },
+      DASH.map((d) => h("button", { type: "button", role: "tab", class: "ffd-tab", "data-id": d.id, onclick: () => open(d.id) }, h("span", { class: "ffd-tab-ico" }, d.icon || "◆"), d.short || d.title)));
+    panel.appendChild(h("header", { class: "ffd-top" },
+      h("div", { class: "ffd-top-row" },
+        h("div", { class: "ffd-brand" }, h("span", { class: "ffd-kicker" }, "داشبوردهای فالکون فارسی"), h("h2", { class: "ffd-title" }, "")),
+        h("div", { class: "ffd-actions" },
+          h("span", { class: "ffd-updated" }, ""),
+          h("button", { type: "button", class: "ffd-btn", onclick: () => { cache.clear(); render(); } }, "به‌روزرسانی"),
+          h("button", { type: "button", class: "ffd-btn ffd-close", "aria-label": "بستن داشبورد", onclick: close }, "✕"))),
+      tabs));
+    panel.appendChild(h("div", { class: "ffd-body" }));
+    document.body.appendChild(panel);
+    window.addEventListener("resize", place);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && panel.classList.contains("is-open") && !document.querySelector(".ff-pal.is-open")) close(); });
+  }
+  let renderTok = 0;
+  async function render() {
+    const d = DASH.find((x) => x.id === cur); if (!d) return;
+    const tok = ++renderTok;
+    panel.querySelector(".ffd-title").textContent = d.title;
+    panel.querySelectorAll(".ffd-tab").forEach((t) => { const on = t.dataset.id === cur; t.classList.toggle("is-on", on); t.setAttribute("aria-selected", String(on)); });
+    const body = panel.querySelector(".ffd-body");
+    body.textContent = "";
+    body.appendChild(h("p", { class: "ffd-lead" }, d.desc));
+    const grid = h("div", { class: "ffd-grid ffd-loading" }, d.slow ? h("p", { class: "ffd-wait" }, d.slow) : null, [1, 2, 3, 4].map(() => h("div", { class: "ffd-skel" })));
+    body.appendChild(grid);
+    try {
+      const out = await d.render(Object.assign({}, window.__ffDash, { rerender: () => { if (cur === d.id) render(); } }));
+      if (cur !== d.id || tok !== renderTok) return;
+      grid.className = "ffd-grid"; grid.textContent = "";
+      (Array.isArray(out) ? out : [out]).forEach((x) => x && grid.appendChild(x));
+      panel.querySelector(".ffd-updated").textContent = "به‌روز: " + new Date().toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
+    } catch (e) {
+      if (cur !== d.id || tok !== renderTok) return;
+      console.warn("[falcon-farsi] dashboard", d.id, e);
+      grid.className = "ffd-grid"; grid.textContent = "";
+      grid.appendChild(K.card("این داشبورد بارگذاری نشد", null, h("div", null, h("p", { class: "ffd-err" }, e.message || "خطای نامشخص"), h("button", { type: "button", class: "ffd-btn", onclick: () => { cache.clear(); render(); } }, "تلاش دوباره")), { span: 12, tone: "bad" }));
+    }
+  }
+  function open(id) {
+    if (!S().enabled) return;
+    if (!panel) build();
+    cur = DASH.some((d) => d.id === id) ? id : DASH[0].id;
+    place();
+    panel.classList.add("is-open");
+    document.documentElement.setAttribute("data-ffd-open", "");
+    if (location.hash !== "#ff=" + cur) history.replaceState(history.state, "", location.pathname + location.search + "#ff=" + cur);
+    markNav();
+    render();
+  }
+  function close() {
+    if (!panel) return;
+    panel.classList.remove("is-open");
+    document.documentElement.removeAttribute("data-ffd-open");
+    cur = null; markNav();
+    if (/^#ff=/.test(location.hash)) history.replaceState(history.state, "", location.pathname + location.search);
+  }
+  function markNav() { if (sideSec) sideSec.querySelectorAll("a").forEach((a) => a.classList.toggle("is-on", a.dataset.id === cur)); }
+
+  /* ---------- بخش سایدبار */
+  function ensureNav() {
+    if (!S().enabled) { document.querySelectorAll(".ffd-nav").forEach((n) => n.remove()); if (panel) close(); return; }
+    const nav = document.querySelector("aside nav");
+    if (!nav || nav.querySelector(".ffd-nav")) return;
+    sideSec = h("div", { class: "ffd-nav" },
+      h("p", null, "داشبوردهای فارسی"),
+      h("ul", null, DASH.map((d) => h("li", null, h("a", { href: "#ff=" + d.id, "data-id": d.id, title: d.desc, onclick: (e) => { e.preventDefault(); open(d.id); } }, h("span", { class: "ffd-nav-ico" }, d.icon || "◆"), h("span", null, d.title))))));
+    nav.appendChild(sideSec);
+    markNav();
+  }
+  // بستن پنل وقتی کاربر به صفحه‌ی دیگری از فالکون می‌رود
+  document.addEventListener("click", (e) => { const a = e.target.closest && e.target.closest("aside nav a"); if (a && !a.closest(".ffd-nav") && panel && panel.classList.contains("is-open")) close(); }, true);
+  window.addEventListener("hashchange", () => { const m = location.hash.match(/^#ff=([\w-]+)/); if (m) open(m[1]); });
+  setInterval(ensureNav, 1000);
+  const boot = () => { ensureNav(); const m = location.hash.match(/^#ff=([\w-]+)/); if (m) setTimeout(() => open(m[1]), 800); };
+  if (document.readyState === "complete") setTimeout(boot, 900); else window.addEventListener("load", () => setTimeout(boot, 900), { once: true });
+  window.__ffDash.open = open;
+  window.__ffDash.close = close;
+  window.__ffDash.list = () => DASH.map((d) => ({ id: d.id, title: d.title }));
+})();
+
+/* فالکون · پوسته‌ی فارسی — تعریف داشبوردهای افزوده
+   هر داشبورد فقط از APIهای خود فالکون (همان نشست کاربر) می‌خواند. */
+(() => {
+  const D = window.__ffDash;
+  if (!D || D.__defs) return;
+  D.__defs = true;
+  const { K, api, settle, h } = D;
+  const { fa, num, compact, pct, pp, ago, jalali, tr } = D.fmt;
+  const C = D.SERIES;
+
+  /* ---------------------------------------------------------------- کمکی‌ها */
+  const median = (a) => { if (!a.length) return null; const b = [...a].sort((x, y) => x - y), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; };
+  const sum = (a, f = (x) => x) => a.reduce((t, x) => t + (Number(f(x)) || 0), 0);
+  const hrs = (a, b) => (Date.parse(b) - Date.parse(a)) / 36e5;
+  const dur = (x) => (x == null || isNaN(x) ? "—" : x < 1 ? `${fa(Math.max(1, Math.round(x * 60)))} دقیقه` : x < 48 ? `${fa(x < 10 ? x.toFixed(1) : Math.round(x))} ساعت` : `${fa(Math.round(x / 24))} روز`);
+  const toman = (v) => {
+    if (v == null || isNaN(v)) return "—";
+    const a = Math.abs(v);
+    if (a >= 1e12) return `${fa((v / 1e12).toFixed(2))} هزار میلیارد تومان`;
+    if (a >= 1e9) return `${fa((v / 1e9).toFixed(a >= 1e11 ? 0 : 1))} میلیارد تومان`;
+    if (a >= 1e6) return `${fa((v / 1e6).toFixed(1))} میلیون تومان`;
+    return `${num(v)} تومان`;
+  };
+  const signedPct = (v, dig = 1) => (v == null || isNaN(v) ? "—" : "⁦" + (v > 0 ? "+" : v < 0 ? "−" : "") + fa(Math.abs(v * 100).toFixed(dig)) + "٪⁩");
+  const ppOf = (frac, dig = 2) => pp(frac * 100, dig);
+  const SEV = { critical: ["بحرانی", "bad", 4], high: ["زیاد", "bad", 3], medium: ["متوسط", "warn", 2], low: ["کم", "info", 1] };
+  const sevBadge = (s) => { const x = SEV[s] || [tr(s || "—"), "neutral"]; return K.badge(x[0], x[1]); };
+  const weekday = (d) => { try { return new Date(d + "T12:00:00").toLocaleDateString("fa-IR", { weekday: "long" }); } catch (e) { return d; } };
+  const expName = (id) => String(id || "").replace(/_experiment$/, "").replace(/_experiment_/, " ").replace(/_/g, " ");
+  const cc = () => api("/api/v1/control-center", 120000);
+  const two = (a, b) => h("div", null, h("b", null, a), b ? h("small", null, b) : null);
+  const deltaSpan = (v, good, text) => h("span", { class: "ffd-delta " + (v == null || v === 0 ? "" : good ? "ffd-up" : "ffd-down") }, text);
+  const state = {};
+
+  /* ================================================================ ۸) خلاصه‌ی هفتگی CEO */
+  D.register({
+    id: "weekly", icon: "✦", title: "خلاصه‌ی هفتگی", short: "خلاصه‌ی هفته",
+    desc: "هفت روز گذشته در برابر هفت روز قبلش، در یک نگاه: سفارش، درآمد، نرخ تبدیل و میانگین سبد؛ به‌همراه مهم‌ترین روایت‌ها، آزمایش‌ها و هشدارها. دکمه‌ی «کپی خلاصه» متن آماده‌ی فرستادن می‌دهد.",
+    async render() {
+      const [c, dg, al] = await settle([cc(), api("/api/v1/overall-funnel/digest?view=standard&baseline_days=10"), api("/api/v1/alerts")]);
+      if (!c) throw new Error("داده‌ی مرکز کنترل در دسترس نیست");
+      const tr30 = [...(c.trend || [])].sort((a, b) => (a.date < b.date ? -1 : 1));
+      const cur = tr30.slice(-7), prev = tr30.slice(-14, -7);
+      const agg = (w) => ({ orders: sum(w, (x) => x.orders), rev: sum(w, (x) => x.revenue_toman), paid: sum(w, (x) => x.paid_orders), cr: w.length ? sum(w, (x) => x.cr) / w.length : null });
+      const A = agg(cur), B = agg(prev);
+      const ch = (a, b) => (b ? a / b - 1 : null);
+      const aovA = A.paid ? A.rev / A.paid : null, aovB = B.paid ? B.rev / B.paid : null;
+      const rng = cur.length ? `${jalali(cur[0].date)} تا ${jalali(cur[cur.length - 1].date)}` : "";
+      const tone = (v) => (v == null ? null : v >= 0.005 ? "good" : v <= -0.005 ? "bad" : null);
+      const crDelta = A.cr != null && B.cr != null ? (A.cr - B.cr) * 100 : null;
+
+      const alerts = (al && al.alerts) || [];
+      const weekAgo = Date.now() - 7 * 864e5;
+      const newAlerts = alerts.filter((a) => Date.parse(a.detected_at) >= weekAgo);
+      const openCrit = alerts.filter((a) => a.status !== "resolved" && (a.severity === "critical" || a.severity === "high"));
+      const exps = (c.experiments || []).flatMap((e) => (e.variations || []).filter((v) => !v.is_control).map((v) => ({ e, v })));
+      const wins = exps.filter((x) => x.v.z >= 1.96).length, losses = exps.filter((x) => x.v.z <= -1.96).length;
+      const hd = c.headline || {};
+
+      const copyText = () => [
+        `خلاصه‌ی هفتگی فالکون (${rng})`,
+        `• سفارش: ${num(A.orders)} (${signedPct(ch(A.orders, B.orders))} نسبت به هفته‌ی قبل)`,
+        `• درآمد: ${toman(A.rev)} (${signedPct(ch(A.rev, B.rev))})`,
+        `• میانگین CR روزانه: ${pct(A.cr)} (${crDelta == null ? "—" : pp(crDelta)})`,
+        `• میانگین سبد: ${toman(aovA)} (${signedPct(ch(aovA, aovB))})`,
+        `• هشدارهای تازه: ${fa(newAlerts.length)} · بحرانی/زیادِ باز: ${fa(openCrit.length)}`,
+        `• آزمایش‌ها: ${fa(wins)} برنده، ${fa(losses)} بازنده از ${fa(exps.length)}`,
+        ...(c.stories || []).slice(0, 3).map((s) => `• ${tr(s.title)}`),
+      ].join("\n").replace(/[⁦⁩]/g, "");
+      const copyBtn = h("button", { type: "button", class: "ffd-btn", onclick: async (e) => { try { await navigator.clipboard.writeText(copyText()); e.target.textContent = "کپی شد ✓"; } catch (x) { e.target.textContent = "کپی نشد"; } setTimeout(() => (e.target.textContent = "کپی خلاصه"), 1800); } }, "کپی خلاصه");
+
+      const hero = K.card(`هفته‌ی ${rng}`, "هر عدد در برابر هفت روز پیش از آن", K.stats([
+        K.stat("سفارش", num(A.orders), `${signedPct(ch(A.orders, B.orders))} نسبت به هفته‌ی قبل`, tone(ch(A.orders, B.orders))),
+        K.stat("درآمد", toman(A.rev), `${signedPct(ch(A.rev, B.rev))} نسبت به هفته‌ی قبل`, tone(ch(A.rev, B.rev))),
+        K.stat("CR (Close Cart)", pct(A.cr), crDelta == null ? "" : `${pp(crDelta)} نسبت به هفته‌ی قبل`, crDelta == null ? null : crDelta >= 0.1 ? "good" : crDelta <= -0.1 ? "bad" : null),
+        K.stat("میانگین سبد", toman(aovA), `${signedPct(ch(aovA, aovB))} نسبت به هفته‌ی قبل`, tone(ch(aovA, aovB))),
+      ]), { span: 12, tone: "hero", aside: copyBtn });
+
+      const days = cur.map((x) => weekday(x.date));
+      const line = K.card("سفارش روزانه: این هفته و هفته‌ی قبل", "هر روزِ این هفته کنار همان روزِ هفته‌ی پیش", K.line([
+        { name: "این هفته", points: cur.map((x, i) => ({ x: i, y: x.orders })) },
+        { name: "هفته‌ی قبل", dashed: true, color: "var(--ff-ink-3)", points: prev.map((x, i) => ({ x: i, y: x.orders })) },
+      ], { xfmt: (i) => days[i] || "", label: "سفارش روزانه" }), { span: 8 });
+
+      const rec = hd.record || {};
+      const side = K.card("در یک نگاه", null, h("div", { class: "ffd-stats" },
+        K.stat("رکورد CR", rec.cr ? pct(rec.cr) : "—", rec.date ? `${jalali(rec.date)} · ${fa(rec.days || 0)} روز پیش` : ""),
+        K.stat("هشدار تازه در هفته", fa(newAlerts.length), `${fa(openCrit.length)} هشدار بحرانی یا زیاد هنوز باز است`, openCrit.length ? "warn" : "good"),
+        K.stat("آزمایش‌ها", `${fa(wins)} ↑ · ${fa(losses)} ↓`, `از ${fa(exps.length)} مقایسه‌ی در جریان`)), { span: 4 });
+
+      const stories = K.card("روایت‌های مهم دیروز", "بخش‌هایی که از رفتار معمولشان فاصله گرفته‌اند", K.list((c.stories || []).map((s) => ({
+        badge: sevBadge(s.severity === "warning" ? "medium" : s.severity), title: tr(s.title), text: tr(s.what),
+        value: s.impact_orders ? `${num(s.impact_orders)} سفارش` : null,
+      }))), { span: 6 });
+
+      const dAl = ((dg && dg.alerts) || []).map((a) => ({
+        label: tr(a.label),
+        value: a.delta_pp != null ? a.delta_pp : (a.delta_pct || 0) * 100,
+        tip: [tr(a.label), a.kind === "count" ? `${num(a.latest)} در برابر ${num(a.baseline)}` : `${pct(a.latest)} در برابر ${pct(a.baseline)}`, a.delta_pp != null ? pp(a.delta_pp) : signedPct(a.delta_pct)],
+      }));
+      const digest = K.card("تغییرهای قیف کل", dg ? `دیروز در برابر میانگین ${fa(dg.baseline_days)} روز قبل (درصد یا واحد درصد)` : "", K.bars(dAl, { fmt: (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + fa(Math.abs(v).toFixed(1)) }), { span: 6 });
+      return [hero, line, side, stories, digest];
+    },
+  });
+
+  /* ================================================================ ۱) پاسخ‌گویی هشدارها */
+  D.register({
+    id: "alerts", icon: "⚑", title: "پاسخ‌گویی هشدارها", short: "هشدارها",
+    desc: "از لحظه‌ی کشف تا رسیدگی: چند هشدار باز است، چقدر طول می‌کشد تا کسی تأییدش کند و ببندد، و کدام قیف و معیار بیشتر هشدار می‌سازد.",
+    async render() {
+      const [al, ow] = await settle([api("/api/v1/alerts"), api("/api/v1/actions/owners")]);
+      if (!al) throw new Error("فهرست هشدارها در دسترس نیست");
+      const A = al.alerts || [];
+      const open = A.filter((a) => a.status !== "resolved");
+      const res = A.filter((a) => a.resolved_at);
+      const ttr = res.map((a) => hrs(a.detected_at, a.resolved_at)).filter((x) => x >= 0);
+      const ackd = A.filter((a) => a.acknowledged_at);
+      const tta = ackd.map((a) => hrs(a.detected_at, a.acknowledged_at)).filter((x) => x >= 0);
+      const unack = open.filter((a) => !a.acknowledged_at);
+      const ages = open.map((a) => hrs(a.detected_at, new Date().toISOString()));
+      const bySev = (l) => Object.keys(SEV).map((k) => [k, l.filter((a) => a.severity === k).length]).filter((x) => x[1]);
+      const silent = open.filter((a) => !(a.owners_notified || []).length);
+
+      const stats = K.card(null, null, K.stats([
+        K.stat("هشدار باز", fa(open.length), bySev(open).map(([k, n]) => `${fa(n)} ${SEV[k][0]}`).join(" · ") || "هیچ", open.some((a) => a.severity === "critical") ? "bad" : open.length ? "warn" : "good"),
+        K.stat("بدون تأیید", fa(unack.length), unack.length ? "هنوز کسی آن‌ها را برعهده نگرفته" : "همه برعهده گرفته شده‌اند", unack.length ? "warn" : "good"),
+        K.stat("میانه‌ی زمان تا بستن", dur(median(ttr)), `بر پایه‌ی ${fa(ttr.length)} هشدار بسته‌شده`),
+        K.stat("میانه‌ی زمان تا تأیید", tta.length ? dur(median(tta)) : "—", tta.length ? `${fa(tta.length)} هشدار تأییدشده` : "هیچ هشداری پیش از بستن تأیید نشده"),
+        K.stat("قدیمی‌ترین هشدار باز", ages.length ? dur(Math.max(...ages)) : "—", silent.length ? `${fa(silent.length)} هشدار باز به هیچ مالکی اطلاع داده نشده` : `${fa(((ow && ow.owners) || []).length)} مالک تعریف شده`, silent.length ? "warn" : null),
+      ]), { span: 12 });
+
+      const openT = K.card("هشدارهای باز", "به ترتیب شدت؛ روی سرستون‌ها بزنید تا مرتب شود", K.table([
+        { key: "metric", label: "معیار", render: (r) => two(tr(r.metric_label), tr(r.funnel_name)) },
+        { key: "sev", label: "شدت", render: (r) => sevBadge(r.severity) },
+        { key: "chg", label: "تغییر", num: true, render: (r) => deltaSpan(r.relative_change, r.favorable, signedPct(r.relative_change)) },
+        { key: "days_breaching", label: "روزِ نقض", num: true, render: (r) => fa(r.days_breaching || 0) },
+        { key: "age", label: "عمر", num: true, render: (r) => dur(r.age) },
+        { key: "ack", label: "وضعیت", render: (r) => (r.acknowledged_at ? K.badge("تأییدشده", "info") : K.badge("بی‌صاحب", "warn")) },
+      ], open.map((a) => ({ ...a, metric: a.metric_label, sev: (SEV[a.severity] || [0, 0, 0])[2], chg: a.relative_change, age: hrs(a.detected_at, new Date().toISOString()), ack: a.acknowledged_at ? 1 : 0 })), { sort: "sev", empty: "هیچ هشدار بازی نیست 🎉" }), { span: 12 });
+
+      const byF = {};
+      A.forEach((a) => { const k = tr(a.metric_label); (byF[k] = byF[k] || { o: 0, r: 0 }); a.status === "resolved" ? byF[k].r++ : byF[k].o++; });
+      const fBars = K.card("پرهشدارترین معیارها", "تعداد کل هشدارهای ثبت‌شده برای هر معیار", K.bars(Object.entries(byF).map(([k, v]) => ({ label: k, value: v.o + v.r, tip: [k, `${fa(v.o)} باز · ${fa(v.r)} بسته`] })).sort((a, b) => b.value - a.value).slice(0, 10), { fmt: (v) => fa(v) }));
+
+      const sevT = Object.keys(SEV).map((k) => { const l = res.filter((a) => a.severity === k).map((a) => hrs(a.detected_at, a.resolved_at)); return { k, m: median(l), n: l.length }; }).filter((x) => x.n);
+      const sBars = K.card("زمان بستن بر اساس شدت", "میانه‌ی ساعت از کشف تا بستن؛ هشدار جدی‌تر باید زودتر بسته شود", K.bars(sevT.map((x) => ({ label: SEV[x.k][0], value: x.m, color: x.k === "critical" || x.k === "high" ? "var(--ff-c4)" : "var(--ff-c1)", tip: [SEV[x.k][0], `میانه: ${dur(x.m)}`, `${fa(x.n)} هشدار`] })), { fmt: dur }));
+
+      const closed = K.card("آخرین هشدارهای بسته‌شده", null, K.table([
+        { key: "metric", label: "معیار", render: (r) => two(tr(r.metric_label), tr(r.funnel_name)) },
+        { key: "sev", label: "شدت", render: (r) => sevBadge(r.severity) },
+        { key: "ttr", label: "زمان تا بستن", num: true, render: (r) => dur(r.ttr) },
+        { key: "by", label: "بست", render: (r) => r.resolved_by_name || "خودکار" },
+        { key: "at", label: "کی", num: true, render: (r) => ago(r.resolved_at) },
+      ], res.map((a) => ({ ...a, metric: a.metric_label, sev: (SEV[a.severity] || [0, 0, 0])[2], ttr: hrs(a.detected_at, a.resolved_at), by: a.resolved_by_name || "", at: Date.parse(a.resolved_at) })), { sort: "at", limit: 12 }), { span: 12 });
+      return [stats, openT, fBars, sBars, closed];
+    },
+  });
+
+  /* ================================================================ ۲) سبد آزمایش‌ها */
+  D.register({
+    id: "experiments", icon: "⚗", title: "سبد آزمایش‌ها", short: "آزمایش‌ها",
+    desc: "همه‌ی A/B تست‌های در جریان کنار هم: هر درمان چقدر CR را نسبت به کنترل جابه‌جا کرده و آیا این اختلاف از نظر آماری معنادار است (|z| ≥ ۱٫۹۶ یعنی اطمینان ۹۵٪).",
+    async render() {
+      const [c, op] = await settle([cc(), api("/api/v1/analytics/incrementality/options", 600000)]);
+      if (!c) throw new Error("داده‌ی آزمایش‌ها در دسترس نیست");
+      const meta = {}; ((op && op.experiments) || []).forEach((e) => (meta[e.experiment_id] = e));
+      const rows = (c.experiments || []).flatMap((e) => {
+        const ctl = (e.variations || []).find((v) => v.is_control) || {};
+        return (e.variations || []).filter((v) => !v.is_control).map((v) => ({
+          id: e.experiment_id, name: expName(e.experiment_id) + ((e.variations || []).length > 2 ? ` · ${v.variation}` : ""),
+          ctlCr: ctl.cr, cr: v.cr, delta: v.delta_pt, z: v.z, share: v.traffic_share, ctlShare: ctl.traffic_share,
+          sessions: (v.sessions || 0) + (ctl.sessions || 0), verdict: v.verdict, m: meta[e.experiment_id],
+        }));
+      });
+      const verdict = (r) => (r.z >= 1.96 ? ["برنده", "good"] : r.z <= -1.96 ? ["بازنده", "bad"] : Math.abs(r.z) >= 1.64 ? ["نزدیک به معنادار", "warn"] : ["بی‌تفاوت", "neutral"]);
+      const wins = rows.filter((r) => r.z >= 1.96), loss = rows.filter((r) => r.z <= -1.96);
+      const stats = K.card(null, null, K.stats([
+        K.stat("مقایسه‌ی در جریان", fa(rows.length), `${fa(new Set(rows.map((r) => r.id)).size)} آزمایش · داده‌ی ${jalali(c.experiments_day || c.live_day)}`),
+        K.stat("برنده", fa(wins.length), wins.map((r) => r.name).join("، ") || "هنوز هیچ", wins.length ? "good" : null),
+        K.stat("بازنده", fa(loss.length), loss.map((r) => r.name).join("، ") || "هیچ", loss.length ? "bad" : null),
+        K.stat("بی‌تفاوت", fa(rows.length - wins.length - loss.length), "اختلاف هنوز در حد نوسان است"),
+        K.stat("نشست‌های زیر آزمایش", compact(sum(rows, (r) => r.sessions)), "جمع کنترل و درمان"),
+      ]), { span: 12 });
+      const colorOf = (r) => (r.z >= 1.96 ? "var(--ff-c2)" : r.z <= -1.96 ? "var(--ff-c4)" : "var(--ff-line-2)");
+      const bars = K.card("اثر درمان روی CR", "واحد درصد نسبت به کنترل؛ رنگ پررنگ فقط وقتی اختلاف معنادار است", K.bars([...rows].sort((a, b) => b.delta - a.delta).map((r) => ({
+        label: r.name, value: r.delta || 0, color: colorOf(r),
+        tip: [r.name, `کنترل ${pct(r.ctlCr, 2)} → درمان ${pct(r.cr, 2)}`, `z = ${fa((r.z || 0).toFixed(2))} · ${verdict(r)[0]}`, `${compact(r.sessions)} نشست`],
+      })), { fmt: (v) => pp(v) }), { span: 12 });
+      const table = K.card("جزئیات", "روی سرستون‌ها بزنید تا مرتب شود", K.table([
+        { key: "name", label: "آزمایش", render: (r) => two(r.name, r.m ? `از ${jalali(r.m.first_day)} · ${fa(Math.round((Date.parse(r.m.last_day) - Date.parse(r.m.first_day)) / 864e5) + 1)} روز` : null) },
+        { key: "share", label: "سهم ترافیک درمان", num: true, render: (r) => pct(r.share, 0) },
+        { key: "ctlCr", label: "CR کنترل", num: true, render: (r) => pct(r.ctlCr, 2) },
+        { key: "cr", label: "CR درمان", num: true, render: (r) => pct(r.cr, 2) },
+        { key: "delta", label: "اختلاف", num: true, render: (r) => deltaSpan(r.delta, r.delta > 0, pp(r.delta)) },
+        { key: "z", label: "z", num: true, render: (r) => fa((r.z || 0).toFixed(2)) },
+        { key: "zabs", label: "حکم", render: (r) => { const v = verdict(r); return K.badge(v[0], v[1]); } },
+      ], rows.map((r) => ({ ...r, zabs: Math.abs(r.z || 0) })), { sort: "zabs" }), { span: 12 });
+      return [stats, bars, table];
+    },
+  });
+
+  /* ================================================================ ۳) رشد واقعی و Cannibalization */
+  D.register({
+    id: "incrementality", icon: "⇄", title: "رشد واقعی و Cannibalization", short: "رشد واقعی",
+    desc: "هر سرویس یا قابلیت تازه چند سفارش واقعاً اضافه کرده و چند سفارش را از سرویس‌های قبلی گرفته است. اعداد از تحلیل علّی خود فالکون (آزمایش تصادفی کاربر-روز) می‌آیند.",
+    slow: "تحلیل علّی روی سرور فالکون حدود نیم دقیقه طول می‌کشد؛ بعد از بار اول، تا پنج دقیقه از حافظه خوانده می‌شود…",
+    async render(ctx) {
+      const op = await api("/api/v1/analytics/incrementality/options", 600000).catch(() => null);
+      const targets = (op && op.targets) || [];
+      const t = state.incTarget || (op && op.default_target) || (targets[0] && targets[0].key) || "";
+      const q = t ? `?target=${encodeURIComponent(t)}` : "";
+      const [sm, se] = await settle([api("/api/v1/analytics/incrementality/summary" + q, 600000), api("/api/v1/analytics/incrementality/service-effects" + (q ? q + "&" : "?") + "metric=orders", 600000)]);
+      if (!sm) throw new Error("خلاصه‌ی اثر افزایشی در دسترس نیست");
+      const cx = sm.context || {}, cards = sm.cards || {};
+      const card = (k) => cards[k] || {};
+      const rows = ((se && se.rows) || []).filter((r) => r.estimate != null);
+      const gains = sum(rows.filter((r) => r.estimate > 0), (r) => r.estimate), losses = -sum(rows.filter((r) => r.estimate < 0), (r) => r.estimate);
+      const ratio = gains ? losses / gains : null;
+      const ci = (c) => (c.ci_low != null ? `بازه‌ی ۹۵٪: ${compact(c.ci_low)} تا ${compact(c.ci_high)}` : tr(c.method || ""));
+
+      const picker = targets.length > 1 ? K.chips(targets.map((x) => ({ value: x.key, label: tr(x.label) })), t, (v) => { state.incTarget = v; ctx.rerender(); }) : null;
+      const head = K.card(`${tr((cx.target && cx.target.label) || t)} · ${jalali(cx.start)} تا ${jalali(cx.end)}`, sm.identification ? tr(sm.identification.explanation || sm.identification.label || "") : null, h("div", null,
+        picker ? h("div", { class: "ffd-actions-row" }, picker) : null,
+        K.stats([
+          K.stat("سفارش افزایشی خالص", signedCount(card("net_incremental_orders").estimate), ci(card("net_incremental_orders")), card("net_incremental_orders").estimate > 0 ? "good" : "bad"),
+          K.stat("سفارش سرویس جدید", compact(card("new_service_gross_orders").estimate), "شمارش مستقیم، برای همه‌ی کاربران"),
+          K.stat("اثر منفی روی سرویس‌های قبلی", compact(card("incumbent_negative_effects").estimate), card("incumbent_negative_effects").sample_size ? `${fa(card("incumbent_negative_effects").sample_size.services_with_loss || 0)} سرویس از ${fa(card("incumbent_negative_effects").sample_size.services || 0)} ضرر کرده‌اند` : "", "warn"),
+          K.stat("نسبت Cannibalization", ratio == null ? "—" : pct(ratio, 0), ratio == null ? "" : `از هر ۱۰۰ سفارش افزوده، ${fa(Math.round(ratio * 100))} سفارش از سرویس‌های دیگر کم شده`, ratio == null ? null : ratio > 0.5 ? "bad" : ratio > 0.25 ? "warn" : "good"),
+          K.stat("کاربر تازه به پلتفرم", compact(card("new_to_platform_users").estimate), tr(card("new_to_platform_users").method || "")),
+        ])), { span: 12, tone: "hero", aside: sm.identification ? K.badge(tr(sm.identification.label || sm.identification.method), sm.identification.causal_status === "causal" ? "good" : "warn") : null });
+
+      const colorOf = (r) => (!r.significant ? "var(--ff-line-2)" : r.role !== "incumbent" ? "var(--ff-c1)" : r.estimate < 0 ? "var(--ff-c4)" : "var(--ff-c2)");
+      const bars = K.card("اثر روی هر سرویس", "سفارش اضافه‌شده یا ازدست‌رفته در دوره؛ خاکستری یعنی از نظر آماری معنادار نیست", K.bars([...rows].sort((a, b) => b.estimate - a.estimate).map((r) => ({
+        label: tr(r.label) + (r.role && r.role !== "incumbent" ? " ★" : ""), value: r.estimate, color: colorOf(r),
+        tip: [tr(r.label), `${signedCount(r.estimate)} سفارش`, r.ci_low != null ? `بازه‌ی ۹۵٪: ${compact(r.ci_low)} تا ${compact(r.ci_high)}` : "", r.p_value != null ? `p = ${fa(r.p_value < 0.001 ? "<0.001" : r.p_value.toFixed(3))}` : "", r.role === "incumbent" ? "سرویس قبلی" : "سرویس جدید"].filter(Boolean),
+      })), { fmt: signedCount }), { span: 7 });
+      const spark = (se && se.platform && se.platform.sparkline) || card("net_incremental_orders").sparkline || [];
+      const line = K.card("اثر خالص روزانه روی کل پلتفرم", "سفارش افزایشی هر روز؛ بالای صفر یعنی رشد واقعی", K.line([{ name: "اثر خالص", points: spark.map((p) => ({ x: p.date, y: p.value })) }], { zero: true, label: "اثر خالص روزانه" }), { span: 5 });
+      const flags = ((cx.quality_flags) || []).filter((f) => f.severity !== "info");
+      const out = [head, bars, line];
+      if (flags.length) out.push(K.card("یادداشت‌های کیفیت تحلیل", null, K.list(flags.map((f) => ({ badge: K.badge(f.severity === "warning" ? "هشدار" : tr(f.severity), "warn"), title: tr(f.message) }))), { span: 12 }));
+      return out;
+    },
+  });
+  function signedCount(v) { return v == null || isNaN(v) ? "—" : "⁦" + (v > 0 ? "+" : v < 0 ? "−" : "") + compact(Math.abs(v)) + "⁩"; }
+
+  /* ================================================================ ۴) رادار ریسک شهرها */
+  D.register({
+    id: "cities", icon: "◎", title: "رادار ریسک شهرها", short: "رادار شهرها",
+    desc: "همه‌ی شهرها روی یک صفحه: فاصله‌ی نرخ تبدیل هر شهر با میانگین وزنی شبکه، روندش نسبت به دوره‌ی قبل، حجم ترافیک، و آب‌وهوای همین حالا. هرچه نقطه پایین‌تر و بزرگ‌تر، ریسک بیشتر.",
+    async render() {
+      const [sg, opp, wx, c] = await settle([api("/api/v1/segments/cities?comparison=previous_period"), api("/api/v1/opportunities?dimension=city&limit=10&comparison=previous_period"), api("/api/v1/shocks/weather-by-city", 900000), cc()]);
+      if (!sg) throw new Error("داده‌ی شهرها در دسترس نیست");
+      const W = {}; (Array.isArray(wx) ? wx : []).forEach((w) => (W[String(w.city_id)] = w));
+      const alertsBy = {}; ((c && c.weather_alerts) || []).forEach((a) => (alertsBy[a.city_name] = a));
+      const bench = sg.benchmark_conversion_rate;
+      const segs = (sg.segments || []).filter((x) => x.sessions > 0).map((x) => {
+        const gapPt = (x.conversion_rate - bench) * 100;
+        const trendPt = x.delta != null ? x.delta * 100 : null;
+        const w = W[String(x.id)], wa = alertsBy[x.name];
+        const risk = Math.max(0, -gapPt) * Math.sqrt(x.traffic_share * 100) + Math.max(0, -(trendPt || 0)) * 2 * Math.sqrt(x.traffic_share * 100) + (wa ? wa.severity / 2 : 0);
+        return { ...x, gapPt, trendPt, w, wa, risk };
+      });
+      const statusFa = { critical: ["بحرانی", "bad"], needs_action: ["نیازمند اقدام", "warn"], watch: ["زیر نظر", "info"], healthy: ["سالم", "good"], good: ["خوب", "good"] };
+      const st = (s) => statusFa[s] || [tr(s || "—"), "neutral"];
+      const crit = segs.filter((x) => x.status === "critical"), need = segs.filter((x) => x.status === "needs_action");
+      const ops = (opp && opp.opportunities) || [];
+      const stats = K.card(null, null, K.stats([
+        K.stat("شهر بحرانی", fa(crit.length), crit.slice(0, 4).map((x) => x.name).join("، "), crit.length ? "bad" : "good"),
+        K.stat("نیازمند اقدام", fa(need.length), need.slice(0, 4).map((x) => x.name).join("، "), need.length ? "warn" : null),
+        K.stat("هشدار آب‌وهوا", fa(((c && c.weather_alerts) || []).length), ((c && c.weather_alerts) || []).map((a) => `${a.city_name} (${tr(a.condition)})`).join("، ") || "آسمان آرام است", ((c && c.weather_alerts) || []).length ? "warn" : null),
+        K.stat("فرصت بالقوه", ops.length ? `${num(sum(ops, (o) => o.estimated_upside_sessions))}` : "—", "سبد بسته‌شده‌ی اضافه اگر ۱۰ شهر اول به میانگین شبکه برسند", "info"),
+        K.stat("میانگین وزنی شبکه", pct(bench, 2), `CR از impression تا Close Cart · ${jalali(sg.period && sg.period.start_date)} تا ${jalali(sg.period && sg.period.end_date)}`),
+      ]), { span: 12 });
+
+      const top = [...segs].sort((a, b) => b.sessions - a.sessions);
+      const labelSet = new Set([...top.slice(0, 6), ...[...segs].sort((a, b) => b.risk - a.risk).slice(0, 5)].map((x) => x.id));
+      const maxS = Math.max(...segs.map((x) => x.sessions)) || 1;
+      const radar = K.card("رادار", "افقی: سهم ترافیک (لگاریتمی) · عمودی: فاصله با میانگین شبکه به واحد درصد · اندازه: حجم نشست", K.scatter(segs.map((x) => ({
+        x: x.traffic_share * 100, y: x.gapPt, r: 3 + Math.sqrt(x.sessions / maxS) * 14,
+        color: x.status === "critical" ? "var(--ff-c4)" : x.status === "needs_action" ? "var(--ff-c3)" : "var(--ff-c1)",
+        label: labelSet.has(x.id) ? x.name : null,
+        tip: [`${x.name} · ${x.province || ""}`, `CR ${pct(x.conversion_rate, 2)} (${pp(x.gapPt)} نسبت به شبکه)`, x.trendPt != null ? `روند: ${pp(x.trendPt)} نسبت به دوره‌ی قبل` : "", `${pct(x.traffic_share, 2)} از ترافیک`, x.w ? `${fa(Math.round(x.w.temp_c))}° · ${tr(x.w.condition)}` : "", st(x.status)[0]].filter(Boolean),
+      })), { logx: true, xfmt: (v) => fa(v < 1 ? v.toFixed(1) : Math.round(v)) + "٪", yfmt: (v) => fa(v.toFixed(1)), label: "رادار ریسک شهرها", legend: [{ label: "بحرانی", color: "var(--ff-c4)" }, { label: "نیازمند اقدام", color: "var(--ff-c3)" }, { label: "دیگر شهرها", color: "var(--ff-c1)" }] }), { span: 8 });
+
+      const oppC = K.card("بیشترین فرصت", "سبد بسته‌شده‌ی اضافه اگر شهر به میانگین شبکه برسد", K.bars(ops.map((o) => ({ label: o.name, value: o.estimated_upside_sessions, color: "var(--ff-c2)", tip: [o.name, `CR ${pct(o.current_conversion_rate, 2)} در برابر ${pct(o.benchmark_conversion_rate, 2)}`, `امتیاز فرصت: ${fa(o.opportunity_score)}`] })), { fmt: num }), { span: 4 });
+
+      const table = K.card("شهرها به ترتیب ریسک", "ریسک = فاصله‌ی منفی با شبکه و روند نزولی، وزن‌دار با ترافیک، به‌علاوه‌ی هشدار آب‌وهوا", K.table([
+        { key: "name", label: "شهر", render: (r) => two(r.name, r.province) },
+        { key: "traffic_share", label: "سهم ترافیک", num: true, render: (r) => pct(r.traffic_share, 2) },
+        { key: "conversion_rate", label: "CR", num: true, render: (r) => pct(r.conversion_rate, 2) },
+        { key: "gapPt", label: "فاصله با شبکه", num: true, render: (r) => deltaSpan(r.gapPt, r.gapPt >= 0, pp(r.gapPt)) },
+        { key: "trendPt", label: "روند", num: true, render: (r) => (r.trendPt == null ? "—" : deltaSpan(r.trendPt, r.trendPt >= 0, pp(r.trendPt))) },
+        { key: "temp", label: "آب‌وهوا", render: (r) => (r.wa ? K.badge(`${tr(r.wa.condition)} · ${fa(Math.round(r.wa.temp_c))}°`, "warn") : r.w ? `${fa(Math.round(r.w.temp_c))}° · ${tr(r.w.condition)}` : "—") },
+        { key: "risk", label: "وضعیت", render: (r) => { const s = st(r.status); return K.badge(s[0], s[1]); } },
+      ], segs.map((x) => ({ ...x, temp: x.w ? x.w.temp_c : -99 })), { sort: "risk", limit: 30 }), { span: 12 });
+      return [stats, radar, oppC, table];
+    },
+  });
+
+  /* ================================================================ ۵) شهر × ساعت */
+  D.register({
+    id: "city-hour", icon: "◷", title: "شهر × ساعت", short: "شهر × ساعت",
+    desc: "الگوی ساعتی نرخ تبدیل در شهرهای پرترافیک، ۱۴ روز اخیر. حالت «نسبت به میانگین همان شهر» نشان می‌دهد هر شهر در کدام ساعت‌ها از خودش بهتر یا بدتر است — جای مناسب برای زمان‌بندی کمپین و ظرفیت.",
+    async render(ctx) {
+      const mode = state.chMode || "index";
+      const c = await cc();
+      const cities = [...((c && c.cities) || [])].sort((a, b) => b.sessions - a.sessions).slice(0, 10);
+      const to = D.iso(D.daysAgo(1)), from = D.iso(D.daysAgo(14));
+      const base = `/api/v1/hourly?from=${from}&to=${to}&comparison=previous_period`;
+      const res = await settle([api(base, 900000), ...cities.map((x) => api(`${base}&city=${encodeURIComponent(x.city_id)}`, 900000))]);
+      const rows = [{ name: "کل شبکه", d: res[0] }, ...cities.map((x, i) => ({ name: x.name, d: res[i + 1] }))].filter((r) => r.d && r.d.hours);
+      if (!rows.length) throw new Error("داده‌ی ساعتی در دسترس نیست");
+      const hours = Array.from({ length: 24 }, (_, i) => i);
+      const H = (r, hh) => (r.d.hours.find((x) => x.hour === hh) || {});
+      const avg = (r) => { const s = sum(r.d.hours, (x) => x.close_cart_sessions), i = sum(r.d.hours, (x) => x.impression_sessions); return i ? s / i : null; };
+      const cell = {
+        cr: (r, hh) => H(r, hh).end_to_end_cr,
+        index: (r, hh) => { const a = avg(r), v = H(r, hh).end_to_end_cr; return a && v != null ? v / a : null; },
+        vol: (r, hh) => H(r, hh).volume_share,
+      }[mode];
+      const fmtTip = { cr: (v) => pct(v, 2), index: (v) => `${fa(v.toFixed(2))}× میانگین همان شهر`, vol: (v) => `${pct(v, 1)} از نشست‌های روز` }[mode];
+      const picker = K.chips([{ value: "index", label: "نسبت به میانگین همان شهر" }, { value: "cr", label: "نرخ تبدیل" }, { value: "vol", label: "سهم حجم" }], mode, (v) => { state.chMode = v; ctx.rerender(); });
+      const heat = K.card("نقشه‌ی گرمایی ساعتی", `${jalali(from)} تا ${jalali(to)} · ساعت به وقت تهران`, h("div", null, h("div", { class: "ffd-actions-row" }, picker),
+        K.heat(rows, hours, (r, hh) => cell(r, hh), {
+          rowLabel: (r) => r.name, colLabel: (hh) => fa(hh), corner: "ساعت",
+          fmt: mode === "index" ? (v) => fa(v.toFixed(1)) : null, tipFmt: fmtTip,
+          lo: mode === "index" ? 0.4 : undefined, hi: mode === "index" ? 1.6 : undefined,
+          scaleLabel: mode === "index" ? "۱ یعنی برابر میانگین" : null,
+        })), { span: 12 });
+      const shiftFa = { Overnight: "شبانه", Morning: "صبح", Lunch: "ناهار", Afternoon: "عصر", Dinner: "شام", Evening: "شب", Night: "شب" };
+      const table = K.card("اوج و افت هر شهر", null, K.table([
+        { key: "name", label: "شهر" },
+        { key: "cr", label: "CR کل", num: true, render: (r) => pct(r.cr, 2) },
+        { key: "peak", label: "پرحجم‌ترین ساعت", num: true, render: (r) => `${fa(r.peak)}:۰۰` },
+        { key: "bestH", label: "پربازده‌ترین ساعت", num: true, render: (r) => `${fa(r.bestH)}:۰۰ · ${pct(r.bestCr, 2)}` },
+        { key: "best", label: "بهترین وعده", render: (r) => shiftFa[r.best] || tr(r.best || "—") },
+        { key: "worst", label: "ضعیف‌ترین وعده", render: (r) => shiftFa[r.worst] || tr(r.worst || "—") },
+      ], rows.map((r) => {
+        const busy = r.d.hours.filter((x) => x.volume_share >= 0.02);
+        const b = [...busy].sort((x, y) => y.end_to_end_cr - x.end_to_end_cr)[0] || {};
+        return { name: r.name, cr: avg(r), peak: r.d.peak_hour, bestH: b.hour, bestCr: b.end_to_end_cr, best: r.d.best_shift, worst: r.d.worst_shift };
+      }), {}), { span: 12 });
+      return [heat, table, K.note("«پربازده‌ترین ساعت» فقط میان ساعت‌هایی سنجیده شده که دست‌کم ۲٪ نشست‌های روز را دارند، تا ساعت‌های خلوتِ پرنوسان گمراه نکنند.")];
+    },
+  });
+
+  /* ================================================================ ۶) اقتصاد سبد */
+  D.register({
+    id: "basket", icon: "◈", title: "اقتصاد سبد", short: "اقتصاد سبد",
+    desc: "درآمد از کجا می‌آید: سهم هر مسیر ورود در درآمد و سفارش، میانگین سبد هر مسیر، و روند میانگین سبد و تخفیف در ۳۰ روز اخیر.",
+    async render(ctx) {
+      const c = await cc();
+      const hd = c.headline || {}, rs = c.revenue_split || {};
+      const svc = (rs.services || []).filter((x) => x.orders > 0).sort((a, b) => b.revenue_toman - a.revenue_toman);
+      const trend = [...(c.trend || [])].sort((a, b) => (a.date < b.date ? -1 : 1));
+      const stats = K.card(`دیروز · ${jalali(hd.day)}`, null, K.stats([
+        K.stat("درآمد", toman(hd.revenue_toman), hd.revenue_low_toman ? `بازه‌ی ${toman(hd.revenue_low_toman)} تا ${toman(hd.revenue_high_toman)}` : ""),
+        K.stat("میانگین سبد (AOV)", toman(hd.aov_toman), `${num(hd.revenue_orders)} سفارش پرداخت‌شده`),
+        K.stat("تخفیف", toman(hd.discount_toman), hd.revenue_toman ? `${pct(hd.discount_toman / (hd.revenue_toman + hd.discount_toman), 1)} از ارزش ناخالص سبد` : "", "warn"),
+        K.stat("Meal for One", toman(hd.mfo && hd.mfo.revenue_toman), hd.mfo ? `${pct(hd.mfo.share_of_revenue, 2)} از درآمد · ${pct(hd.mfo.share_of_orders, 2)} از سفارش` : ""),
+      ]), { span: 12 });
+      const aov = K.card("روند میانگین سبد", "درآمد تقسیم بر سفارش پرداخت‌شده، ۳۰ روز اخیر", K.line([{ name: "AOV", points: trend.filter((x) => x.paid_orders).map((x) => ({ x: x.date, y: x.revenue_toman / x.paid_orders })) }], { yfmt: (v) => compact(v), label: "میانگین سبد" }));
+      const rev = K.card("درآمد روزانه", "۳۰ روز اخیر به تومان", K.line([{ name: "درآمد", color: "var(--ff-c2)", points: trend.map((x) => ({ x: x.date, y: x.revenue_toman })) }], { label: "درآمد روزانه" }));
+      const share = K.card("سهم مسیرها از درآمد", "هر نشست سفارش به یک مسیر ورود نسبت داده شده", K.bars(svc.slice(0, 12).map((x) => ({
+        label: tr(x.label), value: x.share,
+        tip: [tr(x.label), toman(x.revenue_toman), `${pct(x.share, 1)} از درآمد · ${pct(x.order_share, 1)} از سفارش`, `میانگین سبد: ${toman(x.revenue_toman / x.orders)}`],
+      })), { fmt: (v) => pct(v, 1) }));
+      const big = svc.filter((x) => x.orders >= 1000);
+      const avgAll = hd.revenue_orders ? hd.revenue_toman / hd.revenue_orders : null;
+      const per = K.card("میانگین سبد هر مسیر", avgAll ? `خط مبنا: میانگین کل ${toman(avgAll)}؛ مسیرهای زیر ۱٬۰۰۰ سفارش حذف شده‌اند` : null, K.bars(big.map((x) => ({ label: tr(x.label), value: x.revenue_toman / x.orders - (avgAll || 0), tip: [tr(x.label), `میانگین سبد: ${toman(x.revenue_toman / x.orders)}`, `${num(x.orders)} سفارش`] })).sort((a, b) => b.value - a.value), { fmt: (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + compact(Math.abs(v)) }));
+      const withKids = svc.filter((x) => (x.children || []).length);
+      const pick = state.basketSvc && withKids.some((x) => x.key === state.basketSvc) ? state.basketSvc : withKids[0] && withKids[0].key;
+      const sel = withKids.find((x) => x.key === pick);
+      const kids = sel ? K.card("درون یک مسیر", "کدام نقطه‌ی کلیک درون این مسیر بیشترین درآمد را می‌سازد", h("div", null,
+        h("div", { class: "ffd-actions-row" }, K.chips(withKids.slice(0, 10).map((x) => ({ value: x.key, label: tr(x.label) })), pick, (v) => { state.basketSvc = v; ctx.rerender(); })),
+        K.bars([...sel.children].sort((a, b) => b.revenue_toman - a.revenue_toman).map((k) => ({ label: tr(k.label), value: k.revenue_toman, color: "var(--ff-c5)", tip: [tr(k.label), toman(k.revenue_toman), `${num(k.orders)} سفارش`, k.orders ? `میانگین سبد: ${toman(k.revenue_toman / k.orders)}` : ""] })), { fmt: compact })), { span: 12 }) : null;
+      return [stats, aov, rev, share, per, kids, rs.note ? K.note(tr(rs.note)) : null];
+    },
+  });
+
+  /* ================================================================ ۷) سلامت داده */
+  D.register({
+    id: "data", icon: "⛁", title: "سلامت داده", short: "سلامت داده",
+    desc: "پیش از اعتماد به هر عدد: منبع داده زنده است؟ آخرین همگام‌سازی کی بوده؟ کدام دیتاست روز گم‌شده یا کم‌حجم دارد و صف دریافت چقدر عقب است؟",
+    async render() {
+      const [m, ss, ing, c] = await settle([api("/api/v1/meta", 60000), api("/api/v1/source/status", 60000), api("/api/v1/admin/ingestion/status", 60000), cc()]);
+      if (!m && !ss) throw new Error("وضعیت منبع داده در دسترس نیست");
+      const pr = (ss && ss.primary) || (m && m.adapter_health) || {}, of = (ss && ss.overall_funnel) || (m && m.overall_funnel) || {};
+      const dq = (m && m.data_quality) || {};
+      const stats = K.card(null, null, K.stats([
+        K.stat("منبع اصلی", pr.live ? "زنده" : "آفلاین", `${tr(pr.label || pr.source || "")} · همگام‌سازی ${ago(pr.last_synced)}`, pr.live && !pr.stale ? "good" : "bad"),
+        K.stat("قیف کل", of.live ? "زنده" : "آفلاین", `همگام‌سازی ${ago(of.last_synced)}`, of.live && !of.stale ? "good" : "bad"),
+        ing ? K.stat("کارگر دریافت", ing.worker && ing.worker.alive ? "فعال" : "متوقف", ing.worker ? `آخرین ضربان ${ago(ing.worker.heartbeat_at)}${ing.paused ? " · متوقف‌شده" : ""}` : "", ing.worker && ing.worker.alive && !ing.paused ? "good" : "bad") : null,
+        ing && ing.catch_up ? K.stat("صف جبران", fa(ing.catch_up.pending_queries || 0), ing.eta && ing.eta.all_done_at ? `پایان تخمینی ${ago(ing.eta.all_done_at).replace("پیش", "دیگر")}` : "", (ing.catch_up.pending_queries || 0) > 0 ? "warn" : "good") : null,
+        K.stat("کیفیت داده", dq.ok ? "سالم" : "مشکل دارد", `${fa((dq.issues || []).length)} مورد هشدار · ${fa(dq.row_count || 0)} روز`, dq.ok ? "good" : "warn"),
+      ].filter(Boolean)), { span: 12 });
+      const out = [stats];
+      if (ing && ing.datasets) {
+        const ds = ing.datasets;
+        out.push(K.card("پوشش دیتاست‌ها", "هر خانه یک روز است (۶۰ روز اخیر): سبز کامل، زرد کم‌حجم، قرمز گم‌شده، خاکستری هنوز قطعی‌نشده", K.table([
+          { key: "dataset", label: "دیتاست", render: (r) => h("b", null, r.dataset) },
+          { key: "percent", label: "پوشش", num: true, render: (r) => pct(r.percent / 100, 1) },
+          { key: "days_missing", label: "روز گم‌شده", num: true, render: (r) => (r.days_missing ? h("span", { class: "ffd-down" }, fa(r.days_missing)) : fa(0)) },
+          { key: "thin", label: "کم‌حجم", num: true, render: (r) => fa(r.thin) },
+          { key: "latest_covered", label: "آخرین روز", num: true, render: (r) => jalali(r.latest_covered) },
+          { key: "", label: "۶۰ روز اخیر", render: (r) => K.strip((r.cells || []).slice(-60)) },
+        ], ds.map((x) => ({ ...x, thin: (x.thin_days || []).length })), { sort: "days_missing" }), { span: 12 }));
+        const runs = ing.recent_runs || [];
+        const stFa = { ok: ["موفق", "good"], success: ["موفق", "good"], done: ["موفق", "good"], running: ["در حال اجرا", "info"], empty: ["خالی", "warn"], failed: ["ناموفق", "bad"], error: ["خطا", "bad"] };
+        out.push(K.card("آخرین اجراها", null, K.table([
+          { key: "dataset", label: "دیتاست", render: (r) => two(r.dataset, `${tr(r.kind)} · ${jalali(r.day)}`) },
+          { key: "status", label: "وضعیت", render: (r) => { const s = stFa[r.status] || [tr(r.status), "neutral"]; return K.badge(s[0], s[1]); } },
+          { key: "rows", label: "ردیف", num: true, render: (r) => (r.rows == null ? "—" : num(r.rows)) },
+          { key: "wall_ms", label: "زمان", num: true, render: (r) => (r.wall_ms == null ? "—" : r.wall_ms < 60000 ? `${fa((r.wall_ms / 1000).toFixed(1))} ثانیه` : `${fa(Math.round(r.wall_ms / 60000))} دقیقه`) },
+          { key: "t", label: "شروع", num: true, render: (r) => ago(r.started_at) },
+        ], runs.map((r) => ({ ...r, t: Date.parse(r.started_at) })), { sort: "t", limit: 15 }), { span: 7 }));
+      } else {
+        out.push(K.card("جزئیات خط دریافت", null, K.empty("جزئیات صف و پوشش دیتاست‌ها فقط برای ادمین‌های فالکون در دسترس است."), { span: 7 }));
+      }
+      const notes = [...((c && c.data) || []).map((d) => ({ badge: K.badge(tr(d.domain), "info"), title: tr(d.note) })), ...(dq.issues || []).map((i) => ({ badge: K.badge(i.severity === "warning" ? "هشدار" : tr(i.severity), "warn"), title: tr(i.message), value: i.count != null ? `${fa(i.count)} ردیف` : null }))];
+      out.push(K.card("یادداشت‌های داده", m && m.available_range ? `بازه‌ی موجود: ${jalali(m.available_range.start)} تا ${jalali(m.available_range.end)}` : null, K.list(notes), { span: 5 }));
+      return out;
+    },
+  });
 })();
