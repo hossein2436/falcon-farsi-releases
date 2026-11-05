@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.1.0 · compat-marker: __fxLoaded */
+/* falcon-farsi core v2.2.0 · compat-marker: __fxLoaded */
 /* فالکون · پوسته‌ی فارسی — فرهنگ واژه‌ها (v2)
    کلید: متن انگلیسی با حروف کوچک و فاصله‌ی یکسان. اصطلاحات جاافتاده (CR، Close Cart، Supertype، Gem، Off-Box،
    Meal For One، Retention، Funnel، RCA، pp/pt، نام پلتفرم‌ها و رویدادها) عمداً انگلیسی می‌مانند. */
@@ -1041,6 +1041,16 @@ window.FF_DICT = {
   "new service orders": "سفارش سرویس جدید",
   "assumed taken from incumbents": "فرض: گرفته‌شده از سرویس‌های موجود",
   "scenario total": "جمع سناریو",
+  "custom date range": "بازه‌ی دلخواه",
+  "no split to check.": "تقسیمی برای بررسی وجود ندارد.",
+  "no clear effect": "اثر روشنی ندارد",
+  "the data cannot yet tell them apart from orders that would have been placed anyway.": "داده هنوز نمی‌تواند این‌ها را از سفارش‌هایی که در هر صورت ثبت می‌شد جدا کند.",
+  "of users": "از کاربران",
+  "on the source before,": "در مبدأ پیش از آن،",
+  "on the destination after": "در مقصد پس از آن",
+  "no other service shows a clear loss.": "هیچ سرویس دیگری زیان روشنی نشان نمی‌دهد.",
+  "today is not over, so it is left out of every estimate.": "امروز هنوز تمام نشده، پس در هیچ تخمینی حساب نمی‌شود.",
+  "failed to fetch": "دریافت داده ناموفق بود؛ دوباره تلاش کنید",
   "nothing to build a scenario from": "داده‌ای برای ساختن سناریو نیست",
   "a scenario starts from the new service's observed orders and the no-launch baseline of the window. one of them is missing for this target.": "هر سناریو از سفارش‌های مشاهده‌شده‌ی سرویس جدید و خط پایه‌ی بدون لانچ در همین بازه شروع می‌شود. یکی از این دو برای این هدف موجود نیست.",
   "executive, product leadership, finance leadership, growth / cro lead, product manager, analyst, platform administrator": "مدیریتی، رهبری محصول، رهبری مالی، مسئول رشد / CRO، مدیر محصول، تحلیلگر، مدیر پلتفرم",
@@ -1262,7 +1272,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
   const translator = (() => {
     const DICT = window.FF_DICT || {}, PARTS = window.FF_PARTS || {}, DAYS = window.FF_DAYS || {}, MONTHS = window.FF_MONTHS || {};
     const FA = "۰۱۲۳۴۵۶۷۸۹", LRI = "⁦", PDI = "⁩";
-    const SKIP = "script,style,noscript,textarea,input,code,pre,[contenteditable],.ff-skip";
+    const SKIP = "script,style,noscript,textarea,input,code,pre,[contenteditable],.ff-skip,[data-ff-owned]";
     const PLAT = "SUPERAPP_SUPERMARKET|SUPERAPP|PWA|PSA_ANDROID|PSA_IOS|Fidilio|IRANCELL|OUTBOX|AP|PROCUREMENT|SABA";
     const recs = new WeakMap(), touched = new Set();
     const arecs = new WeakMap(), atouched = new Set();
@@ -1304,7 +1314,9 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
     r(/^(.+?) orders lost$/i, (m, n) => `${n} سفارش از دست رفت`);
     r(/^(.+?) orders lost · about (.+?) (million|billion) toman · (.+)$/i, (m, n, a, u, o) => `${n} سفارش از دست رفت · حدود ${a} ${mag(u)} تومان · ${T(o)}`);
     r(/^between (.+?) (billion|million) toman and (.+?) (billion|million) toman$/i, (m, a, u, b, u2) => `بین ${a} ${mag(u)} و ${b} ${mag(u2)} تومان`);
+    r(/^about (.+?) (billion|million) toman$/i, (m, a, u) => `حدود ${a} ${mag(u)} تومان`);
     r(/^(.+?) (billion|million) toman$/i, (m, a, u) => `${a} ${mag(u)} تومان`);
+    r(/^(.+?) orders gained · about (.+?) (million|billion) toman · (.+)$/i, (m, n, a, u, o) => `${n} سفارش بیشتر · حدود ${a} ${mag(u)} تومان · ${T(o)}`);
     r(/^([\d.,]+[KMB]?) toman$/i, (m, a) => `${a} تومان`);
     r(/^(.+?)× avg basket$/i, (m, a) => `${a}× میانگین سبد`);
     r(/^(\d+) earlier (Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days$/i, (m, n, x) => `${n} ${day(x.slice(0, 3))} قبل`);
@@ -1449,6 +1461,11 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
     r(/^Variation (\d+) is taken as the control group \(the GrowthBook convention\)$/i, (m, n) => `واریانت ${n} گروه کنترل در نظر گرفته شده (قرارداد GrowthBook)`);
     r(/^What (.+?) means$/i, (m, a) => `${T(a)} یعنی چه؟`);
     r(/^SE (.+)$/, (m, a) => `خطای معیار ${a}`);
+    r(/^(.+?) shows no measurable effect on the platform's orders in (\d+) days?$/i, (m, a, n) => `${tr(a)} در ${n} روز اثر قابل‌اندازه‌گیری روی سفارش‌های پلتفرم نشان نمی‌دهد`);
+    r(/^The estimate is (minus )?(.+?) orders, but the likely range runs from (minus )?(.+?) to (minus )?(.+?) and includes zero$/i, (m, s1, a, s2, b, s3, c) => `تخمین ${s1 ? "منفی " : ""}${a} سفارش است، اما بازه‌ی محتمل از ${s2 ? "منفی " : ""}${b} تا ${s3 ? "منفی " : ""}${c} است و صفر را در بر می‌گیرد`);
+    r(/^(.+?) itself took (.+?) orders$/i, (m, a, n) => `خودِ ${tr(a)} ${n} سفارش گرفت`);
+    r(/^Fewer than (\d+) days: weekday effects are not averaged out$/i, (m, n) => `کمتر از ${n} روز: اثر روزهای هفته میانگین‌گیری نشده است`);
+    r(/^Orders per (\d+) days$/i, (m, n) => `سفارش در هر ${n} روز`);
     r(/^Service (\d+)$/i, (m, n) => `سرویس ${n}`);
     r(/^about ([\d.,]+[KMB]?)$/i, (m, a) => `حدود ${a}`);
     // ── CPO
@@ -1734,6 +1751,154 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
     return { start, stop, restoreAll, T };
   })();
   window.__ffT = translator.T; // برای عیب‌یابی
+
+  /* ================================================================ UX: پالت فرمان، وضعیت بارگذاری، دکمه‌ی جست‌وجو */
+  const ux = (() => {
+    const FA = "۰۱۲۳۴۵۶۷۸۹";
+    const fa = (n) => String(n).replace(/\d/g, (d) => FA[d]);
+    const normQ = (s) => (s || "").toLowerCase().replace(/ي/g, "ی").replace(/ك/g, "ک").replace(/[‌\s]+/g, " ").trim();
+    const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; e.setAttribute("data-ff-owned", ""); return e; };
+    const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+    let pal = null, items = [], sel = 0, loadT0 = 0, toast = null, tick = 0, wasLoading = false;
+
+    /* ---------- پالت فرمان (⌘K / Ctrl+K) */
+    function collect() {
+      const out = [];
+      document.querySelectorAll("aside nav > div").forEach((sec) => {
+        const group = (sec.querySelector(":scope > p") || {}).textContent || "";
+        sec.querySelectorAll("a[href]").forEach((a) => {
+          const label = a.textContent.replace(/[⁦-⁩]/g, "").trim();
+          if (!label) return;
+          out.push({ kind: "صفحه", group: group.trim(), label, hint: a.getAttribute("href"), key: normQ(label + " " + a.getAttribute("href") + " " + (a.getAttribute("title") || "")), run: () => a.click() });
+        });
+      });
+      for (const v of ["CEO", "CPO", "CRO"]) out.push({ kind: "نما", group: "مرکز کنترل", label: `نمای ${v}`, hint: "/", key: normQ("نما view " + v), run: () => goView(v) });
+      const tt = document.querySelector('[aria-label*="تم روشن"],[aria-label*="تم تیره"],[aria-label*="light theme"],[aria-label*="dark theme"]');
+      if (tt) out.push({ kind: "فرمان", group: "ظاهر", label: "تغییر تم روشن / تیره‌ی فالکون", hint: "", key: normQ("تم روشن تیره شب روز theme dark light"), run: () => tt.click() });
+      out.push({ kind: "فرمان", group: "ترجمه", label: "کپی متن‌های ترجمه‌نشده", hint: "برای فرستادن به من", key: normQ("کپی ترجمه نشده missing translation"), run: copyMissing });
+      return out;
+    }
+    function goView(v) {
+      const click = () => { const t = [...document.querySelectorAll('[role="tab"]')].find((x) => x.textContent.trim() === v); if (t) { t.click(); return true; } return false; };
+      if (location.pathname === "/" && click()) return;
+      const home = document.querySelector('aside nav a[href="/"]'); if (home) home.click();
+      let n = 0; const iv = setInterval(() => { if (click() || ++n > 30) clearInterval(iv); }, 150);
+    }
+    async function copyMissing() {
+      let data = {}; try { data = JSON.parse(localStorage.getItem("ff-missing") || "{}"); } catch (e) { /* */ }
+      const text = Object.entries(data).map(([t, p]) => `${p}\t${t}`).join("\n") || "(خالی)";
+      try { await navigator.clipboard.writeText(text); flash(`${fa(Object.keys(data).length)} متن کپی شد`); } catch (e) { flash("کپی نشد؛ دسترسی کلیپ‌بورد را بررسی کنید"); }
+    }
+    function score(it, q) {
+      if (!q) return 1;
+      const i = it.key.indexOf(q); if (i === 0) return 3; if (i > 0) return 2;
+      return q.split(" ").every((w) => it.key.includes(w)) ? 1 : 0;
+    }
+    function render(q) {
+      const list = pal.querySelector(".ff-pal-list"); list.textContent = "";
+      const nq = normQ(q);
+      items = collect().map((it) => ({ it, s: score(it, nq) })).filter((x) => x.s > 0).sort((a, b) => b.s - a.s).map((x) => x.it).slice(0, 40);
+      if (sel >= items.length) sel = 0;
+      if (!items.length) { list.appendChild(mk("div", "ff-pal-empty", "چیزی پیدا نشد. نام صفحه را فارسی یا انگلیسی بنویسید.")); return; }
+      let lastGroup = null;
+      items.forEach((it, i) => {
+        const g = `${it.kind} · ${it.group}`;
+        if (g !== lastGroup) { list.appendChild(mk("div", "ff-pal-group", g)); lastGroup = g; }
+        const row = mk("button", "ff-pal-item" + (i === sel ? " is-sel" : ""));
+        row.type = "button"; row.setAttribute("role", "option"); row.setAttribute("aria-selected", String(i === sel));
+        row.appendChild(mk("span", "ff-pal-label", it.label));
+        if (it.hint) row.appendChild(mk("span", "ff-pal-hint", it.hint));
+        row.addEventListener("mouseenter", () => { sel = i; mark(); });
+        row.addEventListener("click", () => choose(i));
+        list.appendChild(row);
+      });
+    }
+    function mark() { pal.querySelectorAll(".ff-pal-item").forEach((r, i) => { r.classList.toggle("is-sel", i === sel); r.setAttribute("aria-selected", String(i === sel)); if (i === sel) r.scrollIntoView({ block: "nearest" }); }); }
+    function choose(i) { const it = items[i]; close(); if (it) setTimeout(() => it.run(), 30); }
+    function open() {
+      if (!S.enabled) return;
+      if (!pal) {
+        pal = mk("div", "ff-pal");
+        const card = mk("div", "ff-pal-card");
+        card.setAttribute("role", "dialog"); card.setAttribute("aria-modal", "true"); card.setAttribute("aria-label", "پرش سریع");
+        const head = mk("div", "ff-pal-head");
+        const input = mk("input", "ff-pal-input"); input.type = "search"; input.placeholder = "کجا برویم؟ نام صفحه، نما یا فرمان…"; input.setAttribute("aria-label", "جست‌وجو");
+        head.appendChild(input); head.appendChild(mk("kbd", "ff-kbd", "Esc"));
+        card.appendChild(head);
+        const list = mk("div", "ff-pal-list"); list.setAttribute("role", "listbox"); card.appendChild(list);
+        const foot = mk("div", "ff-pal-foot", "↑ ↓ برای حرکت · Enter برای رفتن · Esc برای بستن");
+        card.appendChild(foot);
+        pal.appendChild(card);
+        pal.addEventListener("mousedown", (e) => { if (e.target === pal) close(); });
+        input.addEventListener("input", () => { sel = 0; render(input.value); });
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowDown") { sel = Math.min(items.length - 1, sel + 1); mark(); e.preventDefault(); }
+          else if (e.key === "ArrowUp") { sel = Math.max(0, sel - 1); mark(); e.preventDefault(); }
+          else if (e.key === "Enter") { choose(sel); e.preventDefault(); }
+          else if (e.key === "Escape") { close(); e.preventDefault(); }
+        });
+        document.body.appendChild(pal);
+      }
+      pal.classList.add("is-open"); sel = 0;
+      const input = pal.querySelector("input"); input.value = ""; render(""); setTimeout(() => input.focus(), 10);
+    }
+    function close() { if (pal) pal.classList.remove("is-open"); }
+    document.addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K" || e.key === "ک")) { if (!S.enabled) return; e.preventDefault(); pal && pal.classList.contains("is-open") ? close() : open(); }
+    }, true);
+
+    /* ---------- دکمه‌ی جست‌وجو در سربرگ */
+    function ensureLauncher() {
+      if (!S.enabled) { document.querySelectorAll(".ff-launch").forEach((n) => n.remove()); return; }
+      const head = document.querySelector("main > div > :first-child");
+      if (!head || !head.querySelector("h1") || head.querySelector(".ff-launch")) return;
+      const holder = head.lastElementChild && head.lastElementChild !== head.firstElementChild ? head.lastElementChild : head;
+      const b = mk("button", "ff-launch"); b.type = "button"; b.setAttribute("aria-label", "پرش سریع به صفحه‌ها");
+      b.appendChild(mk("span", "ff-launch-ico"));
+      b.appendChild(mk("span", null, "پرش سریع"));
+      b.appendChild(mk("kbd", "ff-kbd", isMac ? "⌘K" : "Ctrl K"));
+      b.addEventListener("click", open);
+      holder.appendChild(b);
+    }
+
+    /* ---------- وضعیت بارگذاری (برای صفحه‌های کند مثل اثر افزایشی) */
+    function loading() {
+      const m = document.querySelector("main"); if (!m) return false;
+      return m.querySelectorAll(".animate-pulse").length >= 2 || !!m.querySelector('[aria-label="Loading"],[aria-label="در حال بارگذاری"],[aria-busy="true"]');
+    }
+    function flash(msg, ok) {
+      if (!toast) { toast = mk("div", "ff-toast"); toast.setAttribute("role", "status"); toast.setAttribute("aria-live", "polite"); document.body.appendChild(toast); }
+      toast.textContent = "";
+      toast.appendChild(mk("span", ok ? "ff-toast-ok" : "ff-toast-dot"));
+      toast.appendChild(mk("span", null, msg));
+      toast.classList.add("is-on");
+      clearTimeout(flash.t); flash.t = setTimeout(() => toast.classList.remove("is-on"), 1800);
+    }
+    function pulse() {
+      if (!S.enabled) { if (toast) toast.classList.remove("is-on"); return; }
+      ensureLauncher();
+      const now = Date.now(), L = loading();
+      if (L && !loadT0) loadT0 = now;
+      if (L && now - loadT0 > 2500) {
+        if (!toast) { toast = mk("div", "ff-toast"); toast.setAttribute("role", "status"); toast.setAttribute("aria-live", "polite"); document.body.appendChild(toast); }
+        const sec = Math.round((now - loadT0) / 1000);
+        const slow = /^\/incrementality/.test(location.pathname) ? " · این صفحه معمولاً تا ۴۰ ثانیه طول می‌کشد" : "";
+        toast.textContent = "";
+        toast.appendChild(mk("span", "ff-toast-spin"));
+        toast.appendChild(mk("span", null, `در حال آماده‌سازی داده‌ها · ${fa(sec)} ثانیه${slow}`));
+        const bar = mk("span", "ff-toast-bar"); toast.appendChild(bar);
+        clearTimeout(flash.t); toast.classList.add("is-on"); wasLoading = true;
+      } else if (!L) {
+        if (wasLoading && loadT0 && now - loadT0 > 2500) flash("داده‌ها آماده شد", true);
+        else if (wasLoading && toast) toast.classList.remove("is-on");
+        loadT0 = 0; wasLoading = false;
+      }
+    }
+    function start() { if (!tick) tick = setInterval(pulse, 1000); }
+    return { start, open };
+  })();
+  ux.start();
+  window.__ffOpenPalette = ux.open;
 
   /* ================================================================ boot */
   // لودر تنظیمات را در detail رویداد می‌فرستد (attribute ممکن است با hydration پاک شود)
