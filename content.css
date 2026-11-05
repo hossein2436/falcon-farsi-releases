@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.1.0 */
+/* falcon-farsi core v2.2.0 */
 /* ==================================================================
    فالکون · پوسته‌ی فارسی v2
    زبان طراحی «شاهین»: کاغذ گرم و مرکب لاجوردی در روز، شب عمیق در تاریکی.
@@ -501,6 +501,201 @@ html[data-ff-motion] .ff-verdict > * { animation: ff-rise 420ms var(--ff-ease) b
 html[data-ff-motion] .ff-verdict > *:nth-child(2) { animation-delay: 60ms; }
 html[data-ff-motion] .ff-verdict > *:nth-child(3) { animation-delay: 120ms; }
 html[data-ff-motion] .ff-verdict > *:nth-child(4) { animation-delay: 180ms; }
+
+/* ==================================================================
+   v2.2 — ارتقای طراحی
+   ================================================================== */
+
+/* بافت کاغذ: نویز بسیار ملایم برای حس «کاغذ»، نه رنگ تخت */
+html[data-ff] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .18 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-ff][data-ff-theme="dark"] body::before { opacity: .35; mix-blend-mode: screen; }
+
+/* سربرگ چسبان شیشه‌ای: هنگام اسکرول کنترل‌ها همیشه در دسترس‌اند */
+@keyframes ff-head {
+  from { background-color: transparent; box-shadow: 0 1px 0 transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  to { background-color: color-mix(in srgb, var(--ff-bg) 82%, transparent); box-shadow: 0 1px 0 var(--ff-line), 0 12px 24px -20px rgba(22, 27, 51, .35); -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%); }
+}
+html[data-ff] main > div > :first-child:has(h1) {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  margin-inline: -20px;
+  padding: 12px 20px;
+  margin-top: -12px;
+}
+@supports (animation-timeline: scroll()) {
+  html[data-ff] main > div > :first-child:has(h1) {
+    animation: ff-head linear both !important;
+    animation-timeline: scroll(root) !important;
+    animation-range: 0 96px !important;
+  }
+}
+@supports not (animation-timeline: scroll()) {
+  html[data-ff] main > div > :first-child:has(h1) { background: color-mix(in srgb, var(--ff-bg) 88%, transparent); backdrop-filter: blur(12px); }
+}
+
+/* تایپوگرافی عددها: KPIها سنگین‌تر و منظم‌تر */
+html[data-ff] main .text-2xl.font-bold, html[data-ff] main .text-3xl.font-bold,
+html[data-ff] main .text-2xl.font-extrabold, html[data-ff] main .text-3xl.font-extrabold,
+html[data-ff] main .text-4xl.font-bold {
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums;
+  color: var(--ff-ink) !important;
+}
+html[data-ff-tr] main .shadow-card .uppercase { font-weight: 700 !important; color: var(--ff-ink-3) !important; }
+
+/* دکمه‌ی «بزرگ‌نمایی» فقط وقتی لازم است دیده می‌شود (کاهش نویز بصری) */
+html[data-ff] .shadow-card.group > span.absolute.rounded-full {
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 180ms var(--ff-ease), transform 180ms var(--ff-ease), border-color 180ms, color 180ms !important;
+  background: var(--ff-surface) !important;
+  box-shadow: 0 4px 12px -6px rgba(22, 27, 51, .25);
+}
+html[data-ff] .shadow-card.group:hover > span.absolute.rounded-full,
+html[data-ff] .shadow-card.group:focus-within > span.absolute.rounded-full { opacity: 1; transform: none; color: var(--ff-pri) !important; border-color: var(--ff-pri) !important; }
+@media (hover: none) { html[data-ff] .shadow-card.group > span.absolute.rounded-full { opacity: 1; transform: none; } }
+
+/* آیکون‌های «i» راهنما: آرام‌تر، فقط با هاور پررنگ */
+html[data-ff] main button[title^="منبع داده"], html[data-ff] main button[title^="Where"] {
+  color: var(--ff-ink-3) !important; opacity: .7; transition: opacity 160ms, color 160ms;
+}
+html[data-ff] main button[title^="منبع داده"]:hover, html[data-ff] main button[title^="Where"]:hover { opacity: 1; color: var(--ff-pri) !important; }
+
+/* چیپ‌های تغییر (▲▼) یکدست */
+html[data-ff] main span.rounded-full[class*="px-1.5"][class*="text-[10px]"],
+html[data-ff] main span.rounded[class*="px-1.5"][class*="text-[10px]"] {
+  padding: 2px 8px !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  line-height: 1.6 !important;
+}
+
+/* اسکلت بارگذاری: موج نور به‌جای چشمک */
+@keyframes ff-shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+html[data-ff] main .animate-pulse {
+  animation: ff-shimmer 1.6s linear infinite !important;
+  background-image: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--ff-surface) 70%, transparent) 50%, transparent 70%) !important;
+  background-size: 200% 100% !important;
+  background-color: var(--ff-surface-3) !important;
+  border-radius: 12px;
+}
+
+/* جدول‌ها: سرستون چسبان و ردیف‌های نرم */
+html[data-ff] main table thead th { position: sticky; top: 0; z-index: 1; }
+html[data-ff] main table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--ff-surface-2) 70%, transparent); }
+html[data-ff] main table tbody tr:hover { background: var(--ff-pri-soft) !important; }
+html[data-ff] main table td { font-variant-numeric: tabular-nums; }
+
+/* کارت کاربر پایین سایدبار: آواتار */
+html[data-ff] aside > div:last-child > div { gap: 10px !important; }
+html[data-ff] aside > div:last-child > div > div:first-child { position: relative; padding-inline-start: 42px; }
+html[data-ff] aside > div:last-child > div > div:first-child::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  width: 32px; height: 32px; margin-top: -16px;
+  border-radius: 50%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='12' cy='9' r='3.6'/%3E%3Cpath d='M5.5 19.5c1.4-3 3.8-4.5 6.5-4.5s5.1 1.5 6.5 4.5'/%3E%3C/svg%3E") center / 18px no-repeat,
+    linear-gradient(135deg, var(--ff-saffron-2), var(--ff-pri));
+  box-shadow: 0 0 0 2px var(--ff-surface), 0 0 0 3px var(--ff-line);
+}
+
+/* ---------------- دکمه‌ی پرش سریع در سربرگ */
+html:not([data-ff]) .ff-launch, html:not([data-ff]) .ff-pal, html:not([data-ff]) .ff-toast { display: none !important; }
+html[data-ff] .ff-launch {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 10px 0 12px;
+  border-radius: 12px; border: 1px solid var(--ff-line);
+  background: var(--ff-surface); color: var(--ff-ink-2);
+  font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  box-shadow: var(--ff-shadow);
+}
+html[data-ff] .ff-launch:hover { border-color: var(--ff-pri); color: var(--ff-ink); }
+html[data-ff] .ff-launch-ico {
+  width: 15px; height: 15px; flex: none;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+html[data-ff] .ff-kbd {
+  font: 600 11px/1 ui-monospace, Menlo, monospace; direction: ltr;
+  padding: 4px 6px; border-radius: 6px;
+  background: var(--ff-surface-3); color: var(--ff-ink-3); border: 1px solid var(--ff-line);
+}
+
+/* ---------------- پالت فرمان */
+html[data-ff] .ff-pal {
+  position: fixed; inset: 0; z-index: 2147483000;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 12vh;
+  background: color-mix(in srgb, var(--ff-ink) 28%, transparent);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 180ms var(--ff-ease);
+  direction: rtl;
+}
+html[data-ff]:not([data-ff-rtl]) .ff-pal { direction: ltr; }
+html[data-ff] .ff-pal.is-open { opacity: 1; pointer-events: auto; }
+html[data-ff] .ff-pal-card {
+  width: min(640px, calc(100vw - 32px));
+  max-height: 64vh; display: flex; flex-direction: column;
+  background: var(--ff-surface); color: var(--ff-ink);
+  border: 1px solid var(--ff-line-2); border-radius: 18px;
+  box-shadow: 0 40px 80px -30px rgba(22, 27, 51, .55);
+  overflow: hidden;
+  transform: translateY(-8px) scale(.98);
+  transition: transform 220ms var(--ff-ease);
+}
+html[data-ff] .ff-pal.is-open .ff-pal-card { transform: none; }
+html[data-ff] .ff-pal-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--ff-line); }
+html[data-ff] .ff-pal-input {
+  flex: 1; border: 0 !important; outline: 0; box-shadow: none !important;
+  background: transparent !important; font: inherit; font-size: 16px; font-weight: 600; color: var(--ff-ink) !important;
+}
+html[data-ff] .ff-pal-list { overflow: auto; padding: 8px; }
+html[data-ff] .ff-pal-group { font-size: 11.5px; font-weight: 800; color: var(--ff-ink-3); padding: 10px 10px 4px; }
+html[data-ff] .ff-pal-item {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 42px; padding: 0 12px; border: 0; border-radius: 11px;
+  background: transparent; color: var(--ff-ink); font: inherit; font-size: 14px; text-align: start; cursor: pointer;
+}
+html[data-ff] .ff-pal-item.is-sel { background: var(--ff-pri-soft); color: var(--ff-pri-ink); }
+html[data-ff] .ff-pal-hint { font: 12px ui-monospace, Menlo, monospace; color: var(--ff-ink-3); direction: ltr; }
+html[data-ff] .ff-pal-empty { padding: 24px; text-align: center; color: var(--ff-ink-3); font-size: 13px; }
+html[data-ff] .ff-pal-foot { padding: 10px 16px; border-top: 1px solid var(--ff-line); font-size: 11.5px; color: var(--ff-ink-3); background: var(--ff-surface-2); }
+
+/* ---------------- اعلان وضعیت بارگذاری */
+html[data-ff] .ff-toast {
+  position: fixed; bottom: 24px; left: 50%; z-index: 2147482000;
+  display: flex; align-items: center; gap: 10px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px; border-radius: 14px;
+  background: var(--ff-ink); color: var(--ff-bg);
+  font-size: 13px; font-weight: 600;
+  box-shadow: 0 18px 40px -16px rgba(22, 27, 51, .6);
+  transform: translate(-50%, 16px); opacity: 0; pointer-events: none;
+  transition: opacity 220ms var(--ff-ease), transform 260ms var(--ff-ease);
+  overflow: hidden; direction: rtl;
+}
+html[data-ff] .ff-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+html[data-ff] .ff-toast-spin { width: 14px; height: 14px; flex: none; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--ff-bg) 30%, transparent); border-top-color: var(--ff-saffron-2); animation: ff-spin .8s linear infinite; }
+html[data-ff] .ff-toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ff-saffron-2); flex: none; }
+html[data-ff] .ff-toast-ok { width: 16px; height: 16px; flex: none; border-radius: 50%; background: var(--ff-turq) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5 9-10'/%3E%3C/svg%3E") center / 11px no-repeat; }
+html[data-ff] .ff-toast-bar { position: absolute; inset-inline: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--ff-saffron-2), var(--ff-pri), transparent); background-size: 50% 100%; background-repeat: no-repeat; animation: ff-bar 1.4s var(--ff-ease) infinite; }
+@keyframes ff-spin { to { transform: rotate(360deg); } }
+@keyframes ff-bar { from { background-position: -50% 0; } to { background-position: 150% 0; } }
+@media (prefers-reduced-motion: reduce) { html[data-ff] .ff-toast-spin, html[data-ff] .ff-toast-bar, html[data-ff] main .animate-pulse { animation: none !important; } }
 
 /* ---- generated: Tailwind status colors → palette ---- */
 html[data-ff] .text-amber-500,html[data-ff] .text-amber-600,html[data-ff] .text-amber-700,html[data-ff] .text-amber-800,html[data-ff] .text-amber-900,html[data-ff] .text-yellow-500,html[data-ff] .text-yellow-600,html[data-ff] .text-yellow-700,html[data-ff] .text-yellow-800,html[data-ff] .text-yellow-900,html[data-ff] .text-orange-500,html[data-ff] .text-orange-600,html[data-ff] .text-orange-700,html[data-ff] .text-orange-800,html[data-ff] .text-orange-900{color:var(--ff-saffron)!important}
