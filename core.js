@@ -124,6 +124,7 @@ window.FF_DICT = {
   "data stored": "داده ذخیره شد",
   "conversion": "نرخ تبدیل",
   "valid sessions": "سشن‌های معتبر",
+  "valid users": "کاربران معتبر",
   "revenue": "درآمد",
   "revenue yesterday": "درآمد دیروز",
   "orders yesterday": "سفارش‌های دیروز",
