@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.3.1 */
+/* falcon-farsi core v2.3.2 */
 /* ==================================================================
    فالکون · پوسته‌ی فارسی v2
    زبان طراحی «شاهین»: کاغذ گرم و مرکب لاجوردی در روز، شب عمیق در تاریکی.
@@ -191,7 +191,7 @@ html[data-ff] .text-gray-500, html[data-ff] .text-gray-400, html[data-ff] .text-
 html[data-ff] [role="dialog"]:not(.ff-pal-card),
 html[data-ff] [role="menu"],
 html[data-ff] [role="listbox"],
-html[data-ff] [role="tooltip"] {
+html[data-ff] [role="tooltip"]:not(.ffd-tip) {
   background-color: var(--ff-surface) !important;
   border-color: var(--ff-line-2) !important;
   border-radius: 14px !important;
@@ -1048,12 +1048,12 @@ html[data-ff] .ffd-list .ffd-num { font-size: 13px; font-weight: 800; color: var
 /* tooltip */
 html[data-ff] .ffd-tip {
   position: fixed; z-index: 2147483100; pointer-events: none; opacity: 0; transform: translateY(4px);
-  background: var(--ff-ink); color: var(--ff-surface); border-radius: 10px; padding: 8px 11px; font-size: 12px; line-height: 1.7;
-  box-shadow: 0 10px 30px -10px rgba(0,0,0,.45); direction: rtl; max-width: 300px; transition: opacity 120ms, transform 120ms;
+  background: var(--ff-surface) !important; color: var(--ff-ink) !important; border: 1px solid var(--ff-line-2); border-radius: 12px; padding: 9px 12px; font-size: 12.5px; line-height: 1.8;
+  box-shadow: 0 16px 40px -20px rgba(22, 27, 51, 0.45); direction: rtl; max-width: 300px; transition: opacity 120ms, transform 120ms;
 }
 html[data-ff] .ffd-tip.is-on { opacity: 1; transform: none; }
-html[data-ff] .ffd-tip-h { font-weight: 800; margin-bottom: 2px; }
-html[data-ff] .ffd-tip-r { opacity: .9; font-variant-numeric: tabular-nums; }
+html[data-ff] .ffd-tip-h { font-weight: 800; margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px solid var(--ff-line); color: var(--ff-ink); }
+html[data-ff] .ffd-tip-r { color: var(--ff-ink-2); font-variant-numeric: tabular-nums; }
 
 /* ------------------------------------------------------------------ بخش سایدبار */
 html[data-ff] .ffd-nav { display: block; }
