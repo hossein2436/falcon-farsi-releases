@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.0.0 */
+/* falcon-farsi core v2.1.0 */
 /* فالکون · پوسته‌ی فارسی — فرهنگ واژه‌ها (v2)
    کلید: متن انگلیسی با حروف کوچک و فاصله‌ی یکسان. اصطلاحات جاافتاده (CR، Close Cart، Supertype، Gem، Off-Box،
    Meal For One، Retention، Funnel، RCA، pp/pt، نام پلتفرم‌ها و رویدادها) عمداً انگلیسی می‌مانند. */
@@ -33,7 +33,7 @@ window.FF_DICT = {
   "orders": "سفارش‌ها",
   "funnel explorer": "کاوشگر قیف",
   "home heatmap": "هیت‌مپ خانه",
-  "incrementality": "اثر افزایشی",
+  "incrementality": "اثر افزایشی و Cannibalization",
   "funnel rca engine": "موتور RCA قیف",
   "journey rca": "RCA مسیرها",
   "deep dives": "تحلیل عمیق",
@@ -445,7 +445,7 @@ window.FF_DICT = {
   "basket, checkout and order steps for each entry page, with date range and city filters.": "مرحله‌های سبد، پرداخت و سفارش برای هر صفحه‌ی ورود، با فیلتر تاریخ و شهر.",
   "home heatmap · ": "هیت‌مپ خانه · ",
   "what a launch added to the platform, what it took from other services, and how sure we are": "یک لانچ چه به پلتفرم اضافه کرد، از سرویس‌های دیگر چه گرفت و چقدر مطمئنیم",
-  "cannibalization & incrementality": "هم‌خواری و اثر افزایشی",
+  "cannibalization & incrementality": "Cannibalization و اثر افزایشی",
 
   /* ── RCA ───────────────────────────── */
   "daily · yesterday by default": "روزانه · پیش‌فرض دیروز",
@@ -855,10 +855,195 @@ window.FF_DICT = {
   "share of sessions that ordered, each variation against the control, last 7 days.": "سهم سشن‌هایی که سفارش دادند، هر واریانت در برابر کنترل، ۷ روز اخیر.",
   "a gap counts as at risk only when the drop is at least 2 noise units below usual. inside the normal range it is everyday swing, not a loss.": "فاصله فقط وقتی «در خطر» حساب می‌شود که افت دست‌کم ۲ واحد نوسان زیر معمول باشد. داخل بازه‌ی معمول، نوسان روزمره است نه زیان.",
   "basis": "مبنا",
+  "hide": "بستن توضیح",
+  "show": "نمایش",
+  "show less": "نمایش کمتر",
+  "show more": "نمایش بیشتر",
   "slice = share of sessions": "هر برش = سهم از سشن‌ها",
   "size = traffic share · brightness = conversion rate · top": "اندازه = سهم ترافیک · روشنی = نرخ تبدیل · برترین",
   "the same weekday in the last four weeks, averaged (pooled for the tests)": "همان روز هفته در چهار هفته‌ی اخیر، میانگین‌گیری‌شده (تجمیع‌شده برای آزمون‌ها)",
   "all cities ": "همه‌ی شهرها",
+
+  /* ── اثر افزایشی و Cannibalization ───────────────────────────── */
+  "synthetic preview": "پیش‌نمایش Synthetic",
+  "executive summary": "خلاصه‌ی مدیریتی",
+  "net gain": "رشد خالص",
+  "net loss": "زیان خالص",
+  "feature or experiment": "قابلیت یا آزمایش",
+  "identification": "روش شناسایی",
+  "causal": "علّی",
+  "descriptive": "توصیفی",
+  "users were split at random. each arm's orders are compared per user and day, with intervals from the user-level spread or the spread between days, whichever is wider.": "کاربران تصادفی تقسیم شدند. سفارش‌های هر گروه به ازای هر کاربر و هر روز مقایسه می‌شوند و بازه‌ها از پراکندگی سطح کاربر یا پراکندگی بین روزها، هرکدام پهن‌تر، به دست می‌آیند.",
+  "experiment": "آزمایش",
+  "comparison": "مقایسه",
+  "window": "بازه",
+  "unit": "واحد",
+  "user-day": "کاربر-روز",
+  "order definition": "تعریف سفارش",
+  "distinct order_code on close_cart": "order_code یکتا روی close_cart",
+  "data to": "داده تا",
+  "net incremental orders": "سفارش افزایشیِ خالص",
+  "95% interval": "بازه‌ی ۹۵٪",
+  "interval is above zero": "بازه بالای صفر است",
+  "interval includes zero": "بازه صفر را در بر می‌گیرد",
+  "interval is below zero": "بازه زیر صفر است",
+  "net incremental unique users": "کاربران یکتای افزایشیِ خالص",
+  "active user-days": "کاربر-روزِ فعال",
+  "new service gross orders": "سفارش ناخالص سرویس جدید",
+  "counted for all users, not split by experiment arm.": "برای همه‌ی کاربران شمرده شده، بدون تفکیک گروه آزمایش.",
+  "estimated incumbent negative effects": "اثر منفیِ تخمینی روی سرویس‌های موجود",
+  "no interval: the sum of clipped estimates has no simple one. see each service's interval in the waterfall.": "بدون بازه: جمع تخمین‌های بریده‌شده بازه‌ی ساده‌ای ندارد. بازه‌ی هر سرویس را در نمودار آبشاری ببینید.",
+  "new-to-platform users": "کاربران تازه‌وارد به پلتفرم",
+  "users": "کاربر",
+  "no interval: this is a count, not an estimate.": "بدون بازه: این یک شمارش است، نه تخمین.",
+  "data confidence / identification method": "اطمینان داده / روش شناسایی",
+  "high confidence": "اطمینان بالا",
+  "medium confidence": "اطمینان متوسط",
+  "low confidence": "اطمینان پایین",
+  "no warnings.": "هشداری نیست.",
+  "notes in the diagnostics.": "یادداشت در بخش عیب‌یابی.",
+  "quality notes in the diagnostics": "یادداشت کیفیت در بخش عیب‌یابی",
+  "user flows": "جریان کاربران",
+  "service impact": "اثر روی سرویس‌ها",
+  "daily trend": "روند روزانه",
+  "cohorts": "کوهورت‌ها",
+  "segments": "بخش‌ها",
+  "diagnostics": "عیب‌یابی",
+  "scenario": "سناریو",
+  "sections": "بخش‌ها",
+  "flow explorer": "کاوشگر جریان",
+  "between which services did users observably move, before against after?": "کاربران به‌طور مشاهده‌شده بین کدام سرویس‌ها جابه‌جا شدند، قبل در برابر بعد؟",
+  "observed movement, not a causal estimate.": "جابه‌جایی مشاهده‌شده، نه تخمین علّی.",
+  "observed movement of users between services. a user active on several services before is counted under each of them, so the flows do not add up to the deduplicated total. movement is not proof of cannibalization: the causal effect on each service is in the waterfall.": "جابه‌جایی مشاهده‌شده‌ی کاربران بین سرویس‌ها. کاربری که قبلاً در چند سرویس فعال بوده زیر هرکدام شمرده می‌شود، پس جمع جریان‌ها با کل یکتا برابر نیست. جابه‌جایی اثبات Cannibalization نیست: اثر علّی روی هر سرویس در نمودار آبشاری آمده است.",
+  "unique users (deduplicated)": "کاربر یکتا (بدون تکرار)",
+  "counted under more than one source": "زیر بیش از یک مبدأ شمرده شده",
+  "on several services after": "پس از آن در چند سرویس",
+  "before:": "قبل:",
+  "after:": "بعد:",
+  "observed unique-user transitions between services, before and after": "جابه‌جایی کاربران یکتا بین سرویس‌ها، قبل و بعد",
+  "filter the flows by this service.": "جریان‌ها را با این سرویس فیلتر کنید.",
+  "no users": "بدون کاربر",
+  "hover a band for its users and order rates. select a service to filter the flows, the waterfall and the pair table.": "برای دیدن کاربران و نرخ سفارش، نشانگر را روی هر نوار ببرید. با انتخاب یک سرویس، جریان‌ها، نمودار آبشاری و جدول جفت‌ها فیلتر می‌شوند.",
+  "causal service impact": "اثر علّی روی سرویس‌ها",
+  "which services gained or lost because of the launch, and what is the net for the platform?": "کدام سرویس‌ها به خاطر لانچ رشد کردند یا زیان دیدند و خالصِ اثر برای پلتفرم چیست؟",
+  "active users": "کاربران فعال",
+  "new service": "سرویس جدید",
+  "incumbent, negative": "سرویس موجود، منفی",
+  "incumbent, positive": "سرویس موجود، مثبت",
+  "net platform": "خالص پلتفرم",
+  "net platform effect": "اثر خالص روی پلتفرم",
+  "effect on": "اثر روی",
+  "effect on orders by service": "اثر روی سفارش به تفکیک سرویس",
+  "export service effects as csv": "خروجی CSV اثر سرویس‌ها",
+  "export the daily series as csv": "خروجی CSV سری روزانه",
+  "each bar is the estimated effect of the launch on that service. a negative bar is an estimated loss of the service, not a count of orders identified as having moved.": "هر میله اثر تخمینیِ لانچ روی آن سرویس است. میله‌ی منفی، زیان تخمینیِ آن سرویس است، نه شمار سفارش‌هایی که ثابت شده جابه‌جا شده‌اند.",
+  "daily trend and counterfactual": "روند روزانه و سناریوی خلاف واقع",
+  "what was observed each day, and what would it have been without the launch?": "هر روز چه دیده شد و بدون لانچ چه می‌شد؟",
+  "observed vs baseline": "مشاهده‌شده در برابر خط پایه",
+  "daily effect": "اثر روزانه",
+  "daily view": "نمای روزانه",
+  "show forecast": "نمایش پیش‌بینی",
+  "forecast starts": "شروع پیش‌بینی",
+  "observed orders, treatment arm": "سفارش مشاهده‌شده، گروه آزمایش",
+  "estimated without the launch (control rate applied to the treatment arm)": "تخمین بدون لانچ (نرخ گروه کنترل روی گروه آزمایش)",
+  "forecast (weekday profile), 10th to 90th percentile of past errors at each horizon": "پیش‌بینی (الگوی روز هفته)، صدک ۱۰ تا ۹۰ خطاهای گذشته در هر افق",
+  "forecast backtest:": "آزمون عقب‌گرد پیش‌بینی:",
+  ", mae": "، MAE",
+  "over": "در",
+  "forecast days.": "روز پیش‌بینی.",
+  "a prediction of what will be observed, with the band of the model's own past errors. the forecasted incremental difference assumes the estimated lift stays the same: it is not a causal forecast.": "پیش‌بینیِ آنچه دیده خواهد شد، همراه با باند خطاهای گذشته‌ی خود مدل. تفاوت افزایشیِ پیش‌بینی‌شده فرض می‌کند رشد تخمینی ثابت می‌ماند؛ پیش‌بینی علّی نیست.",
+  "user cohort matrix": "ماتریس کوهورت کاربران",
+  "which cohorts do users fall into, and how did their order frequency change?": "کاربران در کدام کوهورت‌ها قرار می‌گیرند و تکرار سفارششان چطور تغییر کرد؟",
+  "transition heatmap (users, by service before and after)": "هیت‌مپ جابه‌جایی (کاربران، بر اساس سرویس قبل و بعد)",
+  "before \\ after": "قبل \\ بعد",
+  "a user active on two services before appears in two rows, so the cells add up to more than the": "کاربری که قبلاً در دو سرویس فعال بوده در دو ردیف می‌آید، پس جمع خانه‌ها بیشتر از",
+  "unique users.": "کاربر یکتا می‌شود.",
+  "cohorts (each user in exactly one)": "کوهورت‌ها (هر کاربر دقیقاً در یکی)",
+  "unique users": "کاربران یکتا",
+  "orders / 28d": "سفارش / ۲۸ روز",
+  "orders per user per 28 days, before and after": "سفارش هر کاربر در ۲۸ روز، قبل و بعد",
+  "new to platform (no order in the lookback)": "تازه‌وارد به پلتفرم (بدون سفارش در بازه‌ی قبل)",
+  "dormant after (no order in the post window)": "غیرفعال پس از آن (بدون سفارش در بازه‌ی بعد)",
+  "expanded total frequency": "افزایش تکرار کل",
+  "reduced incumbent use": "کاهش استفاده از سرویس‌های موجود",
+  "unchanged use": "استفاده‌ی بدون تغییر",
+  "population:": "جامعه:",
+  "every user with a user_id and an order in either window": "هر کاربری که user_id و دست‌کم یک سفارش در یکی از دو بازه دارد",
+  ". a rate counts as expanded or reduced when it moves by more than": ". یک نرخ وقتی افزایش یا کاهش حساب می‌شود که بیش از",
+  ". cohorts under": " تغییر کند. کوهورت‌های کمتر از",
+  "users are hidden. retention is not shown: the stored signatures hold two windows, not a per-period history.": "کاربر پنهان شده‌اند. بازگشت کاربر نمایش داده نمی‌شود: داده‌ی ذخیره‌شده فقط دو بازه دارد، نه تاریخچه‌ی دوره‌ای.",
+  "is the platform effect the same across the window?": "اثر روی پلتفرم در طول بازه یکسان است؟",
+  "segment by": "تفکیک بر اساس",
+  "weekday": "روز هفته",
+  "grey bars have an interval that includes zero.": "میله‌های خاکستری بازه‌ای دارند که صفر را در بر می‌گیرد.",
+  "segments split the same days, so they are not independent tests: with several segments, one 'significant' row is expected by chance.": "بخش‌ها همان روزها را تقسیم می‌کنند، پس آزمون‌های مستقلی نیستند: با چند بخش، انتظار می‌رود یک ردیف «معنادار» از سر تصادف دیده شود.",
+  "not available at the stored grain:": "در سطح جزئیات ذخیره‌شده در دسترس نیست:",
+  "city, platform": "شهر، پلتفرم",
+  "experiment and quality diagnostics": "عیب‌یابی آزمایش و کیفیت",
+  "how was this identified, and what should make you cautious?": "این اثر چطور شناسایی شد و چه چیزی باید محتاطتان کند؟",
+  "(used)": "(استفاده‌شده)",
+  "(not used)": "(استفاده‌نشده)",
+  "user-level arm statistics are stored for this experiment and window.": "آمار گروه‌ها در سطح کاربر برای این آزمایش و بازه ذخیره شده است.",
+  "superseded by the user-level estimate; kept as a sensitivity check in the diagnostics.": "تخمین سطح کاربر جایگزینش شده؛ به‌عنوان آزمون حساسیت در عیب‌یابی نگه داشته شده.",
+  "staggered rollout, difference in differences": "رول‌اوت مرحله‌ای، تفاضل در تفاضل",
+  "no rollout history (which city got the feature when) is stored.": "تاریخچه‌ی رول‌اوت (کدام شهر کی قابلیت را گرفت) ذخیره نشده است.",
+  "seasonal baseline, no control": "خط پایه‌ی فصلی، بدون گروه کنترل",
+  "not needed: a randomized control group exists.": "لازم نیست: گروه کنترل تصادفی وجود دارد.",
+  "quality flags": "پرچم‌های کیفیت",
+  "info": "اطلاع",
+  "arms are read from experiment_viewed, an exposure event. a user who never fired it is in neither arm, and no assignment log exists to compare against.": "گروه‌ها از experiment_viewed (رویداد مواجهه) خوانده می‌شوند. کاربری که این رویداد را نداشته در هیچ گروهی نیست و لاگ تخصیصی برای مقایسه وجود ندارد.",
+  "not confirmed by the experiment owner.": "مالک آزمایش آن را تأیید نکرده است.",
+  "the unit is a user on a day. totals over the window add user-days; a count of unique users over the whole window needs a window-level pull.": "واحد، یک کاربر در یک روز است. جمع‌ها در طول بازه کاربر-روزها را جمع می‌زنند؛ شمار کاربران یکتا در کل بازه به دریافت داده در سطح بازه نیاز دارد.",
+  "close_cart is fired by the client. it is close to, but not, the billed order count.": "close_cart را سمت کاربر ثبت می‌کند. به شمار سفارش‌های صورت‌حساب‌شده نزدیک است، اما همان نیست.",
+  "the intended traffic split is not stored, so the sample-ratio check tests whether the split is stable from day to day, not whether it is the intended one.": "تقسیم ترافیکِ مدنظر ذخیره نشده، پس آزمون نسبت نمونه فقط ثبات تقسیم را روز به روز می‌سنجد، نه درستیِ آن را.",
+  "independent randomization keeps the comparison fair, but an interaction is possible.": "تصادفی‌سازی مستقل مقایسه را منصفانه نگه می‌دارد، اما برهم‌کنش ممکن است.",
+  "arms in the window": "گروه‌ها در این بازه",
+  "units (": "واحدها (",
+  "outcome per unit": "نتیجه به ازای هر واحد",
+  "treatment": "آزمایش",
+  "excluded": "کنارگذاشته",
+  "data completeness:": "کامل بودن داده:",
+  "days have both arms (": "روز هر دو گروه را دارد (",
+  "exposure rate:": "نرخ مواجهه:",
+  "no assignment log is stored: arms are read from the exposure event itself, so an exposure rate cannot be computed.": "لاگ تخصیص ذخیره نشده: گروه‌ها از خود رویداد مواجهه خوانده می‌شوند، پس نرخ مواجهه قابل محاسبه نیست.",
+  "traffic split over time": "تقسیم ترافیک در طول زمان",
+  "treatment share": "سهم گروه آزمایش",
+  "over the window.": "در طول بازه.",
+  "stable from day to day (p": "از روزی به روز دیگر پایدار است (p",
+  "no intended allocation is stored, so no sample-ratio test against it is possible. the stability test asks whether the split is the same on every day.": "تخصیص مدنظر ذخیره نشده، پس آزمون نسبت نمونه در برابر آن ممکن نیست. آزمون پایداری می‌پرسد آیا تقسیم در همه‌ی روزها یکسان است.",
+  "sensitivity": "حساسیت",
+  "interval from the spread inside each day": "بازه از پراکندگی درون هر روز",
+  "interval from the spread between days": "بازه از پراکندگی بین روزها",
+  "used": "استفاده‌شده",
+  "covariate adjusted (cuped)": "تعدیل با متغیر کمکی (CUPED)",
+  "not computed: no pre-period covariate is stored for the arms.": "محاسبه نشده: متغیر کمکیِ پیش‌دوره برای گروه‌ها ذخیره نشده است.",
+  "session-level comparison (relative lift)": "مقایسه در سطح سشن (رشد نسبی)",
+  "relative lift of order sessions per exposed session, for comparison of sign and size.": "رشد نسبی سشن‌های سفارش به ازای هر سشن مواجه‌شده، برای مقایسه‌ی جهت و اندازه.",
+  "staggered rollout (event study):": "رول‌اوت مرحله‌ای (مطالعه‌ی رویداد):",
+  "no rollout history is stored, so no staggered design can be estimated.": "تاریخچه‌ی رول‌اوت ذخیره نشده، پس طرح مرحله‌ای قابل تخمین نیست.",
+  "what this page cannot tell you": "آنچه این صفحه نمی‌تواند بگوید",
+  "a negative service effect is an estimated loss of that service, not orders identified as having moved to the new one. which incumbent order a new-service order replaced is not observable.": "اثر منفی روی یک سرویس، زیان تخمینیِ آن سرویس است، نه سفارش‌هایی که ثابت شده به سرویس جدید رفته‌اند. اینکه هر سفارش سرویس جدید جای کدام سفارش قدیمی را گرفته قابل مشاهده نیست.",
+  "arms come from an exposure event, not an assignment log. the comparison is among exposed users.": "گروه‌ها از رویداد مواجهه می‌آیند، نه از لاگ تخصیص. مقایسه بین کاربران مواجه‌شده است.",
+  "effects are scaled to the treated arm in the window. they are not extrapolated to a full launch.": "اثرها روی گروه آزمایش در همین بازه مقیاس شده‌اند و به لانچ کامل تعمیم داده نشده‌اند.",
+  "orders are client-side close_cart events with an order code, not billed orders.": "سفارش‌ها رویدادهای close_cart سمت کاربر با کد سفارش‌اند، نه سفارش‌های صورت‌حساب‌شده.",
+  "service means the supertype id on the close_cart row. an id with no known name is shown as service plus the id.": "سرویس یعنی شناسه‌ی Supertype روی ردیف close_cart. شناسه‌ای که نام شناخته‌شده ندارد به شکل «سرویس» + شناسه نشان داده می‌شود.",
+  "scenario explorer": "کاوشگر سناریو",
+  "what would the net look like under assumptions you choose? hypothetical, kept apart from the measured numbers.": "با فرض‌هایی که انتخاب می‌کنید، اثر خالص چطور می‌شد؟ فرضی است و از عددهای اندازه‌گیری‌شده جدا نگه داشته شده.",
+  "scenario / not observed data": "سناریو / داده‌ی غیرمشاهده‌ای",
+  "reset assumptions": "بازنشانی فرض‌ها",
+  "incumbent displacement": "جابه‌جایی از سرویس‌های موجود",
+  "rollout share, against today": "سهم رول‌اوت، نسبت به امروز",
+  "baseline growth": "رشد خط پایه",
+  "displacement is an assumption you set: the measured effect on incumbents is in the waterfall.": "جابه‌جایی فرضی است که شما تعیین می‌کنید: اثر اندازه‌گیری‌شده روی سرویس‌های موجود در نمودار آبشاری است.",
+  "scenario net incremental": "خالص افزایشیِ سناریو",
+  "against the no-launch baseline": "در برابر خط پایه‌ی بدون لانچ",
+  "without the launch": "بدون لانچ",
+  "new service orders": "سفارش سرویس جدید",
+  "assumed taken from incumbents": "فرض: گرفته‌شده از سرویس‌های موجود",
+  "scenario total": "جمع سناریو",
+  "food party": "فودپارتی",
+  "group order": "سفارش گروهی",
+  "min value: undefined, max value: undefined": "بدون مقدار",
   /* ── عمومی ───────────────────────────── */
   "source": "منبع",
   "· source:": "· منبع:",
@@ -916,6 +1101,17 @@ window.FF_PARTS = {
 
 window.FF_DAYS = { saturday: "شنبه", sunday: "یکشنبه", monday: "دوشنبه", tuesday: "سه‌شنبه", wednesday: "چهارشنبه", thursday: "پنجشنبه", friday: "جمعه", sat: "شنبه", sun: "یکشنبه", mon: "دوشنبه", tue: "سه‌شنبه", wed: "چهارشنبه", thu: "پنجشنبه", fri: "جمعه" };
 window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", apr: "آوریل", may: "مه", jun: "ژوئن", jul: "ژوئیه", aug: "اوت", sep: "سپتامبر", oct: "اکتبر", nov: "نوامبر", dec: "دسامبر" };
+
+/* نام سرویس‌ها (Supertype) */
+window.FF_SERVICES = {
+  "restaurant": "رستوران", "bakery": "نانوایی", "confectionery": "شیرینی‌فروشی", "fruit": "میوه", "cafe": "کافه",
+  "juice & ice cream": "آبمیوه و بستنی", "no order before": "بدون سفارش قبلی", "no order after": "بدون سفارش بعدی",
+  "produce market": "تره‌بار", "protein": "پروتئینی", "gifts": "هدیه", "pet shop": "پت‌شاپ", "herbal (attari)": "عطاری",
+  "nuts": "آجیل و خشکبار", "health & beauty": "آرایشی و بهداشتی", "natural products": "محصولات طبیعی", "other": "سایر",
+  "dairy": "لبنیات", "coffee & chocolate": "قهوه و شکلات", "flowers & plants": "گل و گیاه", "sausage & deli": "سوسیس و کالباس",
+  "supermarket": "سوپرمارکت", "off-box": "Off-Box", "food party": "فودپارتی", "group order": "سفارش گروهی"
+};
+for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = window.FF_SERVICES[k];
 
 /* فالکون · پوسته‌ی فارسی — هسته v2
    در main world صفحه اجرا می‌شود و از گیت‌هاب به‌روز می‌شود.
@@ -1076,6 +1272,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     const tr = (s) => { const x = T(s); return x === s ? iso(s) : x; };   // ترجمه یا ایزوله‌ی نام لاتین
     const unit = (u) => ({ s: "ثانیه", m: "دقیقه", h: "ساعت", d: "روز", w: "هفته" }[u.toLowerCase()] || u);
     const mag = (u) => ({ million: "میلیون", billion: "میلیارد", thousand: "هزار" }[u.toLowerCase()] || u);
+    const conf = (x) => ({ low: "پایین", medium: "متوسط", high: "بالا" }[x.toLowerCase()] || x);
     const lvl = (x) => ({ low: "کم", medium: "متوسط", high: "زیاد", critical: "بحرانی" }[x.toLowerCase()] || x);
     const metric = (m) => ({ "cr": "CR", "order rate": "نرخ سفارش", "conversion": "نرخ تبدیل", "e2e cr": "E2E CR", "end-to-end cr": "CR سرتاسری" }[m.toLowerCase()] || m);
     const day = (x) => DAYS[x.toLowerCase()] || x;
@@ -1120,7 +1317,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     r(/^about (.+?) orders$/i, (m, a) => `حدود ${a} سفارش`);
     r(/^between (.+?) (billion|million) toman and (.+?) (billion|million) toman · avg order (.+?) toman$/i,
       (m, a, u, b, u2, c) => `بین ${a} ${mag(u)} و ${b} ${mag(u2)} تومان · میانگین سفارش ${c} تومان`);
-    r(/^usual (.+?) · z (.+?) · confidence (low|medium|high)$/i, (m, a, z, c) => `معمول ${a} · z ${z} · اطمینان ${lvl(c)}`);
+    r(/^usual (.+?) · z (.+?) · confidence (low|medium|high)$/i, (m, a, z, c) => `معمول ${a} · z ${z} · اطمینان ${conf(c)}`);
     r(/^expected (.+?) · at risk (.+)$/i, (m, a, b) => `انتظار ${a} · در خطر ${b}`);
     r(/^normal (.+?) to (.+)$/i, (m, a, b) => `بازه‌ی معمول ${a} تا ${b}`);
     r(/^inside the normal range, nothing at risk$/i, () => "داخل بازه‌ی معمول؛ چیزی در خطر نیست");
@@ -1226,6 +1423,34 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     r(/^([^A-Za-z]+?) to ([^A-Za-z]+)$/, (m, a, b) => `${a} تا ${b}`);
     r(/^([A-Za-z][^,]+?), ([^A-Za-z]+)$/, (m, a, b) => { const A = T(a); return A === a ? null : `${A}، ${b}`; });
     r(/^(.+?) \((.+?)\) vs$/i, (m, a, b) => `${T(a)} (${b}) در برابر`);
+    // ── اثر افزایشی و Cannibalization
+    const SV = (x) => (window.FF_SERVICES || {})[norm(x)] || (/^Service (\d+)$/i.test(x) ? x.replace(/^Service/i, "سرویس") : x);
+    r(/^(.+?) to (.+?): (.+?) users(?:, (.+?) to (.+?) orders per (\d+) days)?$/i, (m, a, b, n, x, y, d) => `از ${SV(a)} به ${SV(b)}: ${n} کاربر` + (x ? `، ${x} تا ${y} سفارش در ${d} روز` : ""));
+    r(/^(.+?), (.+?) user memberships$/i, (m, a, n) => `${SV(a)}، ${n} عضویت کاربر`);
+    r(/^(.+?) added about (.+?) orders to the platform in (\d+) days$/i, (m, a, n, d) => `${tr(a)} حدود ${n} سفارش در ${d} روز به پلتفرم اضافه کرد`);
+    r(/^(.+?) itself took (.+?) orders, so about (\d+) of every (\d+) are new to the platform$/i, (m, a, n, x, y) => `خودِ ${tr(a)} ${n} سفارش گرفت؛ یعنی از هر ${y} سفارش حدود ${x} سفارش برای پلتفرم تازه است`);
+    r(/^The other (\d+) would have been placed anyway$/i, (m, n) => `${n} سفارش دیگر در هر صورت ثبت می‌شد`);
+    r(/^The clearest loss is (.+?): about (.+?) orders fewer, and (\d+) more services? ha(?:ve|s) a clear loss$/i, (m, a, n, k) => `روشن‌ترین زیان مال ${SV(a)} است: حدود ${n} سفارش کمتر؛ و ${k} سرویس دیگر هم زیان روشنی دارند`);
+    r(/^The clearest loss is (.+?): about (.+?) orders fewer$/i, (m, a, n) => `روشن‌ترین زیان مال ${SV(a)} است: حدود ${n} سفارش کمتر`);
+    r(/^It also brought more people to order: about (.+?) more active user-days$/i, (m, n) => `افراد بیشتری را هم به سفارش آورد: حدود ${n} کاربر-روزِ فعالِ بیشتر`);
+    r(/^Randomized experiment, (user|session) level(?:, (high|medium|low) confidence)?$/i, (m, u, c) => `آزمایش تصادفی‌سازی‌شده، در سطح ${u.toLowerCase() === "user" ? "کاربر" : "سشن"}` + (c ? `، اطمینان ${conf(c)}` : ""));
+    r(/^Likely range: (.+?) to (.+?) orders$/i, (m, a, b) => `بازه‌ی محتمل: ${a} تا ${b} سفارش`);
+    r(/^variation (\d+) vs (\d+) \(control\)$/i, (m, a, b) => `واریانت ${a} در برابر ${b} (کنترل)`);
+    r(/^Services add up to (.+?); platform (.+?) \(gap (.+?)\)$/i, (m, a, b, c) => `جمع سرویس‌ها ${a}؛ پلتفرم ${b} (فاصله ${c})`);
+    r(/^Showing the (\d+) largest of (\d+) pairs$/i, (m, a, b) => `${a} جفتِ بزرگ‌تر از ${b} جفت نمایش داده شده`);
+    r(/^Week (\d+) \(from (.+?)\)$/i, (m, n, d) => `هفته‌ی ${n} (از ${d})`);
+    r(/^(\d+) other experiments ran in the same window$/i, (m, n) => `${n} آزمایش دیگر در همین بازه اجرا شد`);
+    r(/^(.+?) of user-days were seen under more than one variation and are left out of both arms$/i, (m, p) => `${p} از کاربر-روزها زیر بیش از یک واریانت دیده شدند و از هر دو گروه کنار گذاشته شدند`);
+    r(/^Starts from (.+?) new-service orders and (.+?) orders without the launch in the selected window$/i, (m, a, b) => `نقطه‌ی شروع: ${a} سفارش سرویس جدید و ${b} سفارش بدون لانچ در بازه‌ی انتخاب‌شده`);
+    r(/^Events with no user_id \(about (.+?) of rows\) cannot be placed in an arm at user level$/i, (m, p) => `رویدادهای بدون user_id (حدود ${p} از ردیف‌ها) در سطح کاربر به هیچ گروهی نسبت داده نمی‌شوند`);
+    r(/^Variation (\d+) is taken as the control group \(the GrowthBook convention\)$/i, (m, n) => `واریانت ${n} گروه کنترل در نظر گرفته شده (قرارداد GrowthBook)`);
+    r(/^What (.+?) means$/i, (m, a) => `${T(a)} یعنی چه؟`);
+    r(/^SE (.+)$/, (m, a) => `خطای معیار ${a}`);
+    // ── CPO
+    r(/^(.+?) orders gained \(about (.+?) (million|billion) toman\)$/i, (m, n, a, u) => `${n} سفارش بیشتر (حدود ${a} ${mag(u)} تومان)`);
+    r(/^(.+?) orders gained$/i, (m, n) => `${n} سفارش بیشتر`);
+    r(/^Entry point ([\w\-]+)$/i, (m, a) => `نقطه‌ی ورود ${iso(a)}`);
+    r(/^([a-z][a-z0-9_\-]+) page$/, (m, a) => `صفحه‌ی ${iso(a)}`);
     r(/^(.+?) sessions lost between (.+?) and (.+)$/i, (m, n, a, b) => `${n} سشن بین ${T(a)} و ${T(b)} از دست رفت`);
     r(/^(.+?) · (high|medium|low|critical)(?: · (.+))?$/i, (m, a, l, rest) => `${tr(a)} · ${lvl(l)}` + (rest ? ` · ${T(rest)}` : ""));
     r(/^(.+?) → (.+)$/, (m, a, b) => { const A = T(a), B = T(b); return A !== a || B !== b ? `${A === a ? iso(a) : A} → ${B === b ? iso(b) : B}` : null; });
@@ -1282,6 +1507,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     }
 
     function faNum(s) {
+      s = s.replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (m) => LRI + m.replace(/\d/g, (x) => FA[x]) + PDI);
       return s.replace(/([+\-−▲▼]\s?)?(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?(\s?(?:%|pp|pt|[KMBk]|x)(?![A-Za-z]))?/g, (m, sign, int, frac, u, off, str) => {
         const prev = str[off - 1] || "";
         if (/[A-Za-z_\/#@:-]/.test(prev) && !(prev === "-" && sign)) return m;   // meal41، v1، w/c، 2026-11-01
@@ -1296,7 +1522,8 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     }
     // علائم نگارشی فارسی وقتی متن فارسی است
     function punct(s) {
-      if (!/[؀-ۿ]/.test(s.replace(/[۰-۹٫٬٪]/g, ""))) return s;
+      const fa = (s.replace(/[۰-۹٫٬٪]/g, "").match(/[؀-ۿ]/g) || []).length, la = (s.match(/[A-Za-z]/g) || []).length;
+      if (!fa || la > fa) return s;
       let o = s.replace(/,(?=\s)/g, "،").replace(/;(?=\s)/g, "؛").replace(/\?(?=\s|$)/g, "؟");
       if (S.rtl) o = o.replace(/→/g, "←");
       return o;
@@ -1322,14 +1549,68 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
       touched.add(node);
       node.nodeValue = val;
     }
+    /* ---- کارت حکم (CPO / CRO): جمله‌ی بلند به ساختار تیتر، آمار، علت و «اول اینجا را ببین» شکسته می‌شود */
+    const VERDICT = /^Conversion is (near|below|above|well below|well above|far below|far above) its usual level: (.+?) against (.+?) usual · (.+?) orders\. (.+?)\. Look first at: (.+) \(([^()]+?) orders\)(?:, plus (\d+) more)?\.?$/i;
+    const vEls = new WeakMap(), vNodes = new Set();
+    const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const num = (x) => (S.digits ? faNum(x) : x);
+    function renderVerdict(node, src) {
+      const m = src.trim().match(VERDICT); if (!m) return false;
+      const [, lv, cur, usual, ord, cause, look, lookN, more] = m;
+      const box = el("span", "ff-verdict");
+      box.setAttribute("data-ff-level", /below/i.test(lv) ? "down" : /above/i.test(lv) ? "up" : "near");
+      box.appendChild(el("span", "ff-v-head", T(`Conversion is ${lv} its usual level`)));
+      const stats = el("span", "ff-v-stats");
+      for (const [k, v] of [["نرخ تبدیل", cur], ["معمول", usual], ["سفارش", ord]]) {
+        const st = el("span", "ff-v-stat"); st.appendChild(el("i", null, k)); st.appendChild(el("b", null, num(v))); stats.appendChild(st);
+      }
+      box.appendChild(stats);
+      box.appendChild(el("span", "ff-v-cause", num(punct(T(cause + ".")))));
+      const lk = el("span", "ff-v-look");
+      lk.appendChild(el("i", null, "اول اینجا را ببین"));
+      lk.appendChild(el("b", null, num(punct(T(look)))));
+      lk.appendChild(el("em", null, num(`${lookN} سفارش`) + (more ? ` · ${num(more)} مورد دیگر` : "")));
+      box.appendChild(lk);
+      const old = vEls.get(node); if (old) old.remove();
+      node.parentElement.insertBefore(box, node.nextSibling);
+      node.parentElement.setAttribute("data-ff-verdict-host", "");
+      vEls.set(node, box); vNodes.add(node);
+      recs.set(node, { src, out: "" }); touched.add(node); node.nodeValue = "";
+      return true;
+    }
+    /* ---- جمع‌آوری متن‌های ترجمه‌نشده (فقط در همین مرورگر، localStorage) */
+    const KEEP = /^(CR|E2E|Close|Cart|Supertype|Gem|Off-Box|Meal|For|One|Eco|Best|Value|RCA|pp|pt|SUPERAPP\w*|PWA|PSA_\w+|Fidilio|IRANCELL|OUTBOX|PROCUREMENT|SABA|Impression|Trino|ClickHouse|CSV|JSON|Markdown|EN|CEO|CPO|CRO|Shapley|MVP|API|SQL|PDP|PLP|VDP|Pro|Synthetic|Cannibalization|GrowthBook|CUPED|WAPE|MAE|SE|Asia|Tehran|Snapp|SnappFood|iOS|Android|Funnel|Incrementality|Retention)$/;
+    const missing = new Map(); let saveT = 0;
+    function noteMissing(out) {
+      if (!S.translate || /^\/shock-monitor/.test(location.pathname)) return;
+      const t = out.replace(/[\u2066-\u2069]/g, "").replace(/\s+/g, " ").trim();
+      if (!t || t.length > 300 || /^[a-z0-9_\-.\/:]+$/i.test(t) && !/\s/.test(t)) return;
+      const words = t.match(/[A-Za-z][A-Za-z'\-]+/g) || [];
+      if (!words.some((w) => !KEEP.test(w) && !/_/.test(w) && !/^[A-Z0-9]+$/.test(w))) return;
+      if (missing.has(t)) return;
+      missing.set(t, location.pathname);
+      clearTimeout(saveT);
+      saveT = setTimeout(() => {
+        try {
+          const prev = JSON.parse(localStorage.getItem("ff-missing") || "{}");
+          for (const [k, v] of missing) prev[k] = v;
+          const keys = Object.keys(prev); if (keys.length > 800) keys.slice(0, keys.length - 800).forEach((k) => delete prev[k]);
+          localStorage.setItem("ff-missing", JSON.stringify(prev));
+        } catch (e) { /* ignore */ }
+      }, 1500);
+    }
+    window.__ffMissing = () => { try { return JSON.parse(localStorage.getItem("ff-missing") || "{}"); } catch (e) { return {}; } };
+
     function processText(node) {
       const p = node.parentElement;
-      if (!p || p.closest(SKIP)) return;
+      if (!p || p.closest(SKIP) || p.closest(".ff-verdict")) return;
       const cur = node.nodeValue, rec = recs.get(node);
       if (rec && cur === rec.out) return;
+      if (S.translate && !p.closest("svg")) { const src0 = rec && cur === "" ? rec.src : cur; if (VERDICT.test(src0.trim()) && renderVerdict(node, src0)) return; }
       const out = transform(cur, p.tagName === "TITLE" ? "title" : !!p.closest("svg"));
       if (out !== cur) { recs.set(node, { src: cur, out }); touched.add(node); node.nodeValue = out; }
       else if (rec) { recs.delete(node); touched.delete(node); }
+      if (/[A-Za-z]{3}/.test(out) && !p.closest("svg,title") && p.offsetParent !== null) noteMissing(out);
     }
     function processAttrs(el) {
       if (!S.translate && !S.digits) return;
@@ -1369,7 +1650,7 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     const joined = new WeakSet();
     function srcOf(n) { const rec = recs.get(n); return rec && n.nodeValue === rec.out ? rec.src : n.nodeValue; }
     function tryJoin(el) {
-      if (!el || el.nodeType !== 1 || !S.translate || el.closest(SKIP) || el.closest("svg")) return false;
+      if (!el || el.nodeType !== 1 || !S.translate || el.closest(SKIP) || el.closest("svg") || el.hasAttribute("data-ff-verdict-host")) return false;
       const kids = [...el.childNodes];
       if (kids.some((c) => c.nodeType === 1)) return false;
       const nodes = kids.filter((c) => c.nodeType === 3);
@@ -1435,6 +1716,8 @@ window.FF_MONTHS = { jan: "ژانویه", feb: "فوریه", mar: "مارس", ap
     function stop() { running = false; mo && mo.disconnect(); }
     function restoreAll() {
       mo && mo.disconnect();
+      for (const n of vNodes) { const b = vEls.get(n); if (b) b.remove(); if (n.parentElement) n.parentElement.removeAttribute("data-ff-verdict-host"); vEls.delete(n); }
+      vNodes.clear();
       for (const n of touched) { const rec = recs.get(n); if (rec && n.isConnected && n.nodeValue === rec.out) n.nodeValue = rec.src; recs.delete(n); }
       touched.clear();
       for (const el of atouched) { const map = arecs.get(el) || {}; for (const a in map) if (el.getAttribute(a) === map[a].out) el.setAttribute(a, map[a].src); arecs.delete(el); }
