@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.3.1 · compat-marker: __fxLoaded */
+/* falcon-farsi core v2.3.2 · compat-marker: __fxLoaded */
 /* فالکون · پوسته‌ی فارسی — فرهنگ واژه‌ها (v2)
    کلید: متن انگلیسی با حروف کوچک و فاصله‌ی یکسان. اصطلاحات جاافتاده (CR، Close Cart، Supertype، Gem، Off-Box،
    Meal For One، Retention، Funnel، RCA، pp/pt، نام پلتفرم‌ها و رویدادها) عمداً انگلیسی می‌مانند. */
@@ -2555,7 +2555,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       const colorOf = (r) => (r.z >= 1.96 ? "var(--ff-c2)" : r.z <= -1.96 ? "var(--ff-c4)" : "var(--ff-line-2)");
       const bars = K.card("اثر درمان روی CR", "واحد درصد نسبت به کنترل؛ رنگ پررنگ فقط وقتی اختلاف معنادار است", K.bars([...rows].sort((a, b) => b.delta - a.delta).map((r) => ({
         label: r.name, value: r.delta || 0, color: colorOf(r),
-        tip: [r.name, `کنترل ${pct(r.ctlCr, 2)} → درمان ${pct(r.cr, 2)}`, `z = ${fa((r.z || 0).toFixed(2))} · ${verdict(r)[0]}`, `${compact(r.sessions)} نشست`],
+        tip: [r.name, `کنترل ${pct(r.ctlCr, 2)} ← درمان ${pct(r.cr, 2)}`, `z = ${fa((r.z || 0).toFixed(2))} · ${verdict(r)[0]}`, `${compact(r.sessions)} نشست`],
       })), { fmt: (v) => pp(v) }), { span: 12 });
       const table = K.card("جزئیات", "روی سرستون‌ها بزنید تا مرتب شود", K.table([
         { key: "name", label: "آزمایش", render: (r) => two(r.name, r.m ? `از ${jalali(r.m.first_day)} · ${fa(Math.round((Date.parse(r.m.last_day) - Date.parse(r.m.first_day)) / 864e5) + 1)} روز` : null) },
