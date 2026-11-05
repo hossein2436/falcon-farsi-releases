@@ -2054,7 +2054,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
     if (attrs) for (const [k, v] of Object.entries(attrs)) {
       if (v == null || v === false) continue;
       if (k === "class") e.className = v;
-      else if (k === "style" && typeof v === "object") Object.assign(e.style, v);
+      else if (k === "style" && typeof v === "object") { for (const [sk, sv] of Object.entries(v)) { if (sk.startsWith("--")) e.style.setProperty(sk, sv); else e.style[sk] = sv; } }
       else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
       else e.setAttribute(k, v === true ? "" : v);
     }
