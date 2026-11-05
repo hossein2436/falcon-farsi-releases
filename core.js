@@ -125,6 +125,29 @@ window.FF_DICT = {
   "conversion": "نرخ تبدیل",
   "valid sessions": "سشن‌های معتبر",
   "valid users": "کاربران معتبر",
+  "overcast": "ابری",
+  "partly cloudy": "نیمه‌ابری",
+  "mostly cloudy": "بیشتر ابری",
+  "cloudy": "ابری",
+  "clear": "صاف",
+  "mostly clear": "بیشتر صاف",
+  "sunny": "آفتابی",
+  "light rain": "باران سبک",
+  "rain": "باران",
+  "heavy rain": "باران شدید",
+  "rain showers": "رگبار",
+  "drizzle": "نم‌نم باران",
+  "thunderstorm": "رعدوبرق",
+  "storm": "طوفان",
+  "snow": "برف",
+  "light snow": "برف سبک",
+  "fog": "مه",
+  "mist": "مه رقیق",
+  "dust": "گردوغبار",
+  "heat": "گرمای شدید",
+  "performing": "عملکرد خوب",
+  "backfill": "پرکردن گذشته",
+  "catch-up": "جبران",
   "revenue": "درآمد",
   "revenue yesterday": "درآمد دیروز",
   "orders yesterday": "سفارش‌های دیروز",
@@ -2136,10 +2159,11 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
         svg.appendChild(s("line", { x1: P.l, x2: W - P.r, y1: y, y2: y, class: "ffd-grid" }));
         svg.appendChild(s("text", { x: P.l - 6, y: y + 4, class: "ffd-axis", "text-anchor": "end" }, (o.yfmt || compact)(v)));
       }
-      for (let i = 0; i <= 4; i++) {
-        const t = x0 + ((x1 - x0) * i) / 4, v = o.logx ? Math.pow(10, t) : t;
+      const xt = o.logx ? Array.from({ length: Math.floor(x1) - Math.ceil(x0) + 1 }, (_, i) => Math.pow(10, Math.ceil(x0) + i)) : [0, 1, 2, 3, 4].map((i) => x0 + ((x1 - x0) * i) / 4);
+      xt.forEach((v) => {
+        svg.appendChild(s("line", { x1: X(v), x2: X(v), y1: P.t, y2: H - P.b, class: "ffd-grid" }));
         svg.appendChild(s("text", { x: X(v), y: H - 18, class: "ffd-axis", "text-anchor": "middle" }, (o.xfmt || compact)(v)));
-      }
+      });
       svg.appendChild(s("line", { x1: P.l, x2: W - P.r, y1: Y(0), y2: Y(0), class: "ffd-zero" }));
       if (o.xlabel) svg.appendChild(s("text", { x: (W + P.l) / 2, y: H - 2, class: "ffd-axis", "text-anchor": "middle" }, o.xlabel));
       if (o.ylabel) svg.appendChild(s("text", { x: P.l, y: 10, class: "ffd-axis", "text-anchor": "start" }, o.ylabel));
@@ -2148,7 +2172,13 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
         if (p.tip) { c.addEventListener("mousemove", (e) => showTip(e, p.tip)); c.addEventListener("mouseleave", hideTip); }
         svg.appendChild(c);
       });
-      points.filter((p) => p.label).forEach((p) => svg.appendChild(s("text", { x: X(p.x), y: Y(p.y) - (p.r || 5) - 4, class: "ffd-pt-l", "text-anchor": "middle" }, p.label)));
+      const placed = [];
+      points.filter((p) => p.label).forEach((p) => {
+        const x = X(p.x), y = Y(p.y) - (p.r || 5) - 4, w = p.label.length * 6 + 6;
+        if (placed.some((q) => Math.abs(q.x - x) < (q.w + w) / 2 && Math.abs(q.y - y) < 14)) return;
+        placed.push({ x, y, w });
+        svg.appendChild(s("text", { x, y, class: "ffd-pt-l", "text-anchor": "middle" }, p.label));
+      });
       return h("div", { class: "ffd-chart" }, o.legend ? h("div", { class: "ffd-legend" }, o.legend.map((l) => h("span", null, h("i", { style: { background: l.color, height: "8px", width: "8px", borderRadius: "50%" } }), l.label))) : null, svg);
     },
     /* جدول مرتب‌شونده */
@@ -2463,7 +2493,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
         { key: "ctlCr", label: "CR کنترل", num: true, render: (r) => pct(r.ctlCr, 2) },
         { key: "cr", label: "CR درمان", num: true, render: (r) => pct(r.cr, 2) },
         { key: "delta", label: "اختلاف", num: true, render: (r) => deltaSpan(r.delta, r.delta > 0, pp(r.delta)) },
-        { key: "z", label: "z", num: true, render: (r) => fa((r.z || 0).toFixed(2)) },
+        { key: "z", label: "z", num: true, render: (r) => "⁦" + (r.z < 0 ? "−" : "") + fa(Math.abs(r.z || 0).toFixed(2)) + "⁩" },
         { key: "zabs", label: "حکم", render: (r) => { const v = verdict(r); return K.badge(v[0], v[1]); } },
       ], rows.map((r) => ({ ...r, zabs: Math.abs(r.z || 0) })), { sort: "zabs" }), { span: 12 });
       return [stats, bars, table];
@@ -2525,17 +2555,19 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       const W = {}; (Array.isArray(wx) ? wx : []).forEach((w) => (W[String(w.city_id)] = w));
       const alertsBy = {}; ((c && c.weather_alerts) || []).forEach((a) => (alertsBy[a.city_name] = a));
       const bench = sg.benchmark_conversion_rate;
-      const segs = (sg.segments || []).filter((x) => x.sessions > 0).map((x) => {
+      const MIN = 3000;
+      const tiny = (sg.segments || []).filter((x) => x.sessions < MIN).length;
+      const segs = (sg.segments || []).filter((x) => x.sessions >= MIN).map((x) => {
         const gapPt = (x.conversion_rate - bench) * 100;
         const trendPt = x.delta != null ? x.delta * 100 : null;
         const w = W[String(x.id)], wa = alertsBy[x.name];
         const risk = Math.max(0, -gapPt) * Math.sqrt(x.traffic_share * 100) + Math.max(0, -(trendPt || 0)) * 2 * Math.sqrt(x.traffic_share * 100) + (wa ? wa.severity / 2 : 0);
         return { ...x, gapPt, trendPt, w, wa, risk };
       });
-      const statusFa = { critical: ["بحرانی", "bad"], needs_action: ["نیازمند اقدام", "warn"], watch: ["زیر نظر", "info"], healthy: ["سالم", "good"], good: ["خوب", "good"] };
+      const statusFa = { critical: ["بحرانی", "bad"], needs_action: ["نیازمند اقدام", "warn"], watch: ["زیر نظر", "info"], healthy: ["سالم", "good"], good: ["خوب", "good"], performing: ["عملکرد خوب", "good"] };
       const st = (s) => statusFa[s] || [tr(s || "—"), "neutral"];
       const crit = segs.filter((x) => x.status === "critical"), need = segs.filter((x) => x.status === "needs_action");
-      const ops = (opp && opp.opportunities) || [];
+      const ops = ((opp && opp.opportunities) || []).filter((o) => o.estimated_upside_sessions > 0);
       const stats = K.card(null, null, K.stats([
         K.stat("شهر بحرانی", fa(crit.length), crit.slice(0, 4).map((x) => x.name).join("، "), crit.length ? "bad" : "good"),
         K.stat("نیازمند اقدام", fa(need.length), need.slice(0, 4).map((x) => x.name).join("، "), need.length ? "warn" : null),
@@ -2545,14 +2577,14 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       ]), { span: 12 });
 
       const top = [...segs].sort((a, b) => b.sessions - a.sessions);
-      const labelSet = new Set([...top.slice(0, 6), ...[...segs].sort((a, b) => b.risk - a.risk).slice(0, 5)].map((x) => x.id));
+      const labelSet = new Set([...top.slice(0, 5), ...[...segs].sort((a, b) => b.risk - a.risk).slice(0, 4)].map((x) => x.id));
       const maxS = Math.max(...segs.map((x) => x.sessions)) || 1;
       const radar = K.card("رادار", "افقی: سهم ترافیک (لگاریتمی) · عمودی: فاصله با میانگین شبکه به واحد درصد · اندازه: حجم نشست", K.scatter(segs.map((x) => ({
         x: x.traffic_share * 100, y: x.gapPt, r: 3 + Math.sqrt(x.sessions / maxS) * 14,
         color: x.status === "critical" ? "var(--ff-c4)" : x.status === "needs_action" ? "var(--ff-c3)" : "var(--ff-c1)",
         label: labelSet.has(x.id) ? x.name : null,
         tip: [`${x.name} · ${x.province || ""}`, `CR ${pct(x.conversion_rate, 2)} (${pp(x.gapPt)} نسبت به شبکه)`, x.trendPt != null ? `روند: ${pp(x.trendPt)} نسبت به دوره‌ی قبل` : "", `${pct(x.traffic_share, 2)} از ترافیک`, x.w ? `${fa(Math.round(x.w.temp_c))}° · ${tr(x.w.condition)}` : "", st(x.status)[0]].filter(Boolean),
-      })), { logx: true, xfmt: (v) => fa(v < 1 ? v.toFixed(1) : Math.round(v)) + "٪", yfmt: (v) => fa(v.toFixed(1)), label: "رادار ریسک شهرها", legend: [{ label: "بحرانی", color: "var(--ff-c4)" }, { label: "نیازمند اقدام", color: "var(--ff-c3)" }, { label: "دیگر شهرها", color: "var(--ff-c1)" }] }), { span: 8 });
+      })), { logx: true, xfmt: (v) => fa(v < 1 ? String(+v.toFixed(2)) : Math.round(v)) + "٪", yfmt: (v) => fa(v.toFixed(1)), label: "رادار ریسک شهرها", legend: [{ label: "بحرانی", color: "var(--ff-c4)" }, { label: "نیازمند اقدام", color: "var(--ff-c3)" }, { label: "دیگر شهرها", color: "var(--ff-c1)" }] }), { span: 8 });
 
       const oppC = K.card("بیشترین فرصت", "سبد بسته‌شده‌ی اضافه اگر شهر به میانگین شبکه برسد", K.bars(ops.map((o) => ({ label: o.name, value: o.estimated_upside_sessions, color: "var(--ff-c2)", tip: [o.name, `CR ${pct(o.current_conversion_rate, 2)} در برابر ${pct(o.benchmark_conversion_rate, 2)}`, `امتیاز فرصت: ${fa(o.opportunity_score)}`] })), { fmt: num }), { span: 4 });
 
@@ -2565,7 +2597,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
         { key: "temp", label: "آب‌وهوا", render: (r) => (r.wa ? K.badge(`${tr(r.wa.condition)} · ${fa(Math.round(r.wa.temp_c))}°`, "warn") : r.w ? `${fa(Math.round(r.w.temp_c))}° · ${tr(r.w.condition)}` : "—") },
         { key: "risk", label: "وضعیت", render: (r) => { const s = st(r.status); return K.badge(s[0], s[1]); } },
       ], segs.map((x) => ({ ...x, temp: x.w ? x.w.temp_c : -99 })), { sort: "risk", limit: 30 }), { span: 12 });
-      return [stats, radar, oppC, table];
+      return [stats, radar, oppC, table, K.note(`${fa(tiny)} شهر با کمتر از ${fa("3,000")} نشست در این دوره کنار گذاشته شده‌اند؛ نرخ تبدیلِ حجم‌های خیلی کم بیشتر نوسان است تا ریسک.`)];
     },
   });
 
