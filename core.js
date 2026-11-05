@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.1.0 */
+/* falcon-farsi core v2.1.0 · compat-marker: __fxLoaded */
 /* فالکون · پوسته‌ی فارسی — فرهنگ واژه‌ها (v2)
    کلید: متن انگلیسی با حروف کوچک و فاصله‌ی یکسان. اصطلاحات جاافتاده (CR، Close Cart، Supertype، Gem، Off-Box،
    Meal For One، Retention، Funnel، RCA، pp/pt، نام پلتفرم‌ها و رویدادها) عمداً انگلیسی می‌مانند. */
