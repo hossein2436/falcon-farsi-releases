@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.3.2 · compat-marker: __fxLoaded */
+/* falcon-farsi core v2.4.0 · compat-marker: __fxLoaded */
 /* فالکون · پوسته‌ی فارسی — فرهنگ واژه‌ها (v2)
    کلید: متن انگلیسی با حروف کوچک و فاصله‌ی یکسان. اصطلاحات جاافتاده (CR، Close Cart، Supertype، Gem، Off-Box،
    Meal For One، Retention، Funnel، RCA، pp/pt، نام پلتفرم‌ها و رویدادها) عمداً انگلیسی می‌مانند. */
@@ -125,6 +125,76 @@ window.FF_DICT = {
   "conversion": "نرخ تبدیل",
   "valid sessions": "سشن‌های معتبر",
   "valid users": "کاربران معتبر",
+  "orders each cell gained or lost from its own conversion change": "سفارشی که هر خانه از تغییر نرخ تبدیل خودش به دست آورده یا از دست داده",
+  "click a cell for its steps": "برای دیدن گام‌ها روی خانه بزنید",
+  "finished days only": "فقط روزهای تمام‌شده",
+  "the button runs that check now": "این دکمه همین بررسی را الان اجرا می‌کند",
+  "pale bar = share of sessions, solid bar = share of orders": "میله‌ی کم‌رنگ = سهم سشن، میله‌ی پررنگ = سهم سفارش",
+  "act": "اقدام",
+  "volume & cr trends": "روند حجم و CR",
+  "definitions & formulas": "تعریف‌ها و فرمول‌ها",
+  "traffic mix between journeys": "ترکیب ترافیک میان مسیرها",
+  "traffic mix": "ترکیب ترافیک",
+  "journeys (": "مسیرها (",
+  "all journeys together. the conversion change split over the four steps with shapley values, in orders on the day's traffic; the parts add up to the total.": "همه‌ی مسیرها با هم. تغییر نرخ تبدیل با مقادیر Shapley میان چهار گام تقسیم شده، به سفارش و روی ترافیک همان روز؛ جمع بخش‌ها برابر کل است.",
+  "mix and rate: mix = sessions moved between journeys at their baseline conversion; rate = journeys converting differently. both add up to the change.": "ترکیب و نرخ: «ترکیب» یعنی سشن‌هایی که با نرخ تبدیل مبنای خود میان مسیرها جابه‌جا شده‌اند؛ «نرخ» یعنی مسیرهایی که متفاوت تبدیل کرده‌اند. جمع این دو برابر کل تغییر است.",
+  "bars = impression volume · line = end-to-end cr. peak hour highlighted.": "میله‌ها = حجم Impression · خط = CR سرتاسری. ساعت اوج پررنگ شده.",
+  "ranked by order rate (cr rank). order rate = close-cart sessions / sessions of that platform.": "به ترتیب نرخ سفارش (رتبه‌ی CR). نرخ سفارش = سشن‌های Close Cart / سشن‌های همان پلتفرم.",
+  "order rate = close-cart sessions / all sessions of that channel, not the overall cr (which divides by valid sessions). a session that changes channel is counted under each, and users are summed per day, so do not add sessions or users across channels.": "نرخ سفارش = سشن‌های Close Cart / همه‌ی سشن‌های همان کانال؛ با CR کلی (که بر سشن‌های معتبر تقسیم می‌شود) فرق دارد. سشنی که کانال عوض کند زیر هر دو کانال شمرده می‌شود و کاربرها روزانه جمع زده می‌شوند، پس سشن یا کاربر کانال‌ها را با هم جمع نزنید.",
+  "opportunity score = traffic share × conversion gap × confidence. upside is an estimate of extra close-cart sessions if the segment reached the benchmark cr over this period.": "امتیاز فرصت = سهم ترافیک × فاصله‌ی نرخ تبدیل × اطمینان. «ظرفیت رشد» برآورد سشن‌های Close Cart اضافه است اگر این بخش در این دوره به CR مبنا می‌رسید.",
+  "meal for one sheet": "شیت Meal For One",
+  "not since this was added": "از زمان افزودن، هنوز نه",
+  "the next complete day shows here": "روز کامل بعدی اینجا نشان داده می‌شود",
+  "days the source has no data for. no worker pulls them until you start them again (for example when the data team says the table is fixed). stored data for these days is kept.": "روزهایی که منبع برایشان داده ندارد. تا دوباره راهشان نیندازید هیچ کارگری سراغشان نمی‌رود (مثلاً وقتی تیم داده بگوید جدول درست شده). داده‌ی ذخیره‌شده‌ی این روزها حفظ می‌شود.",
+  "selected again": "دوباره انتخاب شد",
+  "thin source day, kept (flagged)": "روز کم‌داده‌ی منبع، نگه داشته شد (علامت‌دار)",
+  "not settled yet (may lack the end of the day)": "هنوز قطعی نشده (شاید انتهای روز را نداشته باشد)",
+  "one query for": "یک کوئری برای",
+  ". now runs them all.": ". حالا همه را با هم اجرا می‌کند.",
+  "party funnels": "قیف‌های پارتی",
+  "overall funnel, platforms and cities": "قیف کل، پلتفرم‌ها و شهرها",
+  "entry points: by city, by platform, off-box revenue": "نقاط ورود: به تفکیک شهر، به تفکیک پلتفرم، درآمد Off-Box",
+  "best value funnel and revenue": "قیف و درآمد Best Value",
+  "orders, revenue and experiments": "سفارش، درآمد و آزمایش‌ها",
+  "overall funnel, platform (daily), city (daily)": "قیف کل، پلتفرم (روزانه)، شهر (روزانه)",
+  "mixed entry point, platform x entry point, off-box revenue": "نقطه‌ی ورود ترکیبی، پلتفرم × نقطه‌ی ورود، درآمد Off-Box",
+  "best value, best value revenue": "Best Value، درآمد Best Value",
+  "party home funnel, party non-home funnel, party super app funnel": "قیف پارتی در خانه، قیف پارتی بیرون از خانه، قیف پارتی سوپراپ",
+  "orders and revenue, meal for one revenue, eco revenue, party revenue, gem revenue, experiments": "سفارش و درآمد، درآمد Meal For One، درآمد Eco، درآمد پارتی، درآمد Gem، آزمایش‌ها",
+  "interrupted (process stopped)": "قطع شد (فرایند متوقف شد)",
+  "no error": "بدون خطا",
+  "it did not measurably change how many people order: the gain comes from orders, not from new buyers.": "تعداد سفارش‌دهنده‌ها را به‌شکل قابل‌اندازه‌گیری تغییر نداد: رشد از سفارش بیشتر آمده، نه از خریدار تازه.",
+  "syncing…": "در حال همگام‌سازی…",
+  "syncing...": "در حال همگام‌سازی…",
+  "forecast (prediction)": "پیش‌بینی",
+  "forecast band": "بازه‌ی پیش‌بینی",
+  "forecasted incremental (assumes lift holds)": "افزایشی پیش‌بینی‌شده (با فرض ماندگاری اثر)",
+  "at usual": "در حد معمول",
+  "not yet": "هنوز نه",
+  "start investigating": "شروع بررسی",
+  "open in journey rca": "باز کردن در RCA مسیرها",
+  "what people will do about this alert, by when. done actions are measured in the action tracker.": "چه کسی تا کی درباره‌ی این هشدار چه می‌کند. اقدام‌های انجام‌شده در ردیاب اقدام‌ها سنجیده می‌شوند.",
+  "who was told": "به چه کسانی خبر داده شد",
+  "owners of this funnel whose severity threshold the alert reached.": "مالکان این قیف که هشدار به آستانه‌ی شدتِ موردنظرشان رسیده است.",
+  "nobody. no owner of this funnel has a severity threshold this alert reaches.": "هیچ‌کس. آستانه‌ی شدت هیچ‌کدام از مالکان این قیف به این هشدار نمی‌رسد.",
+  "every step of this alert, oldest first.": "همه‌ی مرحله‌های این هشدار، از قدیمی‌ترین.",
+  "alert opened": "هشدار باز شد",
+  "this is a statistical deviation from the metric's own recent average. it says where to look. it is not a confirmed cause.": "این یک انحراف آماری از میانگین اخیر خود معیار است. می‌گوید کجا را نگاه کنید، نه اینکه علت قطعی چیست.",
+  "where the customers were lost": "مشتری‌ها کجا از دست رفتند",
+  "each funnel step on the judged day against its usual rate for that weekday. lost orders: how many more orders the day would have had if only that step had been at its usual rate.": "هر گام قیف در روز بررسی‌شده، در برابر نرخ معمولش در همان روز هفته. سفارش ازدست‌رفته: اگر فقط همین گام در نرخ معمولش بود، آن روز چند سفارش بیشتر داشت.",
+  "this alert comes from journey rca: open it there for the step split, the platform x journey matrix and the changes logged around the day.": "این هشدار از RCA مسیرها آمده: برای تفکیک گام‌ها، ماتریس پلتفرم × مسیر و تغییرهای ثبت‌شده در حوالی آن روز، آنجا بازش کنید.",
+  "falcon · conversion & behavioral intelligence": "فالکون · هوش تبدیل و رفتار کاربر",
+  "see where customers drop": "ببینید مشتری کجا ریزش می‌کند",
+  "and win the order back": "و سفارش را پس بگیرید",
+  "welcome back!": "خوش برگشتید!",
+  "log in": "ورود",
+  "to follow conversion across the customer journey.": "تا نرخ تبدیل را در سراسر سفر مشتری دنبال کنید.",
+  "no account yet?": "هنوز حساب ندارید؟",
+  "ask an administrator for access.": "از یک ادمین دسترسی بخواهید.",
+  "signing in…": "در حال ورود…",
+  "below the normal range: a real drop, not everyday swing.": "پایین‌تر از بازه‌ی عادی: افت واقعی است، نه نوسان روزمره.",
+  "above the normal range: a real rise, not everyday swing.": "بالاتر از بازه‌ی عادی: رشد واقعی است، نه نوسان روزمره.",
+  "inside the normal range: everyday swing.": "داخل بازه‌ی عادی: نوسان روزمره.",
   "observed pre and post windows": "مقایسه‌ی مشاهده‌ای پیش و پس",
   "observed count": "شمارش مشاهده‌شده",
   "supertype icon on home": "آیکون سوپرتایپ در خانه",
@@ -1395,6 +1465,47 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       const L = { near: "نزدیک سطح معمول است", below: "پایین‌تر از سطح معمول است", above: "بالاتر از سطح معمول است", "well below": "خیلی پایین‌تر از سطح معمول است", "well above": "خیلی بالاتر از سطح معمول است", "far below": "خیلی پایین‌تر از سطح معمول است", "far above": "خیلی بالاتر از سطح معمول است" }[l.toLowerCase()];
       return `نرخ تبدیل ${L}` + (rest ? `: ${T(rest)}` : "");
     });
+    // سربرگ حکم (نسخه‌ی جدید فالکون: fell/rose)
+    r(/^Conversion (fell|rose|dropped|grew) (.+?) points?$/i, (m, k, a) => `نرخ تبدیل ${a} واحد ${/fell|dropped/i.test(k) ? "افت کرد" : "بالا رفت"}`);
+    r(/^(.+?) against (.+?) usual · (.+?) orders · about (.+?) (short|ahead|over|extra|above|below)$/i,
+      (m, a, b, c, d, k) => `${a} در برابر ${b} معمول · ${c} سفارش · حدود ${d} سفارش ${/short|below/i.test(k) ? "کمتر از انتظار" : "بیشتر از انتظار"}`);
+    r(/^The (drop|rise) comes from (.+?): together about (.+?) of the (.+?) orders (short|extra|ahead|over)\.?$/i, (m, k, list, a, b, w) => {
+      const items = []; const re = /\s*(?:and\s+|,\s*)?([^,()]+?) \(([^()]*)\)/g; let x;
+      while ((x = re.exec(list))) items.push(`${tr(x[1].replace(/^and\s+/i, "").trim())} (${orders(x[2].replace(/ pt/g, " واحد"))})`);
+      if (!items.length) return null;
+      const joined = items.length > 1 ? items.slice(0, -1).join("، ") + " و " + items[items.length - 1] : items[0];
+      return `${k.toLowerCase() === "drop" ? "افت" : "رشد"} از ${joined} است؛ روی هم حدود ${a} از ${b} سفارشِ ${/short/i.test(w) ? "کمبود" : "اضافه"}`;
+    });
+    r(/^(.+?) converts (below|above) its usual level \((.+?) orders\)(?:, plus (\d+) more)?$/i, (m, a, k, n, more) => `${tr(a)} ${k.toLowerCase() === "below" ? "پایین‌تر" : "بالاتر"} از سطح معمولش تبدیل می‌کند (${n} سفارش)` + (more ? `، و ${more} مورد دیگر` : ""));
+    r(/^Platform (\S+)$/i, (m, a) => `پلتفرم ${a}`);
+    r(/^vs avg of last (\d+) (Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days$/i, (m, n, x) => `در برابر میانگین ${n} ${day(x.slice(0, 3))}ِ گذشته`);
+    r(/^vs (?:the )?same time (yesterday|last week)$/i, (m, x) => `در برابر همین ساعت ${x.toLowerCase() === "yesterday" ? "دیروز" : "هفته‌ی قبل"}`);
+    r(/^real (drop|rise|gain), about (.+?) (billion|million) toman (at risk|gained|ahead)$/i, (m, k, a, u, w) => `${k.toLowerCase() === "drop" ? "افت" : "رشد"} واقعی، حدود ${a} ${mag(u)} تومان ${/risk/i.test(w) ? "در خطر" : "اضافه"}`);
+    r(/^a real move, (low|medium|high) confidence$/i, (m, c) => `حرکت واقعی، اطمینان ${conf(c)}`);
+    r(/^· dust (.+?) µg\/m³$/i, (m, a) => `· گردوغبار ${a} µg/m³`);
+    // قیف، Meal For One، RCA مسیرها
+    r(/^(.+?) on (\d{4}-\d{2}-\d{2}|.+?\d{4}) was (.+?)% (below|above) its baseline \(z=(.+?)\)\.?$/i, (m, k, dt, n, w, z) => `${T(k)} در ${dt} ${n}% ${w.toLowerCase() === "below" ? "پایین‌تر" : "بالاتر"} از خط مبنا بود (z=${z})`);
+    r(/^(.+?) is missing or still filling \(sessions under (\d+)% of a usual day\); showing (.+?)\.?$/i, (m, a, n, b) => `${a} هنوز نیامده یا در حال پر شدن است (سشن‌ها کمتر از ${n}% یک روز معمول)؛ ${b} نشان داده می‌شود`);
+    r(/^Sessions moved toward (stronger|weaker) journeys, mostly (.+?) \((more|fewer) sessions\) and (.+?) \((more|fewer) sessions\)\.?$/i,
+      (m, k, a, x, b, y) => `سشن‌ها به سمت مسیرهای ${k.toLowerCase() === "stronger" ? "قوی‌تر" : "ضعیف‌تر"} رفتند، بیشتر ${tr(a)} (سشن ${x.toLowerCase() === "more" ? "بیشتر" : "کمتر"}) و ${tr(b)} (سشن ${y.toLowerCase() === "more" ? "بیشتر" : "کمتر"})`);
+    r(/^Strong colou?r = significant; pale = within normal; empty = under (.+?) sessions$/i, (m, n) => `رنگ پررنگ = معنادار؛ کم‌رنگ = در حد معمول؛ خالی = کمتر از ${n} سشن`);
+    r(/^(.+ (?:on|in a) .+|.+, from .+) \(([^()]+)\)$/i, (m, a, b) => { const ta = T(a); return ta === a ? null : `${ta} (${T(b)})`; });
+    // اثر افزایشی
+    r(/^(.+?) shows no measurable effect on the platform's orders in (\d+) days?\.?$/i, (m, a, n) => `${tr(a)} در ${n} روز اثر قابل‌اندازه‌گیری روی سفارش‌های پلتفرم نشان نمی‌دهد`);
+    r(/^The estimate is (minus |plus )?(.+?) orders, but the likely range runs from (minus |plus )?(.+?) to (minus |plus )?(.+?) and includes zero\.?$/i, (m, s1, a, s2, b, s3, c) => {
+      const sg = (x) => (x && /minus/i.test(x) ? "منفی " : "");
+      return `برآورد ${sg(s1)}${a} سفارش است، اما بازه‌ی محتمل از ${sg(s2)}${b} تا ${sg(s3)}${c} است و صفر را هم در بر می‌گیرد.`;
+    });
+    r(/^(.+?) itself took (.+?) orders\. The data cannot yet tell them apart from orders that would have been placed anyway\.?$/i, (m, a, n) => `خود ${tr(a)} ${n} سفارش گرفت. داده هنوز نمی‌تواند این‌ها را از سفارش‌هایی که در هر صورت ثبت می‌شدند جدا کند`);
+    r(/^Fewer than (\d+) days: weekday effects are not averaged out\.?$/i, (m, n) => `کمتر از ${n} روز: اثر روزهای هفته هنوز میانگین‌گیری نشده است`);
+    // کانال‌های ورود، هشدار، ادمین
+    r(/^The x under orders is orders share \/ sessions share: above (\d+) the channel converts better than average$/i, (m, n) => `عدد x زیر سفارش‌ها = سهم سفارش / سهم سشن؛ بالای ${n} یعنی کانال بهتر از میانگین تبدیل می‌کند`);
+    r(/^The grey band is the range the rule allows around the same weekday, last (\d+) weeks$/i, (m, n) => `نوار خاکستری بازه‌ای است که قانون حول همان روز هفته در ${n} هفته‌ی اخیر مجاز می‌داند`);
+    r(/^Only complete days are sent, every (\d+) (min|h)(?:ours?)? by itself$/i, (m, n, u) => `فقط روزهای کامل فرستاده می‌شوند، خودکار هر ${n} ${/h/i.test(u) ? "ساعت" : "دقیقه"}`);
+    r(/^(.+) \((\d+) in 1\)$/i, (m, a, n) => `${T(a)} (${n} در ۱)`);
+    r(/^· done in ~(.+?) (h|m|d|min)$/i, (m, a, u) => `· پایان در حدود ${a} ${unit(u.charAt(0))}`);
+    r(/^no rows for: (.+)$/i, (m, a) => `بدون ردیف برای: ${a.split(/,\s*/).map((x) => tr(x)).join("، ")}`);
+    r(/^(.+), automatically$/i, (m, a) => `${T(a)}، خودکار`);
     r(/^(.+?) against (.+?) usual · (.+?) orders$/i, (m, a, b, c) => `${a} در برابر ${b} معمول · ${c} سفارش`);
     r(/^(CR|Order rate|Conversion|E2E CR|End-to-End CR) (.+?) against (.+?) usual \((.+?) points? (lower|higher), (.+?) sessions\)$/i,
       (m, k, a, b, c, dir, n) => `${metric(k)} ${a} در برابر ${b} معمول (${c} واحد ${dir.toLowerCase() === "lower" ? "کمتر" : "بیشتر"}، ${n} سشن)`);
@@ -1664,18 +1775,20 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       node.nodeValue = val;
     }
     /* ---- کارت حکم (CPO / CRO): جمله‌ی بلند به ساختار تیتر، آمار، علت و «اول اینجا را ببین» شکسته می‌شود */
-    const VERDICT = /^Conversion is (near|below|above|well below|well above|far below|far above) its usual level: (.+?) against (.+?) usual · (.+?) orders\. (.+?)\. Look first at: (.+) \(([^()]+?) orders\)(?:, plus (\d+) more)?\.?$/i;
+    const VERDICT = /^(Conversion (?:is (?:near|below|above|well below|well above|far below|far above) its usual level|(?:fell|rose|dropped|grew) .+? points?)): (.+?) against (.+?) usual · (.+?) orders(?: · about (.+?) (short|ahead|over|extra))?\. (.+?)\. Look first at: (.+) \(([^()]+?) orders\)(?:, plus (\d+) more)?\.?$/i;
     const vEls = new WeakMap(), vNodes = new Set();
     const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
     const num = (x) => (S.digits ? faNum(x) : x);
     function renderVerdict(node, src) {
       const m = src.trim().match(VERDICT); if (!m) return false;
-      const [, lv, cur, usual, ord, cause, look, lookN, more] = m;
+      const [, head, cur, usual, ord, gapN, gapK, cause, look, lookN, more] = m;
       const box = el("span", "ff-verdict");
-      box.setAttribute("data-ff-level", /below/i.test(lv) ? "down" : /above/i.test(lv) ? "up" : "near");
-      box.appendChild(el("span", "ff-v-head", T(`Conversion is ${lv} its usual level`)));
+      box.setAttribute("data-ff-level", /below|fell|dropped/i.test(head) ? "down" : /above|rose|grew/i.test(head) ? "up" : "near");
+      box.appendChild(el("span", "ff-v-head", num(T(head))));
       const stats = el("span", "ff-v-stats");
-      for (const [k, v] of [["نرخ تبدیل", cur], ["معمول", usual], ["سفارش", ord]]) {
+      const sv = [["نرخ تبدیل", cur], ["معمول", usual], ["سفارش", ord]];
+      if (gapN) sv.push([/short/i.test(gapK) ? "کمتر از انتظار" : "بیشتر از انتظار", `حدود ${gapN}`]);
+      for (const [k, v] of sv) {
         const st = el("span", "ff-v-stat"); st.appendChild(el("i", null, k)); st.appendChild(el("b", null, num(v))); stats.appendChild(st);
       }
       box.appendChild(stats);
@@ -2555,7 +2668,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       const colorOf = (r) => (r.z >= 1.96 ? "var(--ff-c2)" : r.z <= -1.96 ? "var(--ff-c4)" : "var(--ff-line-2)");
       const bars = K.card("اثر درمان روی CR", "واحد درصد نسبت به کنترل؛ رنگ پررنگ فقط وقتی اختلاف معنادار است", K.bars([...rows].sort((a, b) => b.delta - a.delta).map((r) => ({
         label: r.name, value: r.delta || 0, color: colorOf(r),
-        tip: [r.name, `کنترل ${pct(r.ctlCr, 2)} → درمان ${pct(r.cr, 2)}`, `z = ${fa((r.z || 0).toFixed(2))} · ${verdict(r)[0]}`, `${compact(r.sessions)} نشست`],
+        tip: [r.name, `کنترل ${pct(r.ctlCr, 2)} ← درمان ${pct(r.cr, 2)}`, `z = ${fa((r.z || 0).toFixed(2))} · ${verdict(r)[0]}`, `${compact(r.sessions)} نشست`],
       })), { fmt: (v) => pp(v) }), { span: 12 });
       const table = K.card("جزئیات", "روی سرستون‌ها بزنید تا مرتب شود", K.table([
         { key: "name", label: "آزمایش", render: (r) => two(r.name, r.m ? `از ${jalali(r.m.first_day)} · ${fa(Math.round((Date.parse(r.m.last_day) - Date.parse(r.m.first_day)) / 864e5) + 1)} روز` : null) },
