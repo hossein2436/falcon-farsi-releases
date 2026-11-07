@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.4.0 · compat-marker: __fxLoaded */
+/* falcon-farsi core v2.5.0 · compat-marker: __fxLoaded */
 /* فالکون · پوسته‌ی فارسی — فرهنگ واژه‌ها (v2)
    کلید: متن انگلیسی با حروف کوچک و فاصله‌ی یکسان. اصطلاحات جاافتاده (CR، Close Cart، Supertype، Gem، Off-Box،
    Meal For One، Retention، Funnel، RCA، pp/pt، نام پلتفرم‌ها و رویدادها) عمداً انگلیسی می‌مانند. */
@@ -125,6 +125,8 @@ window.FF_DICT = {
   "conversion": "نرخ تبدیل",
   "valid sessions": "سشن‌های معتبر",
   "valid users": "کاربران معتبر",
+  "close ✕": "بستن ✕",
+  "✕ close": "✕ بستن",
   "orders each cell gained or lost from its own conversion change": "سفارشی که هر خانه از تغییر نرخ تبدیل خودش به دست آورده یا از دست داده",
   "click a cell for its steps": "برای دیدن گام‌ها روی خانه بزنید",
   "finished days only": "فقط روزهای تمام‌شده",
@@ -2187,7 +2189,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
   async function api(path, ttl = 300000) {
     const hit = cache.get(path);
     if (hit && Date.now() - hit.t < ttl) return hit.p;
-    const p = fetch(path, { credentials: "same-origin", headers: { Accept: "application/json" } }).then(async (r) => {
+    const p = fetch(path, { credentials: "same-origin", headers: { Accept: "application/json" }, __ff: 1 }).then(async (r) => {
       if (r.status === 401 || r.status === 403) throw Object.assign(new Error("دسترسی به این داده را ندارید"), { code: r.status });
       if (!r.ok) throw new Error(`پاسخ سرور ${fa(r.status)} بود`);
       return r.json();
@@ -2911,4 +2913,208 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       return out;
     },
   });
+})();
+
+/* فالکون · پوسته‌ی فارسی — «کارت حکم» مرکز کنترل
+   به‌جای چیدن دوباره‌ی DOM فالکون، کارت را از داده‌ی خود API می‌سازد؛ برای هر سه نقش
+   (CEO / CPO / CRO) و برای پنجره‌ی «جمع‌بندی» یک ساختار واحد، با چیدمان پاسخ‌گو (container query). */
+(() => {
+  if (window.__ffHeroLoaded) return;
+  window.__ffHeroLoaded = true;
+  const core = window.__ffCore, D = window.__ffDash;
+  if (!core || !D) return;
+  const { h } = D;
+  const { fa, num, compact, pct, jalali } = D.fmt;
+  const S = () => core.settings() || {};
+  const T = (x) => core.T(String(x == null ? "" : x));
+
+  /* ------------------------------------------------ ۱) داده: همان پاسخی که خود فالکون گرفته */
+  let data = null, fallbackAt = 0;
+  const ofetch = window.fetch;
+  window.fetch = function (input, init) {
+    const p = ofetch.apply(this, arguments);
+    try {
+      const url = typeof input === "string" ? input : input && input.url;
+      if (url && /\/api\/v1\/control-center(\?|$)/.test(url) && !(init && init.__ff)) {
+        p.then((r) => (r.ok ? r.clone().json() : null)).then((j) => { if (j && j.verdict) { data = j; schedule(); } }).catch(() => {});
+      }
+    } catch (e) { /* هیچ‌وقت نباید درخواست فالکون را خراب کند */ }
+    return p;
+  };
+  function ensureData() {
+    if (data || Date.now() - fallbackAt < 60000) return;
+    fallbackAt = Date.now();
+    ofetch("/api/v1/control-center", { credentials: "same-origin", headers: { Accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.verdict && !data) { data = j; schedule(); } }).catch(() => {});
+  }
+
+  /* ------------------------------------------------ ۲) کمکی‌ها */
+  const LRI = "⁦", PDI = "⁩";
+  const iso = (x) => LRI + x + PDI;
+  const STATUS = {
+    act: { label: "اقدام", tone: "bad", ico: "■", hint: "افت واقعی؛ کسی باید همین امروز پیگیری کند" },
+    watch: { label: "زیر نظر", tone: "warn", ico: "▲", hint: "نزدیک مرز معمول؛ ارزش دنبال کردن دارد" },
+    healthy: { label: "سالم", tone: "good", ico: "●", hint: "همه‌چیز داخل بازه‌ی معمول است" },
+  };
+  const st = (s) => STATUS[String(s || "").toLowerCase()] || STATUS[/act|crit|bad/i.test(s) ? "act" : /watch|warn/i.test(s) ? "watch" : "healthy"];
+  const CONF = { low: "پایین", medium: "متوسط", high: "بالا" };
+  const kNum = (x) => { const m = String(x).replace(/,/g, "").match(/^([\d.]+)([KMB])?$/i); if (!m) return NaN; return +m[1] * ({ K: 1e3, M: 1e6, B: 1e9 }[(m[2] || "").toUpperCase()] || 1); };
+  const signedPt = (v, d = 1) => (v == null || isNaN(v) ? "—" : iso((v > 0 ? "+" : v < 0 ? "−" : "") + fa(Math.abs(v).toFixed(d))) + " واحد");
+  const signedK = (v) => (v == null || isNaN(v) ? "—" : iso((v > 0 ? "+" : v < 0 ? "−" : "") + compact(Math.abs(v))));
+  const toman = (v) => {
+    if (v == null || isNaN(v) || !v) return null;
+    const a = Math.abs(v);
+    if (a >= 1e12) return `${fa((v / 1e12).toFixed(2))} هزار میلیارد تومان`;
+    if (a >= 1e9) return `${fa((v / 1e9).toFixed(a >= 1e11 ? 0 : 1))} میلیارد تومان`;
+    return `${fa((v / 1e6).toFixed(0))} میلیون تومان`;
+  };
+  const dayLabel = (d) => { if (!d) return ""; try { const w = new Date(d + "T12:00:00").toLocaleDateString("fa-IR", { weekday: "long" }); return `${w} ${jalali(d)}`; } catch (e) { return jalali(d); } };
+
+  /* علت را از جمله‌ی انگلیسی خود API بیرون می‌کشیم: شهر/بخش، واحد درصد، سفارش */
+  function parseReason(reason) {
+    const out = { dir: null, items: [], together: null, of: null };
+    if (!reason) return out;
+    const head = reason.match(/^The (drop|rise) comes from (.+?)(?:: together about (.+?) of the (.+?) orders (?:short|extra|ahead|over))?\.?$/i);
+    if (!head) return out;
+    out.dir = head[1].toLowerCase();
+    out.together = head[3] || null; out.of = head[4] || null;
+    const re = /\s*(?:and\s+|,\s*)?([^,()]+?) \(([-+−]?[\d.]+) pt(?:, about ([\d.,]+[KMB]?) orders)?\)/gi;
+    let m;
+    while ((m = re.exec(head[2]))) out.items.push({ name: m[1].replace(/^and\s+/i, "").trim(), pt: parseFloat(m[2].replace("−", "-")), orders: m[3] ? kNum(m[3]) : null, ordersTxt: m[3] || null });
+    return out;
+  }
+
+  /* ------------------------------------------------ ۳) ساخت کارت */
+  function build(d, variant) {
+    const v = d.verdict || {}, hd = d.headline || {}, s = st(d.status);
+    const showKpis = variant === "cpo" || variant === "modal";
+    const why = parseReason(v.reason);
+    const down = (hd.delta_pt != null ? hd.delta_pt < 0 : why.dir === "drop");
+
+    const root = h("section", { class: "ffh", "data-status": s.tone, "data-variant": variant, "data-ff-owned": "" });
+
+    /* سربرگ: وضعیت + روز */
+    root.appendChild(h("header", { class: "ffh-top" },
+      h("span", { class: "ffh-pill", title: s.hint }, h("i", { "aria-hidden": "true" }, s.ico), s.label),
+      h("span", { class: "ffh-kicker" }, hd.day ? `حکم ${dayLabel(hd.day)}` : "حکم دیروز"),
+      hd.confidence ? h("span", { class: "ffh-conf" }, `اطمینان ${CONF[String(hd.confidence).toLowerCase()] || T(hd.confidence)}`) : null));
+
+    /* تیتر و زیرتیتر */
+    root.appendChild(h("h2", { class: "ffh-title" }, T(v.lead || d.sentence || "")));
+    if (v.detail) root.appendChild(h("p", { class: "ffh-sub" }, T(v.detail)));
+
+    const body = h("div", { class: "ffh-body" });
+    const main = h("div", { class: "ffh-main" });
+    const side = h("aside", { class: "ffh-side" });
+
+    /* شاخص‌ها */
+    if (showKpis && hd.cr != null) {
+      const gap = hd.orders != null && hd.expected_orders != null ? hd.orders - hd.expected_orders : null;
+      const risk = toman(hd.revenue_at_risk_toman);
+      const tile = (label, value, sub, tone) => h("div", { class: "ffh-kpi" + (tone ? " is-" + tone : "") }, h("span", { class: "ffh-kpi-l" }, label), h("b", { class: "ffh-kpi-v" }, value), sub ? h("span", { class: "ffh-kpi-s" }, sub) : null);
+      main.appendChild(h("div", { class: "ffh-kpis" },
+        tile("CR (Close Cart)", pct(hd.cr, 1), h("span", null, `معمول ${pct(hd.baseline, 1)} · `, h("em", { class: down ? "is-down" : "is-up" }, signedPt(hd.delta_pt))), null),
+        tile("سفارش", num(hd.orders), hd.expected_orders ? `انتظار ${compact(hd.expected_orders)} · بازه ${compact(hd.expected_low)} تا ${compact(hd.expected_high)}` : null),
+        tile("فاصله با انتظار", gap == null ? "—" : `${signedK(gap)} سفارش`, risk ? `حدود ${risk} در خطر` : "داخل بازه‌ی عادی", gap != null && hd.orders_at_risk > 0 ? "bad" : null),
+        tile("انحراف از معمول (z)", hd.z != null ? iso(`${hd.z < 0 ? "−" : hd.z > 0 ? "+" : ""}${fa(Math.abs(hd.z).toFixed(2))}`) : "—", [Math.abs(hd.z) >= 2 ? "بیرون از نوسان روزمره" : "داخل نوسان روزمره", hd.baseline_days ? `مبنا ${fa(hd.baseline_days)} روز هم‌نام` : null].filter(Boolean).join(" · "), Math.abs(hd.z) >= 2 ? (hd.z < 0 ? "bad" : null) : null)));
+    }
+
+    /* از کجا آمده */
+    if (why.items.length) {
+      const max = Math.max(...why.items.map((x) => Math.abs(x.orders || 0)), 1);
+      const rows = why.items.map((x) => h("li", { class: "ffh-why-row" },
+        h("span", { class: "ffh-why-n" }, T(x.name)),
+        h("span", { class: "ffh-why-pt " + (x.pt < 0 ? "is-down" : "is-up") }, signedPt(x.pt)),
+        h("span", { class: "ffh-why-bar", "aria-hidden": "true" }, h("i", { class: x.pt < 0 ? "is-down" : "is-up", style: { width: `${Math.max(4, (Math.abs(x.orders || 0) / max) * 100).toFixed(1)}%` } })),
+        h("span", { class: "ffh-why-o" }, x.orders != null ? `حدود ${iso(fa(x.ordersTxt))} سفارش` : "")));
+      main.appendChild(h("div", { class: "ffh-why" },
+        h("h3", null, why.dir === "rise" ? "رشد از کجا آمده" : "افت از کجا آمده"),
+        h("ol", null, rows),
+        why.together ? h("p", { class: "ffh-why-sum" }, `این ${fa(why.items.length)} مورد روی هم حدود ${iso(fa(why.together))} از ${iso(fa(why.of))} سفارش ${why.dir === "rise" ? "اضافه" : "کمبود"} را توضیح می‌دهند.`) : null));
+    } else if (v.reason) {
+      main.appendChild(h("p", { class: "ffh-why-text" }, T(v.reason)));
+    }
+
+    /* اول اینجا را ببین */
+    if (v.focus) {
+      side.appendChild(h("div", { class: "ffh-look" },
+        h("span", { class: "ffh-look-k" }, "اول اینجا را ببین"),
+        h("b", null, T(v.focus)),
+        h("span", { class: "ffh-look-m" }, [v.focus_orders ? `${num(v.focus_orders)} سفارش` : null, v.more ? `${fa(v.more)} سیگنال دیگر` : null].filter(Boolean).join(" · "))));
+    }
+    /* رکورد */
+    const rec = hd.record;
+    if (rec && rec.cr && hd.cr != null) {
+      const ratio = Math.max(0, Math.min(1, hd.cr / rec.cr));
+      side.appendChild(h("div", { class: "ffh-rec" },
+        h("div", { class: "ffh-rec-h" }, h("span", null, "رکورد CR"), h("b", null, pct(rec.cr, 2))),
+        h("div", { class: "ffh-rec-bar", "aria-hidden": "true" }, h("i", { style: { width: (ratio * 100).toFixed(1) + "%" } })),
+        h("span", { class: "ffh-rec-s" }, `${signedPt((hd.cr - rec.cr) * 100)} تا رکورد · ${jalali(rec.date)}`)));
+    }
+
+    body.appendChild(main);
+    if (side.children.length) body.appendChild(side); else body.classList.add("is-single");
+    root.appendChild(body);
+    return root;
+  }
+
+  /* ------------------------------------------------ ۴) پیدا کردن جای کارت در هر نقش */
+  function targets() {
+    const out = [];
+    // CEO: ردیف وضعیت + تیتر (بالای صفحه) و پاراگراف علت زیرش
+    document.querySelectorAll("main div.flex-wrap.items-center").forEach((row) => {
+      if (!/xl:flex-nowrap/.test(row.className)) return;
+      const f = row.firstElementChild;
+      if (!f || f.tagName !== "SPAN" || !/rounded-full/.test(f.className)) return;
+      const host = row.parentElement;
+      out.push({ host, before: row, hide: [...host.children].filter((c) => !c.classList.contains("ffh")), variant: "ceo" });
+    });
+    // CPO / CRO / پنجره‌ی جمع‌بندی: جایی که جمله‌ی کامل حکم آمده
+    document.querySelectorAll("[data-ff-verdict-host]").forEach((p) => {
+      const host = p.parentElement; if (!host) return;
+      if (p.closest('[role="dialog"]')) {
+        const hide = [p];
+        const nx = p.nextElementSibling;
+        if (nx && nx.tagName === "P" && /رکورد|record/i.test(nx.textContent)) hide.push(nx);
+        out.push({ host, before: p, hide, variant: "modal" });
+      } else if (p.closest(".ck-hero")) {
+        out.push({ host, before: host.firstElementChild, hide: [...host.children].filter((c) => !c.classList.contains("ffh")), variant: "cro" });
+      } else {
+        out.push({ host, before: host.firstElementChild, hide: [...host.children].filter((c) => !c.classList.contains("ffh")), variant: "cpo" });
+      }
+    });
+    return out;
+  }
+
+  /* ------------------------------------------------ ۵) چرخه */
+  const sigOf = (d, variant) => [variant, d.day || (d.headline && d.headline.day), d.status, d.sentence, S().digits ? 1 : 0].join("|");
+  function cleanup() {
+    document.querySelectorAll(".ffh").forEach((e) => e.remove());
+    document.querySelectorAll("[data-ff-hide]").forEach((e) => e.removeAttribute("data-ff-hide"));
+    document.querySelectorAll("[data-ff-hero-host]").forEach((e) => e.removeAttribute("data-ff-hero-host"));
+  }
+  function apply() {
+    const s = S();
+    if (!s.enabled || !s.translate || !(location.pathname === "/" || location.pathname === "/control")) { if (document.querySelector(".ffh, [data-ff-hide]")) cleanup(); return; }
+    const list = targets();
+    if (!list.length) return;
+    if (!data) { ensureData(); return; }
+    for (const t of list) {
+      const sig = sigOf(data, t.variant);
+      let hero = [...t.host.children].find((c) => c.classList.contains("ffh"));
+      if (!hero || hero.dataset.sig !== sig) {
+        const fresh = build(data, t.variant); fresh.dataset.sig = sig;
+        if (hero) hero.replaceWith(fresh); else t.host.insertBefore(fresh, t.before && t.before.parentElement === t.host ? t.before : t.host.firstChild);
+      }
+      if (!t.host.hasAttribute("data-ff-hero-host")) t.host.setAttribute("data-ff-hero-host", t.variant);
+      for (const e of t.hide) if (!e.hasAttribute("data-ff-hide")) e.setAttribute("data-ff-hide", "");
+    }
+  }
+  let pend = 0;
+  function schedule() { if (pend) return; pend = setTimeout(() => { pend = 0; try { apply(); } catch (e) { console.warn("[falcon-farsi] hero", e); } }, 60); }
+  const mo = new MutationObserver((ms) => { for (const m of ms) { if (m.target.closest && m.target.closest(".ffh")) continue; schedule(); return; } });
+  const start = () => { mo.observe(document.body, { childList: true, subtree: true }); schedule(); };
+  if (document.body) start(); else document.addEventListener("DOMContentLoaded", start, { once: true });
+  setInterval(schedule, 1500);
+  window.__ffHero = { refresh: () => { data = null; fallbackAt = 0; schedule(); }, data: () => data };
 })();
