@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.5.0 · compat-marker: __fxLoaded */
+/* falcon-farsi core v2.6.0 · compat-marker: __fxLoaded */
 /* فالکون · پوسته‌ی فارسی — فرهنگ واژه‌ها (v2)
    کلید: متن انگلیسی با حروف کوچک و فاصله‌ی یکسان. اصطلاحات جاافتاده (CR، Close Cart، Supertype، Gem، Off-Box،
    Meal For One، Retention، Funnel، RCA، pp/pt، نام پلتفرم‌ها و رویدادها) عمداً انگلیسی می‌مانند. */
@@ -3124,7 +3124,6 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
     if (rows.length) {
       const top = rows.slice(0, 4), rest = rows.slice(4);
       if (rest.length) top.push({ platform: `سایر (${fa(rest.length)})`, sessions: rest.reduce((x, r) => x + r.sessions, 0), orders: rest.reduce((x, r) => x + (r.orders || 0), 0), session_share: rest.reduce((x, r) => x + r.session_share, 0), order_share: rest.reduce((x, r) => x + (r.order_share || 0), 0), usual_share: rest.reduce((x, r) => x + (r.usual_share || 0), 0), cr: null, other: true });
-      const max = Math.max(...top.map((r) => Math.max(r.session_share, r.usual_share || 0)), 0.01);
       const list = h("div", { class: "fft-plat" },
         h("div", { class: "fft-plat-head" }, h("span", null, "پلتفرم"), h("span", null, "سهم سشن (خط = سهم معمول)"), h("span", null, "سهم سفارش"), h("span", null, "CR امروز")),
         top.map((r, i) => {
@@ -3132,7 +3131,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
           return h("div", { class: "fft-plat-row" },
             h("span", { class: "fft-plat-n" }, h("i", { style: { background: r.other ? "var(--ff-line-2)" : `var(--ff-c${(i % 5) + 1})` } }), iso(r.platform)),
             h("span", { class: "fft-plat-bar", title: `سهم معمول ${pct(r.usual_share, 1)}` },
-              h("span", { class: "fft-plat-track" }, h("i", { style: { width: ((r.session_share / max) * 100).toFixed(1) + "%", background: r.other ? "var(--ff-line-2)" : `var(--ff-c${(i % 5) + 1})` } }), r.usual_share != null ? h("b", { style: { insetInlineStart: ((r.usual_share / max) * 100).toFixed(1) + "%" } }) : null),
+              h("span", { class: "fft-plat-track" }, h("i", { style: { width: Math.max(0.6, r.session_share * 100).toFixed(1) + "%", background: r.other ? "var(--ff-line-2)" : `var(--ff-c${(i % 5) + 1})` } }), r.usual_share != null ? h("b", { style: { insetInlineStart: (r.usual_share * 100).toFixed(1) + "%" } }) : null),
               h("em", null, pct(r.session_share, 0)),
               dv != null && Math.abs(dv) >= 1 ? h("small", { class: dv < 0 ? "is-down" : "is-up" }, signedPt(dv, 0)) : null),
             h("span", { class: "fft-plat-o" }, pct(r.order_share, 0)),
