@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.6.0 */
+/* falcon-farsi core v2.7.0 */
 /* ==================================================================
    فالکون · پوسته‌ی فارسی v2
    زبان طراحی «شاهین»: کاغذ گرم و مرکب لاجوردی در روز، شب عمیق در تاریکی.
@@ -1109,6 +1109,49 @@ html[data-ff] .ffd-pt:hover, html[data-ff] .ffd-pt:focus-visible { opacity: 1; s
 html[data-ff] .ffd-pt-l { fill: var(--ff-ink-2); font-size: 11px; font-weight: 700; font-family: inherit; paint-order: stroke; stroke: var(--ff-surface); stroke-width: 3px; }
 html[data-ff] .ffd-actions-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
 html[data-ff] .ffd-delta { font-size: 12px; font-weight: 700; direction: ltr; unicode-bidi: isolate; }
+
+/* ------------------------------------------------------------------ خلاصه‌ی هفتگی مدیرعامل (.ffw) */
+html[data-ff] .ffw-hero { display: grid; gap: 6px; }
+html[data-ff] .ffw-kicker { margin: 0; font-size: 12.5px; font-weight: 700; color: var(--ff-ink-3); }
+html[data-ff] .ffw-title { margin: 0; font-size: 26px; font-weight: 800; line-height: 1.45; color: var(--ff-ink); }
+html[data-ff] .ffw-sub { margin: 0 0 6px; font-size: 14px; color: var(--ff-ink-2); }
+html[data-ff] .ffw-tldr { margin-top: 6px; padding: 12px 16px; border-radius: 14px; background: color-mix(in srgb, var(--ff-saffron-soft) 70%, var(--ff-surface)); border-inline-start: 4px solid var(--ff-saffron-2); }
+html[data-ff] .ffw-tldr h3 { margin: 0 0 6px; font-size: 13px; font-weight: 800; color: var(--ff-saffron); }
+html[data-ff] .ffw-tldr ol { margin: 0; padding-inline-start: 20px; display: grid; gap: 6px; }
+html[data-ff] .ffw-tldr li { font-size: 14px; line-height: 1.9; color: var(--ff-ink-2); padding-inline-start: 4px; }
+html[data-ff] .ffw-tldr li b { color: var(--ff-ink); font-weight: 800; }
+html[data-ff] .ffw-tldr li::marker { font-weight: 800; color: var(--ff-ink-3); }
+html[data-ff] .ffw-tldr li.is-bad::marker { color: var(--ff-red); }
+html[data-ff] .ffw-tldr li.is-good::marker { color: var(--ff-turq); }
+html[data-ff] .ffw-tldr li.is-warn::marker { color: var(--ff-saffron); }
+html[data-ff] .ffw-link { font-size: 12.5px; font-weight: 800; color: var(--ff-pri-ink); text-decoration: none; white-space: nowrap; cursor: pointer; }
+html[data-ff] .ffw-link:hover { text-decoration: underline; }
+
+html[data-ff] .ffw-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+html[data-ff] .ffw-kpi { display: grid; gap: 2px; align-content: start; padding: 12px 14px; border-radius: 12px; background: var(--ff-surface-2); border: 1px solid var(--ff-line); min-width: 0; }
+html[data-ff] .ffw-kpi.is-bad { border-color: color-mix(in srgb, var(--ff-red) 40%, var(--ff-line)); background: color-mix(in srgb, var(--ff-red-soft) 55%, var(--ff-surface-2)); }
+html[data-ff] .ffw-kpi.is-good { border-color: color-mix(in srgb, var(--ff-turq) 40%, var(--ff-line)); background: color-mix(in srgb, var(--ff-turq-soft) 55%, var(--ff-surface-2)); }
+html[data-ff] .ffw-kpi-l { font-size: 12px; font-weight: 700; color: var(--ff-ink-3); }
+html[data-ff] .ffw-kpi-v { font-size: 22px; font-weight: 800; color: var(--ff-ink); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+html[data-ff] .ffw-kpi-d { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--ff-ink-3); }
+html[data-ff] .ffw-kpi-d em { font-style: normal; font-weight: 800; color: var(--ff-ink-2); white-space: nowrap; }
+html[data-ff] .ffw-spark { display: flex; align-items: flex-end; gap: 3px; height: 26px; margin-top: 6px; }
+html[data-ff] .ffw-spark i { flex: 1; min-width: 4px; border-radius: 3px 3px 1px 1px; background: color-mix(in srgb, var(--ff-c1) 55%, transparent); }
+html[data-ff] .ffw-spark i:last-child { background: var(--ff-c1); }
+
+html[data-ff] .ffw-risks { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+html[data-ff] .ffw-risk { display: grid; gap: 4px; align-content: start; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--ff-line); background: var(--ff-surface); border-inline-start: 4px solid var(--ff-line-2); }
+html[data-ff] .ffw-risk.is-bad { border-inline-start-color: var(--ff-red); background: color-mix(in srgb, var(--ff-red-soft) 45%, var(--ff-surface)); }
+html[data-ff] .ffw-risk.is-warn { border-inline-start-color: var(--ff-saffron-2); background: color-mix(in srgb, var(--ff-saffron-soft) 45%, var(--ff-surface)); }
+html[data-ff] .ffw-risk.is-good { border-inline-start-color: var(--ff-turq); }
+html[data-ff] .ffw-risk-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+html[data-ff] .ffw-risk-h b { font-size: 14px; font-weight: 800; color: var(--ff-ink); }
+html[data-ff] .ffw-risk p { margin: 0; font-size: 12.5px; line-height: 1.8; color: var(--ff-ink-2); }
+html[data-ff] .ffw-cellbar { position: relative; display: inline-flex; align-items: center; justify-content: flex-end; min-width: 110px; gap: 8px; }
+html[data-ff] .ffw-cellbar i { display: inline-block; height: 8px; max-width: 70px; border-radius: 4px; background: color-mix(in srgb, var(--ff-c1) 70%, transparent); flex: none; }
+html[data-ff] .ffd-grid > .ffd-span-7 { grid-column: span 7; }
+html[data-ff] .ffd-grid > .ffd-span-5 { grid-column: span 5; }
+html[data-ff] .ffw-kpi-v small { font-size: 12px; font-weight: 700; color: var(--ff-ink-3); }
 
 /* ==================================================================
    کارت حکم مرکز کنترل (.ffh) — یک ساختار برای CEO، CPO، CRO و «جمع‌بندی»

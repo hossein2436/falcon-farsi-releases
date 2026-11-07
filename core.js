@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.6.0 · compat-marker: __fxLoaded */
+/* falcon-farsi core v2.7.0 · compat-marker: __fxLoaded */
 /* فالکون · پوسته‌ی فارسی — فرهنگ واژه‌ها (v2)
    کلید: متن انگلیسی با حروف کوچک و فاصله‌ی یکسان. اصطلاحات جاافتاده (CR، Close Cart، Supertype، Gem، Off-Box،
    Meal For One، Retention، Funnel، RCA، pp/pt، نام پلتفرم‌ها و رویدادها) عمداً انگلیسی می‌مانند. */
@@ -2387,7 +2387,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
 
   /* ================================================================ رجیستری داشبوردها */
   const DASH = [];
-  const register = (d) => DASH.push(d);
+  const register = (d) => { const i = DASH.findIndex((x) => x.id === d.id); if (i >= 0) DASH.splice(i, 1); if (d.first) DASH.unshift(d); else DASH.push(d); };
   window.__ffDash = { register, K, api, settle, arr, pick, fmt: { fa, num, compact, pct, pctRaw, pp, signed, ago, jalali, tr }, h, s, iso, daysAgo, SERIES };
 
   /* ================================================================ پنل */
@@ -2519,77 +2519,6 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
   const two = (a, b) => h("div", null, h("b", null, a), b ? h("small", null, b) : null);
   const deltaSpan = (v, good, text) => h("span", { class: "ffd-delta " + (v == null || v === 0 ? "" : good ? "ffd-up" : "ffd-down") }, text);
   const state = {};
-
-  /* ================================================================ ۸) خلاصه‌ی هفتگی CEO */
-  D.register({
-    id: "weekly", icon: "✦", title: "خلاصه‌ی هفتگی", short: "خلاصه‌ی هفته",
-    desc: "هفت روز گذشته در برابر هفت روز قبلش، در یک نگاه: سفارش، درآمد، نرخ تبدیل و میانگین سبد؛ به‌همراه مهم‌ترین روایت‌ها، آزمایش‌ها و هشدارها. دکمه‌ی «کپی خلاصه» متن آماده‌ی فرستادن می‌دهد.",
-    async render() {
-      const [c, dg, al] = await settle([cc(), api("/api/v1/overall-funnel/digest?view=standard&baseline_days=10"), api("/api/v1/alerts")]);
-      if (!c) throw new Error("داده‌ی مرکز کنترل در دسترس نیست");
-      const tr30 = [...(c.trend || [])].sort((a, b) => (a.date < b.date ? -1 : 1));
-      const cur = tr30.slice(-7), prev = tr30.slice(-14, -7);
-      const agg = (w) => ({ orders: sum(w, (x) => x.orders), rev: sum(w, (x) => x.revenue_toman), paid: sum(w, (x) => x.paid_orders), cr: w.length ? sum(w, (x) => x.cr) / w.length : null });
-      const A = agg(cur), B = agg(prev);
-      const ch = (a, b) => (b ? a / b - 1 : null);
-      const aovA = A.paid ? A.rev / A.paid : null, aovB = B.paid ? B.rev / B.paid : null;
-      const rng = cur.length ? `${jalali(cur[0].date)} تا ${jalali(cur[cur.length - 1].date)}` : "";
-      const tone = (v) => (v == null ? null : v >= 0.02 ? "good" : v <= -0.02 ? "bad" : null);
-      const crDelta = A.cr != null && B.cr != null ? (A.cr - B.cr) * 100 : null;
-
-      const alerts = (al && al.alerts) || [];
-      const weekAgo = Date.now() - 7 * 864e5;
-      const newAlerts = alerts.filter((a) => Date.parse(a.detected_at) >= weekAgo);
-      const openCrit = alerts.filter((a) => a.status !== "resolved" && (a.severity === "critical" || a.severity === "high"));
-      const exps = (c.experiments || []).flatMap((e) => (e.variations || []).filter((v) => !v.is_control).map((v) => ({ e, v })));
-      const wins = exps.filter((x) => x.v.z >= 1.96).length, losses = exps.filter((x) => x.v.z <= -1.96).length;
-      const hd = c.headline || {};
-
-      const copyText = () => [
-        `خلاصه‌ی هفتگی فالکون (${rng})`,
-        `• سفارش: ${num(A.orders)} (${signedPct(ch(A.orders, B.orders))} نسبت به هفته‌ی قبل)`,
-        `• درآمد: ${toman(A.rev)} (${signedPct(ch(A.rev, B.rev))})`,
-        `• میانگین CR روزانه: ${pct(A.cr)} (${crDelta == null ? "—" : pp(crDelta)})`,
-        `• میانگین سبد: ${toman(aovA)} (${signedPct(ch(aovA, aovB))})`,
-        `• هشدارهای تازه: ${fa(newAlerts.length)} · بحرانی/زیادِ باز: ${fa(openCrit.length)}`,
-        `• آزمایش‌ها: ${fa(wins)} برنده، ${fa(losses)} بازنده از ${fa(exps.length)}`,
-        ...(c.stories || []).slice(0, 3).map((s) => `• ${tr(s.title)}`),
-      ].join("\n").replace(/[⁦⁩]/g, "");
-      const copyBtn = h("button", { type: "button", class: "ffd-btn", onclick: async (e) => { try { await navigator.clipboard.writeText(copyText()); e.target.textContent = "کپی شد ✓"; } catch (x) { e.target.textContent = "کپی نشد"; } setTimeout(() => (e.target.textContent = "کپی خلاصه"), 1800); } }, "کپی خلاصه");
-
-      const hero = K.card(`هفته‌ی ${rng}`, "هر عدد در برابر هفت روز پیش از آن", K.stats([
-        K.stat("سفارش", num(A.orders), `${signedPct(ch(A.orders, B.orders))} نسبت به هفته‌ی قبل`, tone(ch(A.orders, B.orders))),
-        K.stat("درآمد", toman(A.rev), `${signedPct(ch(A.rev, B.rev))} نسبت به هفته‌ی قبل`, tone(ch(A.rev, B.rev))),
-        K.stat("CR (Close Cart)", pct(A.cr), crDelta == null ? "" : `${pp(crDelta)} نسبت به هفته‌ی قبل`, crDelta == null ? null : crDelta >= 0.3 ? "good" : crDelta <= -0.3 ? "bad" : null),
-        K.stat("میانگین سبد", toman(aovA), `${signedPct(ch(aovA, aovB))} نسبت به هفته‌ی قبل`, tone(ch(aovA, aovB))),
-      ]), { span: 12, tone: "hero", aside: copyBtn });
-
-      const days = cur.map((x) => weekday(x.date));
-      const line = K.card("سفارش روزانه: این هفته و هفته‌ی قبل", "هر روزِ این هفته کنار همان روزِ هفته‌ی پیش", K.line([
-        { name: "این هفته", points: cur.map((x, i) => ({ x: i, y: x.orders })) },
-        { name: "هفته‌ی قبل", dashed: true, color: "var(--ff-ink-3)", points: prev.map((x, i) => ({ x: i, y: x.orders })) },
-      ], { xfmt: (i) => days[i] || "", label: "سفارش روزانه" }), { span: 8 });
-
-      const rec = hd.record || {};
-      const side = K.card("در یک نگاه", null, h("div", { class: "ffd-stats" },
-        K.stat("رکورد CR", rec.cr ? pct(rec.cr) : "—", rec.date ? `${jalali(rec.date)} · ${fa(rec.days || 0)} روز پیش` : ""),
-        K.stat("هشدار تازه در هفته", fa(newAlerts.length), `${fa(openCrit.length)} هشدار بحرانی یا زیاد هنوز باز است`, openCrit.length ? "warn" : "good"),
-        K.stat("آزمایش‌های برنده", fa(wins), `${fa(losses)} بازنده از ${fa(exps.length)} مقایسه‌ی در جریان`, wins ? "good" : null)), { span: 4 });
-
-      const stories = K.card("روایت‌های مهم دیروز", "بخش‌هایی که از رفتار معمولشان فاصله گرفته‌اند", K.list((c.stories || []).map((s) => ({
-        badge: sevBadge(s.severity === "warning" ? "medium" : s.severity), title: tr(s.title), text: tr(s.what),
-        value: s.impact_orders ? `${num(s.impact_orders)} سفارش` : null,
-      }))), { span: 6 });
-
-      const dAl = ((dg && dg.alerts) || []).map((a) => ({
-        label: tr(a.label),
-        value: a.delta_pp != null ? a.delta_pp : (a.delta_pct || 0) * 100,
-        tip: [tr(a.label), a.kind === "count" ? `${num(a.latest)} در برابر ${num(a.baseline)}` : `${pct(a.latest)} در برابر ${pct(a.baseline)}`, a.delta_pp != null ? pp(a.delta_pp) : signedPct(a.delta_pct)],
-      }));
-      const digest = K.card("تغییرهای قیف کل", dg ? `دیروز در برابر میانگین ${fa(dg.baseline_days)} روز قبل (درصد یا واحد درصد)` : "", K.bars(dAl, { fmt: (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + fa(Math.abs(v).toFixed(1)) }), { span: 6 });
-      return [hero, line, side, stories, digest];
-    },
-  });
 
   /* ================================================================ ۱) پاسخ‌گویی هشدارها */
   D.register({
@@ -2913,6 +2842,306 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       const notes = [...((c && c.data) || []).map((d) => ({ badge: K.badge(tr(d.domain), "info"), title: /days stored/.test(d.note) ? noteFa(d.note) : tr(d.note) })), ...(dq.issues || []).map((i) => ({ badge: K.badge(i.severity === "warning" ? "هشدار" : tr(i.severity), "warn"), title: tr(i.message), value: i.count != null ? `${fa(i.count)} ردیف` : null }))];
       out.push(K.card("یادداشت‌های داده", m && m.available_range ? `بازه‌ی موجود: ${jalali(m.available_range.start)} تا ${jalali(m.available_range.end)}` : null, K.list(notes), { span: 5 }));
       return out;
+    },
+  });
+})();
+
+/* فالکون · پوسته‌ی فارسی — «خلاصه‌ی هفتگی مدیرعامل»
+   یک نگاه به کل اکوسیستم در هفته‌ی کامل (شنبه تا جمعه): نتیجه، سه نکته، شاخص‌ها،
+   نقشه‌ی ریسک (محصول، پلتفرم، شهر، درآمد، آزمایش، پاسخ‌گویی، داده)، روزها و تصمیم‌ها. */
+(() => {
+  const D = window.__ffDash;
+  if (!D || D.__weekly) return;
+  D.__weekly = true;
+  const { K, api, settle, h } = D;
+  const { fa, num, compact, pct, jalali, tr } = D.fmt;
+
+  /* ---------------------------------------------------------------- تاریخ */
+  const LRI = "⁦", PDI = "⁩";
+  const iso = (x) => LRI + x + PDI;
+  const add = (d, n) => { const t = new Date(d + "T12:00:00Z"); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); };
+  const wday = (d) => new Date(d + "T12:00:00Z").getUTCDay(); // 5 = جمعه، 6 = شنبه
+  const range = (a, b) => { const out = []; for (let d = a; d <= b; d = add(d, 1)) out.push(d); return out; };
+  const todayTehran = () => { try { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); } catch (e) { return new Date().toISOString().slice(0, 10); } };
+  const lastFriday = () => { let d = add(todayTehran(), -1); while (wday(d) !== 5) d = add(d, -1); return d; };
+  const dayName = (d) => { try { return new Date(d + "T12:00:00Z").toLocaleDateString("fa-IR", { weekday: "long", timeZone: "UTC" }); } catch (e) { return d; } };
+  const weekLabel = (s, e) => `${jalali(s)} تا ${jalali(e)}`;
+
+  /* ---------------------------------------------------------------- قالب عدد */
+  const rnd = (v, d) => +v.toFixed(d);
+  const sPct = (v, d = 1) => { if (v == null || !isFinite(v)) return "—"; const r = rnd(v, d); return iso((r > 0 ? "+" : r < 0 ? "−" : "") + fa(Math.abs(r).toFixed(d)) + "٪"); };
+  const sPt = (v, d = 1) => { if (v == null || !isFinite(v)) return "—"; const r = rnd(v, d); return iso((r > 0 ? "+" : r < 0 ? "−" : "") + fa(Math.abs(r).toFixed(d))) + " واحد"; };
+  const tomanParts = (v) => {
+    if (v == null || !isFinite(v)) return "—";
+    const a = Math.abs(v);
+    if (a >= 1e12) return [fa((v / 1e12).toFixed(2)), "هزار میلیارد تومان"];
+    if (a >= 1e9) return [fa((v / 1e9).toFixed(a >= 1e11 ? 0 : 1)), "میلیارد تومان"];
+    return [compact(v), "تومان"];
+  };
+  const toman = (v) => {
+    if (v == null || !isFinite(v)) return "—";
+    const a = Math.abs(v);
+    if (a >= 1e12) return `${fa((v / 1e12).toFixed(2))} هزار میلیارد تومان`;
+    if (a >= 1e9) return `${fa((v / 1e9).toFixed(a >= 1e11 ? 0 : 1))} میلیارد تومان`;
+    if (a >= 1e6) return `${fa((v / 1e6).toFixed(0))} میلیون تومان`;
+    return `${num(v)} تومان`;
+  };
+  const tone = (v, good = 0.5, bad = -0.5, inverse = false) => { if (v == null || !isFinite(v)) return null; const x = inverse ? -v : v; return x >= good ? "good" : x <= bad ? "bad" : null; };
+  const cls = (v, inverse) => (v == null || !isFinite(v) || v === 0 ? "" : (inverse ? v < 0 : v > 0) ? "ffd-up" : "ffd-down");
+  const sum = (a, f) => a.reduce((t, x) => t + (Number(f(x)) || 0), 0);
+  const median = (a) => { if (!a.length) return null; const b = [...a].sort((x, y) => x - y), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; };
+  const SEVFA = { critical: "بحرانی", high: "زیاد", medium: "متوسط", low: "کم" };
+  const STATUS = { act: ["اقدام", "bad"], watch: ["زیر نظر", "warn"], ok: ["سالم", "good"], na: ["بدون داده", "neutral"] };
+
+  /* ---------------------------------------------------------------- محاسبه‌ها */
+  function weekAgg(byDate, days) {
+    const rows = days.map((d) => byDate[d]).filter(Boolean);
+    if (rows.length < days.length) return null;
+    return rows;
+  }
+  function funnelWeek(rows) {
+    if (!rows) return null;
+    const S = (k) => sum(rows, (r) => r[k]);
+    const valid = S("valid_sessions"), click = S("first_click_sessions"), atc = S("add_to_cart_sessions"), bas = S("go_to_basket_sessions"), cont = S("continue_purchase_sessions"), close = S("close_cart_sessions"), gross = S("gross_orders"), net = S("net_orders");
+    return {
+      valid, close, gross, net,
+      cr: valid ? close / valid : null,
+      cancel: gross ? 1 - net / gross : null,
+      steps: [
+        ["سشن معتبر ← اولین کلیک", valid ? click / valid : null, "/funnel"],
+        ["اولین کلیک ← افزودن به سبد", click ? atc / click : null, "/funnel"],
+        ["افزودن به سبد ← سبد", atc ? bas / atc : null, "/funnel"],
+        ["سبد ← ادامه‌ی خرید", bas ? cont / bas : null, "/funnel"],
+        ["ادامه‌ی خرید ← Close Cart", cont ? close / cont : null, "/funnel"],
+      ],
+    };
+  }
+  function trendWeek(rows) {
+    if (!rows) return null;
+    const orders = sum(rows, (r) => r.orders), paid = sum(rows, (r) => r.paid_orders), rev = sum(rows, (r) => r.revenue_toman);
+    return { orders, paid, rev, aov: paid ? rev / paid : null };
+  }
+  const chg = (a, b) => (a != null && b ? (a / b - 1) * 100 : null);
+  const chgPt = (a, b) => (a != null && b != null ? (a - b) * 100 : null);
+
+  /* ---------------------------------------------------------------- سازنده‌های کوچک */
+  const link = (href, text) => h("a", { href, class: "ffw-link", onclick: (e) => { if (href.startsWith("#ff=")) { e.preventDefault(); D.open(href.slice(4)); } } }, text);
+  const spark = (vals, opts = {}) => {
+    const v = vals.map((x) => (x == null || !isFinite(x) ? 0 : x));
+    const mx = Math.max(...v), mn = opts.zero ? 0 : Math.min(...v) * 0.92;
+    return h("span", { class: "ffw-spark", "aria-hidden": "true" }, v.map((x, i) => h("i", { class: opts.mark === i ? "is-mark" : null, style: { height: `${mx > mn ? Math.max(12, ((x - mn) / (mx - mn)) * 100) : 50}%` } })));
+  };
+  const kpi = (label, value, vsPrev, vsAvg, avgN, sparkVals, opts = {}) => {
+    const fmtD = opts.pt ? sPt : sPct;
+    const t = tone(vsPrev, opts.pt ? 0.3 : 1.5, opts.pt ? -0.3 : -1.5, opts.inverse);
+    return h("div", { class: "ffw-kpi" + (t ? " is-" + t : "") },
+      h("span", { class: "ffw-kpi-l" }, label),
+      h("b", { class: "ffw-kpi-v" }, Array.isArray(value) ? [value[0], h("small", null, " " + value[1])] : value),
+      h("span", { class: "ffw-kpi-d" }, h("span", null, "هفته‌ی قبل "), h("em", { class: cls(vsPrev, opts.inverse) }, fmtD(vsPrev))),
+      vsAvg != null ? h("span", { class: "ffw-kpi-d" }, h("span", null, `میانگین ${fa(avgN)} هفته `), h("em", { class: cls(vsAvg, opts.inverse) }, fmtD(vsAvg))) : null,
+      sparkVals ? spark(sparkVals) : null);
+  };
+  const riskTile = (title, st, line, href, linkText) => {
+    const [label, t] = STATUS[st] || STATUS.na;
+    return h("div", { class: "ffw-risk is-" + t },
+      h("div", { class: "ffw-risk-h" }, h("b", null, title), K.badge(label, t)),
+      h("p", null, line),
+      href ? link(href, linkText || "جزئیات ←") : null);
+  };
+
+  /* ---------------------------------------------------------------- داشبورد */
+  const state = { k: 0 };
+  D.register({
+    id: "weekly", first: true, icon: "✦", title: "خلاصه‌ی هفتگی مدیرعامل", short: "خلاصه‌ی هفته",
+    desc: "هفته‌ی کامل گذشته (شنبه تا جمعه) در یک صفحه: نتیجه‌ی هفته، سه نکته‌ی مهم، شاخص‌ها در برابر هفته‌ی قبل و میانگین هفته‌های اخیر، نقشه‌ی ریسک همه‌ی اکوسیستم، روزبه‌روز، قیف، پلتفرم‌ها، شهرها و تصمیم‌هایی که منتظرند.",
+    slow: "ساختن خلاصه‌ی هفته از چند منبع فالکون چند ثانیه طول می‌کشد…",
+    async render(ctx) {
+      const E0 = lastFriday();
+      const E = add(E0, -7 * state.k), S = add(E, -6);
+      const P_S = add(S, -7), P_E = add(S, -1), H_S = add(S, -28);
+      const [cc, fn, seg, pl, al, cal, live] = await settle([
+        api(`/api/v1/control-center?day=${E}`, 600000).catch(() => api("/api/v1/control-center", 120000)),
+        api(`/api/v1/overall-funnel?view=standard&from=${H_S}&to=${E}&comparison=previous_period&granularity=weekly`, 600000),
+        api(`/api/v1/segments/cities?from=${S}&to=${E}&comparison=previous_period`, 600000),
+        api(`/api/v1/platforms?start=${P_S}&end=${E}`, 600000),
+        api("/api/v1/alerts", 120000),
+        state.k === 0 ? api(`/api/v1/shocks/calendar?start=${add(E, 1)}&end=${add(E, 7)}`, 3600000) : Promise.resolve(null),
+        state.k === 0 ? api("/api/v1/control-center", 120000) : Promise.resolve(null),
+      ]);
+      if (!cc && !fn) throw new Error("داده‌ی هفته از فالکون نرسید");
+
+      /* ---- داده‌ی روزانه */
+      const T = {}; ((cc && cc.trend) || []).forEach((r) => (T[r.date] = r));
+      const F = {}; ((fn && fn.daily) || []).forEach((r) => (F[r.date] = r));
+      const W = range(S, E), PW = range(P_S, P_E);
+      const priorWeeks = [1, 2, 3, 4].map((i) => range(add(S, -7 * i), add(E, -7 * i)));
+      const tw = trendWeek(weekAgg(T, W)), tp = trendWeek(weekAgg(T, PW));
+      const fw = funnelWeek(weekAgg(F, W)), fp = funnelWeek(weekAgg(F, PW));
+      const tAvg = priorWeeks.map((d) => trendWeek(weekAgg(T, d))).filter(Boolean);
+      const fAvg = priorWeeks.map((d) => funnelWeek(weekAgg(F, d))).filter(Boolean);
+      const avg = (arr, f) => (arr.length ? sum(arr, f) / arr.length : null);
+      const ordersOf = (t, f) => (f ? f.close : t ? t.orders : null);
+      const ordW = ordersOf(tw, fw), ordP = ordersOf(tp, fp);
+      const ordAvg = fAvg.length ? avg(fAvg, (x) => x.close) : avg(tAvg, (x) => x.orders);
+      const nAvgF = fAvg.length || tAvg.length, nAvgT = tAvg.length;
+
+      const ordPct = chg(ordW, ordP), revPct = chg(tw && tw.rev, tp && tp.rev), aovPct = chg(tw && tw.aov, tp && tp.aov), paidPct = chg(tw && tw.paid, tp && tp.paid);
+      const crPt = chgPt(fw && fw.cr, fp && fp.cr), validPct = chg(fw && fw.valid, fp && fp.valid), cancelPt = chgPt(fw && fw.cancel, fp && fp.cancel);
+
+      /* ---- روزها */
+      const days = W.map((d) => {
+        const f = F[d], t = T[d], pf = F[add(d, -7)], pt = T[add(d, -7)];
+        const o = f ? f.close_cart_sessions : t && t.orders, po = pf ? pf.close_cart_sessions : pt && pt.orders;
+        const cr = f && f.valid_sessions ? f.close_cart_sessions / f.valid_sessions : t && t.cr;
+        const pcr = pf && pf.valid_sessions ? pf.close_cart_sessions / pf.valid_sessions : pt && pt.cr;
+        return { d, o, cr, rev: t && t.revenue_toman, dO: chg(o, po), dCr: chgPt(cr, pcr) };
+      });
+      const worst = [...days].filter((x) => x.dCr != null).sort((a, b) => (a.dCr + a.dO / 10) - (b.dCr + b.dO / 10))[0];
+
+      /* ---- قیف */
+      const steps = fw && fp ? fw.steps.map((s, i) => ({ name: s[0], v: s[1], d: chgPt(s[1], fp.steps[i][1]) })) : [];
+      const worstStep = [...steps].sort((a, b) => a.d - b.d)[0];
+
+      /* ---- پلتفرم‌ها */
+      const P = {};
+      ((pl && pl.daily) || []).forEach((r) => {
+        const inW = r.date >= S && r.date <= E, inP = r.date >= P_S && r.date <= P_E; if (!inW && !inP) return;
+        const x = (P[r.platform] = P[r.platform] || { name: r.platform, s: 0, c: 0, ps: 0, pc: 0 });
+        if (inW) { x.s += r.sessions || 0; x.c += r.close_cart_sessions || 0; } else { x.ps += r.sessions || 0; x.pc += r.close_cart_sessions || 0; }
+      });
+      const totS = Object.values(P).reduce((t, x) => t + x.s, 0) || 1;
+      const plats = Object.values(P).filter((x) => x.s > 0).map((x) => ({ ...x, share: x.s / totS, or: x.c / x.s, por: x.ps ? x.pc / x.ps : null, dS: chg(x.s, x.ps), dOr: x.ps ? chgPt(x.c / x.s, x.pc / x.ps) : null })).sort((a, b) => b.s - a.s);
+      const platRisk = plats.filter((x) => x.share >= 0.03 && x.dOr != null).sort((a, b) => a.dOr * a.share - b.dOr * b.share)[0];
+
+      /* ---- شهرها */
+      const cities = ((seg && seg.segments) || []).filter((x) => x.sessions >= 3000 && x.delta != null).map((x) => ({ ...x, impact: x.delta * x.sessions }));
+      const losers = [...cities].sort((a, b) => a.impact - b.impact).slice(0, 4).filter((x) => x.impact < 0);
+      const gainers = [...cities].sort((a, b) => b.impact - a.impact).slice(0, 2).filter((x) => x.impact > 0);
+      const critCities = cities.filter((x) => x.status === "critical");
+
+      /* ---- هشدارها و آزمایش‌ها */
+      const alerts = (al && al.alerts) || [];
+      const inWeek = (t) => { const d = String(t || "").slice(0, 10); return d >= S && d <= E; };
+      const opened = alerts.filter((a) => inWeek(a.detected_at));
+      const openNow = alerts.filter((a) => a.status !== "resolved");
+      const openHot = openNow.filter((a) => a.severity === "critical" || a.severity === "high");
+      const unowned = openHot.filter((a) => !(a.owners_notified || []).length && !a.acknowledged_at);
+      const closedW = alerts.filter((a) => a.resolved_at && inWeek(a.resolved_at)).map((a) => (Date.parse(a.resolved_at) - Date.parse(a.detected_at)) / 36e5).filter((x) => x >= 0);
+      const exps = ((cc && cc.experiments) || []).flatMap((e) => (e.variations || []).filter((v) => !v.is_control).map((v) => ({ id: String(e.experiment_id).replace(/_experiment$/, "").replace(/_/g, " "), ...v })));
+      const wins = exps.filter((x) => x.z >= 1.96), losses = exps.filter((x) => x.z <= -1.96);
+
+      /* ---- سه نکته‌ی هفته: هر کاندید وزن دارد؛ سه‌تای اول */
+      const C = [];
+      if (ordPct != null && Math.abs(ordPct) >= 1) C.push({ w: Math.abs(ordPct) * 1.1, t: ordPct < 0 ? "bad" : "good", txt: h("span", null, h("b", null, `سفارش ${sPct(ordPct)}`), ` نسبت به هفته‌ی قبل (${compact(ordW)} سفارش).`), href: "#ff=basket" });
+      if (revPct != null && ordPct != null && Math.abs(revPct - ordPct) >= 1.2) C.push({ w: Math.abs(revPct - ordPct) * 1.3, t: revPct < ordPct ? "bad" : "good", txt: h("span", null, h("b", null, `درآمد ${sPct(revPct)}`), ` در حالی که سفارش ${sPct(ordPct)}: میانگین سبد ${sPct(aovPct)} تغییر کرد.`), href: "#ff=basket" });
+      if (worst && (worst.dCr <= -0.8 || worst.dO <= -5)) C.push({ w: Math.abs(worst.dCr) * 3 + Math.abs(worst.dO) / 3, t: "bad", txt: h("span", null, h("b", null, `${dayName(worst.d)} ${jalali(worst.d)} ضعیف‌ترین روز بود`), `: CR ${sPt(worst.dCr)} و سفارش ${sPct(worst.dO)} نسبت به همان روزِ هفته‌ی قبل.`), href: "#ff=cities" });
+      if (worstStep && Math.abs(worstStep.d) >= 0.5) C.push({ w: Math.abs(worstStep.d) * 2.5, t: worstStep.d < 0 ? "bad" : "good", txt: h("span", null, h("b", null, `گام «${worstStep.name}»`), ` در قیف ${sPt(worstStep.d)} تغییر کرد؛ ${worstStep.d < 0 ? "بزرگ‌ترین ریزش محصول این هفته" : "بهبود محصول"}.`), href: "/funnel" });
+      if (platRisk && platRisk.dOr <= -0.8) C.push({ w: Math.abs(platRisk.dOr) * platRisk.share * 12, t: "bad", txt: h("span", null, h("b", null, `پلتفرم ${iso(platRisk.name)}`), ` نرخ سفارش ${sPt(platRisk.dOr)} (${pct(platRisk.share, 0)} از ترافیک).`), href: "/platforms" });
+      if (losers[0]) C.push({ w: Math.abs(losers[0].impact) / 900, t: "bad", txt: h("span", null, h("b", null, `${losers[0].name}`), ` بیشترین افت شهری: CR ${sPt(losers[0].delta * 100, 2)} با ${pct(losers[0].traffic_share, 1)} از ترافیک.`), href: "#ff=cities" });
+      if (cancelPt != null && cancelPt >= 0.3) C.push({ w: cancelPt * 4, t: "bad", txt: h("span", null, h("b", null, `نرخ ابطال سفارش ${sPt(cancelPt)}`), ` بالا رفت (${pct(fw.cancel, 1)} از سفارش‌های ناخالص).`), href: "/funnel" });
+      if (unowned.length) C.push({ w: 2 + unowned.length * 0.6, t: "warn", txt: h("span", null, h("b", null, `${fa(unowned.length)} هشدار بحرانی یا زیادِ باز`), " هنوز مالک یا تأیید ندارد."), href: "#ff=alerts" });
+      if (wins.length) C.push({ w: 1.6 + wins.length * 0.4, t: "good", txt: h("span", null, h("b", null, `${fa(wins.length)} آزمایش برنده`), ` منتظر تصمیم انتشار است: ${wins.slice(0, 3).map((x) => x.id).join("، ")}.`), href: "#ff=experiments" });
+      if (losses.length) C.push({ w: 2 + losses.length * 0.5, t: "bad", txt: h("span", null, h("b", null, `${fa(losses.length)} آزمایش بازنده`), ` هنوز روشن است: ${losses.slice(0, 3).map((x) => x.id).join("، ")}.`), href: "#ff=experiments" });
+      const top3 = C.sort((a, b) => b.w - a.w).slice(0, 3);
+
+      /* ---- تیتر هفته */
+      let headline;
+      if (ordPct == null) headline = "داده‌ی کامل این هفته هنوز نرسیده است";
+      else if (Math.abs(ordPct) < 1.5) {
+        if (revPct != null && revPct <= -1.5) headline = `سفارش ثابت ماند، درآمد ${sPct(revPct)}`;
+        else if (revPct != null && revPct >= 1.5) headline = `سفارش ثابت ماند، درآمد ${sPct(revPct)}`;
+        else headline = worst && worst.dCr <= -1 ? `هفته‌ی باثباتی بود، به‌جز ${dayName(worst.d)}` : "هفته‌ی باثباتی بود";
+      } else headline = ordPct > 0 ? `هفته‌ی رشد: سفارش ${sPct(ordPct)}` : `هفته‌ی افت: سفارش ${sPct(ordPct)}`;
+      const subline = [ordW != null ? `${compact(ordW)} سفارش` : null, tw ? toman(tw.rev) : null, fw ? `CR ${pct(fw.cr, 1)}` : null].filter(Boolean).join(" · ");
+
+      /* ---------------- بخش ۱: سربرگ + سه نکته */
+      const chips = K.chips([0, 1, 2, 3].map((k) => { const e = add(E0, -7 * k); return { value: k, label: k === 0 ? `هفته‌ی گذشته · ${weekLabel(add(e, -6), e)}` : weekLabel(add(e, -6), e) }; }), state.k, (v) => { state.k = v; ctx.rerender(); });
+      const hero = K.card(null, null, h("div", { class: "ffw-hero" },
+        h("div", { class: "ffd-actions-row" }, chips),
+        h("p", { class: "ffw-kicker" }, `شنبه ${jalali(S)} تا جمعه ${jalali(E)} · در برابر هفته‌ی قبل (${weekLabel(P_S, P_E)})`),
+        h("h2", { class: "ffw-title" }, headline),
+        h("p", { class: "ffw-sub" }, subline),
+        top3.length ? h("div", { class: "ffw-tldr" }, h("h3", null, "سه نکته‌ی این هفته"),
+          h("ol", null, top3.map((c) => h("li", { class: "is-" + c.t }, c.txt, " ", c.href ? link(c.href, "دیدن ←") : null)))) : null), { span: 12, tone: "hero" });
+
+      /* ---------------- بخش ۲: کارت شاخص‌ها */
+      const dailyO = days.map((x) => x.o), dailyR = days.map((x) => x.rev), dailyC = days.map((x) => x.cr);
+      const score = K.card("شاخص‌های هفته", `هر شاخص در برابر هفته‌ی قبل و میانگین ${fa(nAvgF || nAvgT)} هفته‌ی پیش از آن · میله‌های کوچک = هفت روز هفته`, h("div", { class: "ffw-kpis" },
+        kpi("سفارش (Close Cart)", compact(ordW), ordPct, chg(ordW, ordAvg), nAvgF, dailyO),
+        kpi("درآمد", tomanParts(tw && tw.rev), revPct, chg(tw && tw.rev, avg(tAvg, (x) => x.rev)), nAvgT, dailyR),
+        kpi("CR (Close Cart)", pct(fw && fw.cr, 1), crPt, chgPt(fw && fw.cr, avg(fAvg, (x) => x.cr)), nAvgF, dailyC, { pt: true }),
+        kpi("میانگین سبد", tw && tw.aov ? [compact(tw.aov), "تومان"] : "—", aovPct, chg(tw && tw.aov, avg(tAvg, (x) => x.aov)), nAvgT, null),
+        kpi("سفارش پرداخت‌شده", compact(tw && tw.paid), paidPct, chg(tw && tw.paid, avg(tAvg, (x) => x.paid)), nAvgT, null),
+        kpi("سشن معتبر", compact(fw && fw.valid), validPct, chg(fw && fw.valid, avg(fAvg, (x) => x.valid)), nAvgF, null),
+        kpi("نرخ ابطال سفارش", pct(fw && fw.cancel, 1), cancelPt, chgPt(fw && fw.cancel, avg(fAvg, (x) => x.cancel)), nAvgF, null, { pt: true, inverse: true })), { span: 12 });
+
+      /* ---------------- بخش ۳: نقشه‌ی ریسک اکوسیستم */
+      const stStep = !worstStep ? "na" : worstStep.d <= -1 ? "act" : worstStep.d <= -0.5 ? "watch" : "ok";
+      const stPlat = !platRisk ? "na" : platRisk.dOr <= -1.5 ? "act" : platRisk.dOr <= -0.8 ? "watch" : "ok";
+      const stCity = !cities.length ? "na" : critCities.length >= 3 ? "act" : critCities.length || (losers[0] && losers[0].delta * 100 <= -0.5) ? "watch" : "ok";
+      const stRev = aovPct == null ? "na" : aovPct <= -2 || (cancelPt || 0) >= 0.5 ? "act" : aovPct <= -1 || (cancelPt || 0) >= 0.3 ? "watch" : "ok";
+      const stExp = !exps.length ? "na" : losses.length ? "watch" : "ok";
+      const stAl = unowned.length >= 3 ? "act" : unowned.length ? "watch" : "ok";
+      const dq = fn && fn.data_quality;
+      const missingDays = W.filter((d) => !F[d] || !T[d]).length;
+      const stData = missingDays ? "watch" : dq && dq.ok === false ? "watch" : "ok";
+      const risk = K.card("نقشه‌ی ریسک اکوسیستم", "هر حوزه در هفته‌ی گذشته؛ رنگ نشان می‌دهد کجا باید وقت گذاشت", h("div", { class: "ffw-risks" },
+        riskTile("قیف محصول", stStep, worstStep ? `ضعیف‌ترین گام: «${worstStep.name}» ${sPt(worstStep.d)}` : "داده‌ی قیف نرسید", "/funnel", "قیف کلی ←"),
+        riskTile("پلتفرم‌ها", stPlat, platRisk ? `${iso(platRisk.name)}: نرخ سفارش ${sPt(platRisk.dOr)} · سهم ${pct(platRisk.share, 0)}` : "داده‌ی پلتفرم نرسید", "/platforms", "پلتفرم‌ها ←"),
+        riskTile("شهرها", stCity, cities.length ? `${fa(critCities.length)} شهر بحرانی${losers[0] ? ` · بیشترین افت: ${losers[0].name} (${sPt(losers[0].delta * 100, 2)})` : ""}` : "داده‌ی شهرها نرسید", "#ff=cities", "رادار شهرها ←"),
+        riskTile("درآمد و سبد", stRev, `میانگین سبد ${sPct(aovPct)} · ابطال ${sPt(cancelPt)}`, "#ff=basket", "اقتصاد سبد ←"),
+        riskTile("آزمایش‌ها", stExp, exps.length ? `${fa(wins.length)} برنده · ${fa(losses.length)} بازنده · ${fa(exps.length - wins.length - losses.length)} بی‌تفاوت` : "آزمایشی گزارش نشد", "#ff=experiments", "سبد آزمایش‌ها ←"),
+        riskTile("پاسخ‌گویی هشدارها", stAl, `${fa(opened.length)} هشدار تازه در هفته · ${fa(openHot.length)} بحرانی/زیادِ باز · ${fa(unowned.length)} بی‌مالک`, "#ff=alerts", "هشدارها ←"),
+        riskTile("سلامت داده", stData, missingDays ? `${fa(missingDays)} روز از هفته داده‌ی کامل ندارد` : "همه‌ی روزهای هفته کامل رسیده‌اند", "#ff=data", "سلامت داده ←")), { span: 12 });
+
+      /* ---------------- بخش ۴: روزبه‌روز + قیف */
+      const maxO = Math.max(...days.map((x) => x.o || 0), 1);
+      const dayT = K.card("روزبه‌روز", "هر روز در برابر همان روزِ هفته‌ی قبل", K.table([
+        { key: "d", label: "روز", render: (r) => h("div", null, h("b", null, dayName(r.d)), h("small", null, jalali(r.d))) },
+        { key: "o", label: "سفارش", num: true, render: (r) => h("span", { class: "ffw-cellbar" }, h("i", { style: { width: `${((r.o || 0) / maxO) * 100}%` } }), compact(r.o)) },
+        { key: "dO", label: "تغییر", num: true, render: (r) => h("span", { class: cls(r.dO) }, sPct(r.dO)) },
+        { key: "cr", label: "CR", num: true, render: (r) => pct(r.cr, 1) },
+        { key: "dCr", label: "تغییر CR", num: true, render: (r) => h("span", { class: cls(r.dCr) }, sPt(r.dCr)) },
+        { key: "s", label: "", render: (r) => (r.dCr != null && (r.dCr <= -1 || r.dO <= -5) ? K.badge("افت", "bad") : r.dO >= 5 ? K.badge("رشد", "good") : "") },
+      ], days.map((x) => ({ ...x, s: 0 })), { sort: null }), { span: 7 });
+      const fun = K.card("قیف هفته، گام به گام", "نرخ هر گام و تغییرش نسبت به هفته‌ی قبل", steps.length ? K.table([
+        { key: "name", label: "گام", render: (r) => h("b", null, r.name) },
+        { key: "v", label: "این هفته", num: true, render: (r) => pct(r.v, 1) },
+        { key: "d", label: "تغییر", num: true, render: (r) => h("span", { class: cls(r.d) }, sPt(r.d)) },
+        { key: "f", label: "", render: (r) => (r.d <= -0.5 ? K.badge("ریزش", "bad") : r.d >= 0.5 ? K.badge("بهبود", "good") : "") },
+      ], steps.map((x) => ({ ...x, f: 0 })), { sort: null }) : K.empty("داده‌ی قیف نرسید"), { span: 5 });
+
+      /* ---------------- بخش ۵: پلتفرم‌ها + شهرها */
+      const platT = K.card("پلتفرم‌ها", "هفته در برابر هفته‌ی قبل", K.table([
+        { key: "name", label: "پلتفرم", render: (r) => h("b", null, iso(r.name)) },
+        { key: "share", label: "سهم ترافیک", num: true, render: (r) => pct(r.share, 1) },
+        { key: "dS", label: "تغییر سشن", num: true, render: (r) => h("span", { class: cls(r.dS) }, sPct(r.dS)) },
+        { key: "or", label: "نرخ سفارش", num: true, render: (r) => pct(r.or, 1) },
+        { key: "dOr", label: "تغییر نرخ", num: true, render: (r) => h("span", { class: cls(r.dOr) }, sPt(r.dOr)) },
+      ], plats.slice(0, 6), { sort: "share" }));
+      const cityC = K.card("شهرها: بیشترین تکان", "مرتب‌شده با اثر وزن‌دار (تغییر CR × ترافیک)؛ فقط شهرهای بالای ۳٬۰۰۰ سشن", (losers.length || gainers.length) ? K.table([
+        { key: "name", label: "شهر", render: (r) => h("b", null, r.name) },
+        { key: "traffic_share", label: "سهم ترافیک", num: true, render: (r) => pct(r.traffic_share, 1) },
+        { key: "conversion_rate", label: "CR", num: true, render: (r) => pct(r.conversion_rate, 2) },
+        { key: "delta", label: "تغییر", num: true, render: (r) => h("span", { class: cls(r.delta) }, sPt(r.delta * 100, 2)) },
+        { key: "k", label: "", render: (r) => K.badge(r.impact < 0 ? "افت" : "رشد", r.impact < 0 ? "bad" : "good") },
+      ], [...losers, ...gainers].map((x) => ({ ...x, k: 0 })), { sort: null }) : K.empty("تکان قابل‌توجهی در شهرها نبود"));
+
+      /* ---------------- بخش ۶: تصمیم‌ها + هفته‌ی پیش رو */
+      const dec = K.card("منتظر تصمیم", "آزمایش‌های معنادار و هشدارهای جدیِ بی‌مالک", K.list([
+        ...wins.map((x) => ({ badge: K.badge("برنده", "good"), title: x.id, value: sPt(x.delta_pt, 2), text: "اختلاف معنادار؛ تصمیم انتشار برای همه" })),
+        ...losses.map((x) => ({ badge: K.badge("بازنده", "bad"), title: x.id, value: sPt(x.delta_pt, 2), text: "اختلاف منفی معنادار؛ خاموش کردن یا بازطراحی" })),
+        ...unowned.slice(0, 5).map((a) => ({ badge: K.badge(SEVFA[a.severity] || a.severity, "bad"), title: tr(a.metric_label), value: sPct((a.relative_change || 0) * 100), text: `${tr(a.funnel_name)} · بدون مالک` })),
+      ].slice(0, 8)));
+      const nextItems = [];
+      ((Array.isArray(cal) ? cal : []) || []).forEach((c) => { if ((c.titles && c.titles.length) || c.is_holiday) nextItems.push({ badge: K.badge(c.is_holiday ? "تعطیل" : "مناسبت", c.is_holiday ? "warn" : "info"), title: `${dayName(c.date)} ${jalali(c.date)}`, text: (c.titles || []).join("، ") || "تعطیل رسمی" }); });
+      ((live && live.weather_alerts) || []).forEach((w) => nextItems.push({ badge: K.badge("آب‌وهوا", "warn"), title: `${w.city_name} (${w.province})`, text: `${tr(w.condition)} · ${fa(Math.round(w.temp_c))}°` }));
+      const next = state.k === 0 ? K.card("هفته‌ی پیش رو", "مناسبت‌ها، تعطیلی‌ها و هشدار آب‌وهوای الان", nextItems.length ? K.list(nextItems.slice(0, 8)) : K.empty("هفته‌ی پیش رو مناسبت یا تعطیلی ثبت‌شده‌ای ندارد.")) : K.card("پاسخ‌گویی همان هفته", null, K.stats([
+        K.stat("هشدار تازه", fa(opened.length)), K.stat("میانه‌ی زمان بستن", closedW.length ? `${fa(Math.round(median(closedW)))} ساعت` : "—"),
+      ]));
+
+      const foot = K.note(`هفته = شنبه تا جمعه، فقط روزهای کامل. CR = سشن Close Cart ÷ سشن معتبر (وزن‌دار، نه میانگین روزها). نرخ ابطال = ۱ − سفارش خالص ÷ سفارش ناخالص. شهرها با CR بر پایه‌ی Impression فالکون سنجیده می‌شوند. «میانگین n هفته» فقط هفته‌هایی را می‌شمارد که داده‌ی هر هفت روزشان موجود است.`);
+      return [hero, score, risk, dayT, fun, platT, cityC, dec, next, foot];
     },
   });
 })();
