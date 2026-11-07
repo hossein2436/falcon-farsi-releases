@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.3.2 */
+/* falcon-farsi core v2.4.0 */
 /* ==================================================================
    فالکون · پوسته‌ی فارسی v2
    زبان طراحی «شاهین»: کاغذ گرم و مرکب لاجوردی در روز، شب عمیق در تاریکی.
@@ -699,6 +699,31 @@ html[data-ff] .ff-toast-bar { position: absolute; inset-inline: 0; bottom: 0; he
 @media (prefers-reduced-motion: reduce) { html[data-ff] .ff-toast-spin, html[data-ff] .ff-toast-bar, html[data-ff] main .animate-pulse { animation: none !important; } }
 html[data-ff] .ff-pal-input:focus, html[data-ff] .ff-pal-input:focus-visible { outline: 0 !important; border: 0 !important; box-shadow: none !important; }
 html[data-ff] .ff-pal-input::-webkit-search-cancel-button { display: none; }
+
+/* ===== v2.4: سربرگ حکم CEO (Act / زیر نظر / سالم) — جدول‌بندی ثابت به‌جای ردیف یک‌خطی ===== */
+html[data-ff] main div.flex-wrap.items-center.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) {
+  display: grid !important;
+  grid-template-columns: max-content max-content minmax(0, 1fr);
+  align-items: center;
+  column-gap: 14px !important;
+  row-gap: 10px !important;
+}
+html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) > span:first-child { grid-column: 1; grid-row: 1; align-self: start; margin-top: 2px; }
+html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) > :nth-child(2) { grid-column: 2 / -1; grid-row: 1; min-width: 0; flex-shrink: 1 !important; }
+html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) > :nth-child(2) > div { white-space: normal !important; }
+html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) > :nth-child(3) { grid-column: 2; grid-row: 2; justify-self: start; }
+html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) > :nth-child(4) { grid-column: 3; grid-row: 2; justify-self: start; max-width: 100%; min-width: 0; }
+html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) > :nth-child(n+5) { grid-column: 2 / -1; justify-self: start; max-width: 100%; }
+html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) > :nth-child(3):last-child { grid-column: 2 / -1; }
+html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) ~ p { margin-inline-start: 0; max-width: 980px; line-height: 1.9 !important; }
+@media (max-width: 900px) {
+  html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) { grid-template-columns: max-content minmax(0, 1fr); }
+  html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) > :nth-child(n+3) { grid-column: 2 !important; grid-row: auto !important; }
+}
+html[data-ff] .ff-verdict { min-width: 0; max-width: 100%; }
+html[data-ff] .ff-verdict .ff-v-stats { max-width: 720px; }
+html[data-ff] .ff-verdict .ff-v-stat { flex: 1 1 auto; min-width: 0; justify-content: space-between; }
+html[data-ff] .ff-verdict .ff-v-stat > i, html[data-ff] .ff-verdict .ff-v-stat > b { white-space: nowrap; }
 
 /* ---- generated: Tailwind status colors → palette ---- */
 html[data-ff] .text-amber-500,html[data-ff] .text-amber-600,html[data-ff] .text-amber-700,html[data-ff] .text-amber-800,html[data-ff] .text-amber-900,html[data-ff] .text-yellow-500,html[data-ff] .text-yellow-600,html[data-ff] .text-yellow-700,html[data-ff] .text-yellow-800,html[data-ff] .text-yellow-900,html[data-ff] .text-orange-500,html[data-ff] .text-orange-600,html[data-ff] .text-orange-700,html[data-ff] .text-orange-800,html[data-ff] .text-orange-900{color:var(--ff-saffron)!important}
