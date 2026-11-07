@@ -1,4 +1,4 @@
-/* falcon-farsi core v2.5.0 · compat-marker: __fxLoaded */
+/* falcon-farsi core v2.6.0 · compat-marker: __fxLoaded */
 /* فالکون · پوسته‌ی فارسی — فرهنگ واژه‌ها (v2)
    کلید: متن انگلیسی با حروف کوچک و فاصله‌ی یکسان. اصطلاحات جاافتاده (CR، Close Cart، Supertype، Gem، Off-Box،
    Meal For One، Retention، Funnel، RCA، pp/pt، نام پلتفرم‌ها و رویدادها) عمداً انگلیسی می‌مانند. */
@@ -1481,6 +1481,8 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
     r(/^(.+?) converts (below|above) its usual level \((.+?) orders\)(?:, plus (\d+) more)?$/i, (m, a, k, n, more) => `${tr(a)} ${k.toLowerCase() === "below" ? "پایین‌تر" : "بالاتر"} از سطح معمولش تبدیل می‌کند (${n} سفارش)` + (more ? `، و ${more} مورد دیگر` : ""));
     r(/^Platform (\S+)$/i, (m, a) => `پلتفرم ${a}`);
     r(/^vs avg of last (\d+) (Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days$/i, (m, n, x) => `در برابر میانگین ${n} ${day(x.slice(0, 3))}ِ گذشته`);
+    r(/^Last (\d+) (Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days, same time$/i, (m, n, x) => `${n} ${day(x.slice(0, 3))}ِ گذشته، همین ساعت`);
+    r(/^Last (\d+) (Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)days, full day$/i, (m, n, x) => `${n} ${day(x.slice(0, 3))}ِ گذشته، کل روز`);
     r(/^vs (?:the )?same time (yesterday|last week)$/i, (m, x) => `در برابر همین ساعت ${x.toLowerCase() === "yesterday" ? "دیروز" : "هفته‌ی قبل"}`);
     r(/^real (drop|rise|gain), about (.+?) (billion|million) toman (at risk|gained|ahead)$/i, (m, k, a, u, w) => `${k.toLowerCase() === "drop" ? "افت" : "رشد"} واقعی، حدود ${a} ${mag(u)} تومان ${/risk/i.test(w) ? "در خطر" : "اضافه"}`);
     r(/^a real move, (low|medium|high) confidence$/i, (m, c) => `حرکت واقعی، اطمینان ${conf(c)}`);
@@ -2929,23 +2931,27 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
   const T = (x) => core.T(String(x == null ? "" : x));
 
   /* ------------------------------------------------ ۱) داده: همان پاسخی که خود فالکون گرفته */
-  let data = null, fallbackAt = 0;
+  let data = null, fallbackAt = 0, dataAt = 0;
   const ofetch = window.fetch;
   window.fetch = function (input, init) {
     const p = ofetch.apply(this, arguments);
     try {
       const url = typeof input === "string" ? input : input && input.url;
       if (url && /\/api\/v1\/control-center(\?|$)/.test(url) && !(init && init.__ff)) {
-        p.then((r) => (r.ok ? r.clone().json() : null)).then((j) => { if (j && j.verdict) { data = j; schedule(); } }).catch(() => {});
+        p.then((r) => (r.ok ? r.clone().json() : null)).then((j) => { if (j && j.verdict) { data = j; dataAt = Date.now(); schedule(); } }).catch(() => {});
       }
     } catch (e) { /* هیچ‌وقت نباید درخواست فالکون را خراب کند */ }
     return p;
   };
   function ensureData() {
-    if (data || Date.now() - fallbackAt < 60000) return;
+    // داده‌ی «امروز» زنده است: اگر فالکون خودش تازه نکرد، هر ۵ دقیقه یک بار بی‌صدا تازه‌اش می‌کنیم
+    if ((data && Date.now() - dataAt < 300000) || Date.now() - fallbackAt < 60000) return;
     fallbackAt = Date.now();
     ofetch("/api/v1/control-center", { credentials: "same-origin", headers: { Accept: "application/json" } })
-      .then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.verdict && !data) { data = j; schedule(); } }).catch(() => {});
+      .then((r) => (r.ok ? r.json() : null)).then((j) => {
+        if (j && j.verdict && (!data || !/day=/.test(location.search))) { data = j; dataAt = Date.now(); schedule(); }
+        else if (!data) fallbackAt = Date.now() - 50000; // پاسخ بی‌مصرف: ده ثانیه‌ی دیگر دوباره
+      }).catch(() => { fallbackAt = Date.now() - 50000; });
   }
 
   /* ------------------------------------------------ ۲) کمکی‌ها */
@@ -3058,6 +3064,99 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
     return root;
   }
 
+  /* ------------------------------------------------ ۳ب) «امروز تا این لحظه» */
+  const tehranNow = () => {
+    try {
+      const p = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Tehran", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date());
+      const hh = +p.find((x) => x.type === "hour").value, mm = +p.find((x) => x.type === "minute").value;
+      return { hh: hh % 24, mm };
+    } catch (e) { const d = new Date(); return { hh: d.getHours(), mm: d.getMinutes() }; }
+  };
+  const minsAgo = (t) => { const m = Math.round((Date.now() - Date.parse(t)) / 60000); return isNaN(m) ? null : Math.max(0, m); };
+  const pctSigned = (v, d = 1) => (v == null || isNaN(v) ? "—" : iso((v > 0 ? "+" : v < 0 ? "−" : "") + fa(Math.abs(v).toFixed(d)) + "٪"));
+  function buildToday(d, variant) {
+    const t = d.today || {};
+    const vs = t.vs_same_time || {};
+    const base = vs.weekday || vs.yesterday || null;
+    const baseIsWeekday = !!vs.weekday;
+    const n = vs.weekday_count || 0;
+    const wd = (() => { try { return new Date((t.date || d.live_day) + "T12:00:00").toLocaleDateString("fa-IR", { weekday: "long" }); } catch (e) { return ""; } })();
+    const baseLabel = baseIsWeekday ? `میانگین ${fa(n || 1)} ${wd}ِ گذشته تا همین ساعت` : "دیروز تا همین ساعت";
+    const root = h("section", { class: "fft", "data-variant": variant, "data-ff-owned": "" });
+
+    /* سربرگ: زنده، روز، پیشرفت روز، تازگی داده */
+    const now = tehranNow();
+    const dayPct = (now.hh * 60 + now.mm) / 1440;
+    const ago = minsAgo(t.loaded_at);
+    const stale = ago != null && ago > 45;
+    root.appendChild(h("header", { class: "fft-top" },
+      h("span", { class: "fft-live" + (stale ? " is-stale" : ""), "aria-hidden": "true" }, h("i")),
+      h("h2", { class: "fft-title" }, "امروز تا این لحظه"),
+      h("span", { class: "fft-day" }, `${wd} ${jalali(t.date || d.live_day)}`),
+      h("span", { class: "fft-progress", title: "چقدر از شبانه‌روز گذشته است (به وقت تهران)" },
+        h("span", { class: "fft-progress-bar", "aria-hidden": "true" }, h("i", { style: { width: (dayPct * 100).toFixed(1) + "%" } })),
+        `ساعت ${fa(String(now.hh).padStart(2, "0"))}:${fa(String(now.mm).padStart(2, "0"))} · ${fa(Math.round(dayPct * 100))}٪ از روز`),
+      h("span", { class: "fft-fresh" + (stale ? " is-stale" : "") }, ago == null ? "" : ago < 1 ? "داده همین حالا به‌روز شد" : `داده ${fa(ago)} دقیقه پیش به‌روز شد`)));
+
+    /* شاخص‌ها با یک مبنای مشترک */
+    const usualSessions = base && base.cr ? base.orders / base.cr : null;
+    const sessPct = usualSessions && t.valid_sessions ? (t.valid_sessions / usualSessions - 1) * 100 : null;
+    const ordPct = base ? base.orders_pct : null;
+    const crPt = base ? base.cr_pt : null;
+    const chip = (v, txt) => h("span", { class: "fft-chip " + (v == null ? "" : v < 0 ? "is-down" : v > 0 ? "is-up" : "") }, v == null ? "" : (v < 0 ? "▼ " : v > 0 ? "▲ " : "") , txt);
+    const tile = (label, value, ch, sub) => h("div", { class: "fft-kpi" }, h("span", { class: "fft-kpi-l" }, label), h("div", { class: "fft-kpi-row" }, h("b", { class: "fft-kpi-v" }, value), ch), sub ? h("span", { class: "fft-kpi-s" }, sub) : null);
+    const aov = t.orders ? t.revenue_toman / t.orders : null;
+    root.appendChild(h("div", { class: "fft-kpis" },
+      tile("سفارش", compact(t.orders), base ? chip(ordPct, pctSigned(Math.abs(ordPct)).replace(/[+−]/, "")) : null, base ? `معمولاً تا این ساعت ${compact(base.orders)}` : null),
+      tile("نرخ تبدیل", pct(t.cr, 1), base ? chip(crPt, signedPt(Math.abs(crPt)).replace(/[+−]/, "")) : null, base ? `معمولاً تا این ساعت ${pct(base.cr, 1)}` : null),
+      tile("سشن معتبر", compact(t.valid_sessions), sessPct != null ? chip(sessPct, pctSigned(Math.abs(sessPct)).replace(/[+−]/, "")) : null, usualSessions ? `معمولاً تا این ساعت حدود ${compact(usualSessions)}` : null),
+      tile("درآمد", toman(t.revenue_toman) || "—", null, aov ? `میانگین سبد ${compact(aov)} تومان` : null)));
+
+    /* یک جمله‌ی تشخیصی: افت از ترافیک است یا از تبدیل؟ */
+    if (base && ordPct != null && sessPct != null) {
+      let msg = null, tone = "neutral";
+      if (Math.abs(ordPct) < 3) { msg = "سفارش‌ها هم‌پای معمولِ همین ساعت جلو می‌رود."; tone = "good"; }
+      else if (ordPct < 0 && Math.abs(sessPct) < 4) { msg = `ترافیک در حد معمول است؛ کمبود سفارش از نرخ تبدیل می‌آید (${signedPt(crPt)}).`; tone = "bad"; }
+      else if (ordPct < 0 && sessPct < -4 && Math.abs(crPt) < 1) { msg = `نرخ تبدیل سالم است؛ کمبود سفارش از ترافیک کمتر می‌آید (${pctSigned(sessPct)} سشن).`; tone = "warn"; }
+      else if (ordPct < 0) { msg = `هم ترافیک (${pctSigned(sessPct)}) و هم نرخ تبدیل (${signedPt(crPt)}) پایین‌تر از معمول‌اند.`; tone = "bad"; }
+      else { msg = `سفارش‌ها ${pctSigned(ordPct)} جلوتر از معمولِ همین ساعت است.`; tone = "good"; }
+      root.appendChild(h("p", { class: "fft-insight is-" + tone }, msg));
+    }
+    root.appendChild(h("p", { class: "fft-base" }, base ? `مبنای مقایسه: ${baseLabel}` : "برای امروز هنوز مبنای مقایسه‌ی هم‌ساعت در دسترس نیست."));
+
+    /* پلتفرم‌ها: سهم سشن با نشانه‌ی سهم معمول، سهم سفارش و CR */
+    const rows = ((d.platform_share && d.platform_share.rows) || []).slice().sort((a, b) => b.sessions - a.sessions);
+    if (rows.length) {
+      const top = rows.slice(0, 4), rest = rows.slice(4);
+      if (rest.length) top.push({ platform: `سایر (${fa(rest.length)})`, sessions: rest.reduce((x, r) => x + r.sessions, 0), orders: rest.reduce((x, r) => x + (r.orders || 0), 0), session_share: rest.reduce((x, r) => x + r.session_share, 0), order_share: rest.reduce((x, r) => x + (r.order_share || 0), 0), usual_share: rest.reduce((x, r) => x + (r.usual_share || 0), 0), cr: null, other: true });
+      const list = h("div", { class: "fft-plat" },
+        h("div", { class: "fft-plat-head" }, h("span", null, "پلتفرم"), h("span", null, "سهم سشن (خط = سهم معمول)"), h("span", null, "سهم سفارش"), h("span", null, "CR امروز")),
+        top.map((r, i) => {
+          const dv = r.usual_share != null ? (r.session_share - r.usual_share) * 100 : null;
+          return h("div", { class: "fft-plat-row" },
+            h("span", { class: "fft-plat-n" }, h("i", { style: { background: r.other ? "var(--ff-line-2)" : `var(--ff-c${(i % 5) + 1})` } }), iso(r.platform)),
+            h("span", { class: "fft-plat-bar", title: `سهم معمول ${pct(r.usual_share, 1)}` },
+              h("span", { class: "fft-plat-track" }, h("i", { style: { width: Math.max(0.6, r.session_share * 100).toFixed(1) + "%", background: r.other ? "var(--ff-line-2)" : `var(--ff-c${(i % 5) + 1})` } }), r.usual_share != null ? h("b", { style: { insetInlineStart: (r.usual_share * 100).toFixed(1) + "%" } }) : null),
+              h("em", null, pct(r.session_share, 0)),
+              dv != null && Math.abs(dv) >= 1 ? h("small", { class: dv < 0 ? "is-down" : "is-up" }, signedPt(dv, 0)) : null),
+            h("span", { class: "fft-plat-o" }, pct(r.order_share, 0)),
+            h("span", { class: "fft-plat-cr" }, r.cr == null ? "—" : pct(r.cr, 1)));
+        }));
+      root.appendChild(list);
+    }
+    return root;
+  }
+  function targetsToday() {
+    const out = [];
+    document.querySelectorAll("span.font-bold").forEach((sp) => {
+      if (sp.closest(".fft, .ffh, [data-ff-owned]") || !/^(امروز تا این لحظه|Today so far)$/i.test(sp.textContent.trim())) return;
+      const head = sp.parentElement, host = head && head.parentElement;
+      if (!host || host.closest(".fft")) return;
+      out.push({ kind: "today", host, before: head, hide: [...host.children].filter((c) => !c.classList.contains("fft")), variant: sp.closest('[role="dialog"]') ? "today-modal" : "today" });
+    });
+    return out;
+  }
+
   /* ------------------------------------------------ ۴) پیدا کردن جای کارت در هر نقش */
   function targets() {
     const out = [];
@@ -3089,21 +3188,24 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
   /* ------------------------------------------------ ۵) چرخه */
   const sigOf = (d, variant) => [variant, d.day || (d.headline && d.headline.day), d.status, d.sentence, S().digits ? 1 : 0].join("|");
   function cleanup() {
-    document.querySelectorAll(".ffh").forEach((e) => e.remove());
+    document.querySelectorAll(".ffh, .fft").forEach((e) => e.remove());
     document.querySelectorAll("[data-ff-hide]").forEach((e) => e.removeAttribute("data-ff-hide"));
     document.querySelectorAll("[data-ff-hero-host]").forEach((e) => e.removeAttribute("data-ff-hero-host"));
   }
   function apply() {
     const s = S();
-    if (!s.enabled || !s.translate || !(location.pathname === "/" || location.pathname === "/control")) { if (document.querySelector(".ffh, [data-ff-hide]")) cleanup(); return; }
-    const list = targets();
+    if (!s.enabled || !s.translate || !(location.pathname === "/" || location.pathname === "/control")) { if (document.querySelector(".ffh, .fft, [data-ff-hide]")) cleanup(); return; }
+    const list = [...targets(), ...targetsToday()];
     if (!list.length) return;
-    if (!data) { ensureData(); return; }
+    ensureData();
+    if (!data) return;
     for (const t of list) {
-      const sig = sigOf(data, t.variant);
-      let hero = [...t.host.children].find((c) => c.classList.contains("ffh"));
+      const isToday = t.kind === "today", cls = isToday ? "fft" : "ffh";
+      if (isToday && !data.today) continue;
+      const sig = isToday ? [t.variant, data.today.loaded_at, data.today.orders, Math.floor(Date.now() / 60000), S().digits ? 1 : 0].join("|") : sigOf(data, t.variant);
+      let hero = [...t.host.children].find((c) => c.classList.contains(cls));
       if (!hero || hero.dataset.sig !== sig) {
-        const fresh = build(data, t.variant); fresh.dataset.sig = sig;
+        const fresh = isToday ? buildToday(data, t.variant) : build(data, t.variant); fresh.dataset.sig = sig;
         if (hero) hero.replaceWith(fresh); else t.host.insertBefore(fresh, t.before && t.before.parentElement === t.host ? t.before : t.host.firstChild);
       }
       if (!t.host.hasAttribute("data-ff-hero-host")) t.host.setAttribute("data-ff-hero-host", t.variant);
@@ -3112,7 +3214,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
   }
   let pend = 0;
   function schedule() { if (pend) return; pend = setTimeout(() => { pend = 0; try { apply(); } catch (e) { console.warn("[falcon-farsi] hero", e); } }, 60); }
-  const mo = new MutationObserver((ms) => { for (const m of ms) { if (m.target.closest && m.target.closest(".ffh")) continue; schedule(); return; } });
+  const mo = new MutationObserver((ms) => { for (const m of ms) { if (m.target.closest && m.target.closest(".ffh, .fft")) continue; schedule(); return; } });
   const start = () => { mo.observe(document.body, { childList: true, subtree: true }); schedule(); };
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start, { once: true });
   setInterval(schedule, 1500);
