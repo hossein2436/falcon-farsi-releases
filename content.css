@@ -1120,7 +1120,7 @@ html:not([data-ff]) .ffh { display: none !important; }
 html[data-ff] [data-ff-hero-host="ceo"]:not(#ff-x):not(#ff-y) { padding: 20px 24px 18px !important; padding-inline-end: 112px !important; background: none !important; }
 html[data-ff] [data-ff-hero-host="cpo"]:not(#ff-x):not(#ff-y) { display: block !important; padding: 20px 24px !important; }
 html[data-ff] [data-ff-hero-host="cro"]:not(#ff-x):not(#ff-y) { display: block !important; padding: 22px 24px !important; }
-html[data-ff] [data-ff-hero-host="modal"]:not(#ff-x):not(#ff-y) { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px !important; }
+html[data-ff] [data-ff-hero-host="modal"]:not(#ff-x):not(#ff-y) { border: 0 !important; background: none !important; box-shadow: none !important; padding: 0 !important; display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px !important; }
 html[data-ff] [data-ff-hero-host="modal"] > * { margin: 0 !important; }
 html[data-ff] [data-ff-hero-host="modal"] > .ffh,
 html[data-ff] [data-ff-hero-host="modal"] > p { grid-column: 1 / -1; }

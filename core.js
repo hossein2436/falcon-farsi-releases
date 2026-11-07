@@ -3016,7 +3016,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
         tile("CR (Close Cart)", pct(hd.cr, 1), h("span", null, `معمول ${pct(hd.baseline, 1)} · `, h("em", { class: down ? "is-down" : "is-up" }, signedPt(hd.delta_pt))), null),
         tile("سفارش", num(hd.orders), hd.expected_orders ? `انتظار ${compact(hd.expected_orders)} · بازه ${compact(hd.expected_low)} تا ${compact(hd.expected_high)}` : null),
         tile("فاصله با انتظار", gap == null ? "—" : `${signedK(gap)} سفارش`, risk ? `حدود ${risk} در خطر` : "داخل بازه‌ی عادی", gap != null && hd.orders_at_risk > 0 ? "bad" : null),
-        tile("نوسان", hd.z != null ? iso(`z ${hd.z < 0 ? "−" : ""}${fa(Math.abs(hd.z).toFixed(2))}`) : "—", hd.baseline_days ? `مبنا: ${fa(hd.baseline_days)} روزِ هم‌نام اخیر` : null)));
+        tile("انحراف از معمول (z)", hd.z != null ? iso(`${hd.z < 0 ? "−" : hd.z > 0 ? "+" : ""}${fa(Math.abs(hd.z).toFixed(2))}`) : "—", [Math.abs(hd.z) >= 2 ? "بیرون از نوسان روزمره" : "داخل نوسان روزمره", hd.baseline_days ? `مبنا ${fa(hd.baseline_days)} روز هم‌نام` : null].filter(Boolean).join(" · "), Math.abs(hd.z) >= 2 ? (hd.z < 0 ? "bad" : null) : null)));
     }
 
     /* از کجا آمده */
