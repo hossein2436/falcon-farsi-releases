@@ -1471,7 +1471,7 @@ for (const k in window.FF_SERVICES) if (!window.FF_DICT[k]) window.FF_DICT[k] = 
       (m, a, b, c, d, k) => `${a} در برابر ${b} معمول · ${c} سفارش · حدود ${d} سفارش ${/short|below/i.test(k) ? "کمتر از انتظار" : "بیشتر از انتظار"}`);
     r(/^The (drop|rise) comes from (.+?): together about (.+?) of the (.+?) orders (short|extra|ahead|over)\.?$/i, (m, k, list, a, b, w) => {
       const items = []; const re = /\s*(?:and\s+|,\s*)?([^,()]+?) \(([^()]*)\)/g; let x;
-      while ((x = re.exec(list))) items.push(`${tr(x[1].replace(/^and\s+/i, "").trim())} (${orders(x[2].replace(/ pt/g, " واحد"))})`);
+      while ((x = re.exec(list))) items.push(`${tr(x[1].replace(/^and\s+/i, "").trim())} (${orders(x[2].replace(/([-+−]?[\d.,]+) pt/g, (q, n) => `${LRI}${n}${PDI} واحد`))})`);
       if (!items.length) return null;
       const joined = items.length > 1 ? items.slice(0, -1).join("، ") + " و " + items[items.length - 1] : items[0];
       return `${k.toLowerCase() === "drop" ? "افت" : "رشد"} از ${joined} است؛ روی هم حدود ${a} از ${b} سفارشِ ${/short/i.test(w) ? "کمبود" : "اضافه"}`;

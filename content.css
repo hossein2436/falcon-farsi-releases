@@ -720,6 +720,8 @@ html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div
   html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) { grid-template-columns: max-content minmax(0, 1fr); }
   html[data-ff] main div.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) > :nth-child(n+3) { grid-column: 2 !important; grid-row: auto !important; }
 }
+html[data-ff] .ff-verdict .ff-v-stats { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 8px; max-width: 680px; }
+html[data-ff] .ff-verdict .ff-v-stat { justify-content: space-between; }
 
 /* ---- generated: Tailwind status colors → palette ---- */
 html[data-ff] .text-amber-500,html[data-ff] .text-amber-600,html[data-ff] .text-amber-700,html[data-ff] .text-amber-800,html[data-ff] .text-amber-900,html[data-ff] .text-yellow-500,html[data-ff] .text-yellow-600,html[data-ff] .text-yellow-700,html[data-ff] .text-yellow-800,html[data-ff] .text-yellow-900,html[data-ff] .text-orange-500,html[data-ff] .text-orange-600,html[data-ff] .text-orange-700,html[data-ff] .text-orange-800,html[data-ff] .text-orange-900{color:var(--ff-saffron)!important}
