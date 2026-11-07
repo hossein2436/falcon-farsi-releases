@@ -701,7 +701,7 @@ html[data-ff] .ff-pal-input:focus, html[data-ff] .ff-pal-input:focus-visible { o
 html[data-ff] .ff-pal-input::-webkit-search-cancel-button { display: none; }
 
 /* ===== v2.4: سربرگ حکم CEO (Act / زیر نظر / سالم) — جدول‌بندی ثابت به‌جای ردیف یک‌خطی ===== */
-html[data-ff] main div.flex-wrap.items-center.xl\:flex-nowrap:has(> span.rounded-full:first-child + div.shrink-0) {
+html[data-ff] main div.flex-wrap.items-center.xl\:flex-nowrap:not([data-ff-hide]):has(> span.rounded-full:first-child + div.shrink-0) {
   display: grid !important;
   grid-template-columns: max-content max-content minmax(0, 1fr);
   align-items: center;
@@ -1159,7 +1159,7 @@ html[data-ff] .ffh-pill { display: inline-flex; align-items: center; gap: 7px; p
 html[data-ff] .ffh-pill i { font-style: normal; font-size: 10px; }
 html[data-ff] .ffh-kicker { font-size: 12.5px; font-weight: 700; color: var(--ff-ink-3); }
 html[data-ff] .ffh-conf { font-size: 12px; color: var(--ff-ink-3); padding-inline-start: 12px; border-inline-start: 1px solid var(--ff-line-2); }
-html[data-ff] .ffh-title { margin: 0; font-size: 24px; font-weight: 800; line-height: 1.45; color: var(--ff-ink); letter-spacing: 0; }
+html[data-ff] .ffh .ffh-title { margin: 0 !important; font-size: 25px !important; font-weight: 800 !important; line-height: 1.45 !important; color: var(--ff-ink) !important; letter-spacing: 0 !important; }
 html[data-ff] .ffh-sub { margin: -6px 0 0; font-size: 14px; color: var(--ff-ink-2); font-variant-numeric: tabular-nums; }
 
 html[data-ff] .ffh-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
@@ -1200,7 +1200,7 @@ html[data-ff] .ffh-why-text { margin: 0; font-size: 14px; color: var(--ff-ink-2)
   html[data-ff] .ffh-why-row { grid-template-columns: minmax(0, 1fr) max-content; row-gap: 4px; padding: 6px 10px; }
   html[data-ff] .ffh-why-bar { grid-column: 1 / -1; order: 3; }
   html[data-ff] .ffh-why-o { grid-column: 1 / -1; order: 4; text-align: right; }
-  html[data-ff] .ffh-title { font-size: 20px; }
+  html[data-ff] .ffh .ffh-title { font-size: 20px !important; }
 }
 
 /* کنار: اول اینجا را ببین + رکورد */
@@ -1215,6 +1215,6 @@ html[data-ff] .ffh-rec-bar { height: 6px; border-radius: 999px; background: var(
 html[data-ff] .ffh-rec-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(to left, var(--ff-saffron-2), var(--ff-pri)); }
 html[data-ff] .ffh-rec-s { font-size: 12px; color: var(--ff-ink-2); }
 /* CRO: ستون باریک؛ کنار به زیر می‌رود و ساده‌تر می‌شود */
-html[data-ff] .ffh[data-variant="cro"] .ffh-title { font-size: 20px; }
+html[data-ff] .ffh[data-variant="cro"] .ffh-title { font-size: 21px !important; }
 html[data-ff] .ffh[data-variant="cro"] .ffh-side { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 @media (prefers-reduced-motion: reduce) { html[data-ff] .ffh *, html[data-ff] .ffh { animation: none !important; } }
